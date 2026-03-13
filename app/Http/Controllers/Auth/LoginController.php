@@ -28,7 +28,7 @@ class LoginController extends Controller
 
             if (!$user->is_verified) {
                 Auth::logout();
-                toastr()->error('Please verify your email before logging in.');
+                Toastr::error('Please verify your email before logging in.');
                 return redirect()->route('login');
             }
 
@@ -48,10 +48,10 @@ class LoginController extends Controller
             }
         }
         
-
-       // Invalid credentials
-        Toastr::error('Invalid email or password.');
-        return back()->withInput($request->only('email'));
+        // Invalid credentials - redirect back with error
+        return back()->withInput($request->only('email'))->withErrors([
+            'email' => 'Invalid email or password.',
+        ]);
     }
 
 

@@ -4,11 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - FindNest</title>
+    <title>Reset Password - FindNest</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <style>
         /* FindNest Airbnb-Style Theme */
         :root {
@@ -34,7 +33,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 40px 20px;
             position: relative;
             overflow-x: hidden;
         }
@@ -43,7 +41,7 @@
         body::before {
             content: '';
             position: absolute;
-            top: -20%;
+            top: -50%;
             right: -10%;
             width: 600px;
             height: 600px;
@@ -55,7 +53,7 @@
         body::after {
             content: '';
             position: absolute;
-            bottom: -20%;
+            bottom: -30%;
             left: -5%;
             width: 500px;
             height: 500px;
@@ -65,8 +63,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(5deg); }
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-30px) rotate(5deg);
+            }
         }
 
         /* Glassmorphism Card */
@@ -84,6 +89,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             100% {
                 opacity: 1;
                 transform: translateY(0);
@@ -91,7 +97,7 @@
         }
 
         /* Input Fields */
-        .fn-input, .fn-select {
+        .fn-input {
             width: 100%;
             padding: 14px 18px;
             border: 2px solid var(--fn-gray-light);
@@ -102,7 +108,7 @@
             color: var(--fn-charcoal);
         }
 
-        .fn-input:focus, .fn-select:focus {
+        .fn-input:focus {
             outline: none;
             border-color: var(--fn-red);
             box-shadow: 0 0 0 4px rgba(255, 56, 92, 0.1);
@@ -111,22 +117,6 @@
 
         .fn-input::placeholder {
             color: var(--fn-gray-dark);
-        }
-
-        /* Checkbox */
-        .fn-checkbox {
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--fn-gray-light);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            accent-color: var(--fn-red);
-        }
-
-        .fn-checkbox:checked {
-            background: var(--fn-red);
-            border-color: var(--fn-red);
         }
 
         /* Primary Button */
@@ -197,6 +187,16 @@
         }
 
         /* Alert Styles */
+        .fn-alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #166534;
+            padding: 12px 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            animation: slideDown 0.5s ease;
+        }
+
         .fn-alert-danger {
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.3);
@@ -212,6 +212,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             100% {
                 opacity: 1;
                 transform: translateY(0);
@@ -227,23 +228,18 @@
             font-size: 14px;
         }
 
-        /* Grid Layout */
-        .fn-grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        @media (max-width: 640px) {
-            .fn-grid-2 {
-                grid-template-columns: 1fr;
-            }
+        /* Password Strength Indicator */
+        .password-strength {
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 8px;
+            transition: all 0.3s ease;
         }
     </style>
 </head>
 
 <body>
-    <div class="relative z-10 w-full max-w-2xl px-6">
+    <div class="relative z-10 w-full max-w-md px-6">
         <!-- Logo Header -->
         <div class="text-center mb-8">
             <a href="/" class="inline-flex items-center gap-2 text-3xl font-bold" style="color: var(--fn-red);">
@@ -252,15 +248,25 @@
                 </svg>
                 FindNest
             </a>
-            <p class="mt-2" style="color: var(--fn-gray-dark); font-size: 15px;">Create your account to get started.</p>
+            <p class="mt-2" style="color: var(--fn-gray-dark); font-size: 15px;">Create a new password</p>
         </div>
 
-        <!-- Registration Card -->
+        <!-- Reset Password Card -->
         <div class="fn-glass-card p-8">
-            <h2 class="text-2xl font-bold text-center mb-6" style="color: var(--fn-charcoal);">Create Account</h2>
+            <h2 class="text-2xl font-bold text-center mb-4" style="color: var(--fn-charcoal);">Reset Password</h2>
+            <p class="text-center mb-6" style="color: var(--fn-gray-dark); font-size: 14px;">
+                Enter your new password below
+            </p>
+
+            <!-- Success Message -->
+            @if (session('success'))
+            <div class="fn-alert-success">
+                {{ session('success') }}
+            </div>
+            @endif
 
             <!-- Error Messages -->
-            @if($errors->any())
+            @if ($errors->any())
             <div class="fn-alert-danger">
                 @foreach($errors->all() as $error)
                 <p class="mb-1 last:mb-0">{{ $error }}</p>
@@ -268,121 +274,61 @@
             </div>
             @endif
 
-            <!-- Registration Form -->
-            <form method="POST" action="{{ route('register') }}">
+            <!-- Reset Password Form -->
+            <form method="POST" action="{{ route('password.update') }}">
                 @csrf
 
-                <!-- First Name & Last Name -->
-                <div class="fn-grid-2 mb-5">
-                    <div>
-                        <label for="first_name" class="fn-label">First Name</label>
-                        <input type="text" 
-                               class="fn-input" 
-                               id="first_name" 
-                               name="first_name" 
-                               value="{{ old('first_name') }}" 
-                               placeholder="John"
-                               required>
-                    </div>
-                    <div>
-                        <label for="last_name" class="fn-label">Last Name</label>
-                        <input type="text" 
-                               class="fn-input" 
-                               id="last_name" 
-                               name="last_name" 
-                               value="{{ old('last_name') }}" 
-                               placeholder="Doe"
-                               required>
-                    </div>
+                <!-- Hidden Token Field -->
+                <input type="hidden" name="token" value="{{ $request->route('token') }}">
+
+                <!-- Email Field -->
+                <div class="mb-5">
+                    <label for="email" class="fn-label">Email Address</label>
+                    <input type="email"
+                        class="fn-input"
+                        id="email"
+                        name="email"
+                        value="{{ old('email', $request->email) }}"
+                        placeholder="your.email@example.com"
+                        required
+                        autofocus>
                 </div>
 
-                <!-- Email & Phone -->
-                <div class="fn-grid-2 mb-5">
-                    <div>
-                        <label for="email" class="fn-label">Email Address</label>
-                        <input type="email" 
-                               class="fn-input" 
-                               id="email" 
-                               name="email" 
-                               value="{{ old('email') }}" 
-                               placeholder="your.email@example.com"
-                               required>
-                    </div>
-                    <div>
-                        <label for="phone" class="fn-label">Phone <span style="color: var(--fn-gray-dark); font-weight: 400;">(Optional)</span></label>
-                        <input type="tel" 
-                               class="fn-input" 
-                               id="phone" 
-                               name="phone" 
-                               value="{{ old('phone') }}" 
-                               placeholder="+1 234 567 8900">
-                    </div>
+                <!-- Password Field -->
+                <div class="mb-5">
+                    <label for="password" class="fn-label">New Password</label>
+                    <input type="password"
+                        class="fn-input"
+                        id="password"
+                        name="password"
+                        placeholder="Enter new password (min. 8 characters)"
+                        required>
+                    <p class="mt-2 text-xs" style="color: var(--fn-gray-dark);">
+                        Password must be at least 8 characters long
+                    </p>
                 </div>
 
-                <!-- Password & Confirm Password -->
-                <div class="fn-grid-2 mb-5">
-                    <div>
-                        <label for="password" class="fn-label">Password</label>
-                        <input type="password" 
-                               class="fn-input" 
-                               id="password" 
-                               name="password" 
-                               placeholder="Min. 8 characters"
-                               required>
-                    </div>
-                    <div>
-                        <label for="password_confirmation" class="fn-label">Confirm Password</label>
-                        <input type="password" 
-                               class="fn-input" 
-                               id="password_confirmation" 
-                               name="password_confirmation" 
-                               placeholder="Re-enter password"
-                               required>
-                    </div>
+                <!-- Confirm Password Field -->
+                <div class="mb-6">
+                    <label for="password_confirmation" class="fn-label">Confirm Password</label>
+                    <input type="password"
+                        class="fn-input"
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        placeholder="Confirm your new password"
+                        required>
                 </div>
 
-                <!-- Role & Gender -->
-                <div class="fn-grid-2 mb-5">
-                    <div>
-                        <label for="role" class="fn-label">I am a</label>
-                        <select class="fn-select" id="role" name="role" required>
-                            <option value="">Select your role</option>
-                            <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Regular User</option>
-                            <option value="owner" {{ old('role') == 'owner' ? 'selected' : '' }}>Property Owner</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="gender" class="fn-label">Gender</label>
-                        <select class="fn-select" id="gender" name="gender" required>
-                            <option value="">Select Gender</option>
-                            <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
-                            <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
-                            <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>Other</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Terms & Conditions -->
-                <div class="mb-6 flex items-start gap-3">
-                    <input type="checkbox" 
-                           class="fn-checkbox mt-1" 
-                           id="terms" 
-                           required>
-                    <label for="terms" class="fn-label mb-0 cursor-pointer" style="margin-top: 2px;">
-                        I agree to the <a href="#" class="fn-link">Terms & Conditions</a> and <a href="#" class="fn-link">Privacy Policy</a>
-                    </label>
-                </div>
-
-                <!-- Register Button -->
+                <!-- Submit Button -->
                 <button type="submit" class="fn-btn-primary">
-                    Create Account
+                    Reset Password
                 </button>
             </form>
 
             <!-- Footer Links -->
             <div class="mt-6 text-center space-y-2">
                 <p style="color: var(--fn-gray-dark); font-size: 14px;">
-                    Already have an account? 
+                    Remember your password?
                     <a href="{{ route('login') }}" class="fn-link">Sign In</a>
                 </p>
                 <p>
@@ -396,18 +342,15 @@
         <!-- Trust Badge -->
         <div class="text-center mt-6" style="color: var(--fn-gray-dark); font-size: 13px;">
             <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
             </svg>
-            Safe & Secure Registration
+            Secure Password Reset • Your data is protected
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-    <!-- Toastr messages from session -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     {!! Toastr::message() !!}
-
 </body>
 
 </html>

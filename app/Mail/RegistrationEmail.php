@@ -23,6 +23,6 @@ class RegistrationEmail extends Mailable
     public function build()
     {
         return $this->subject('Verify Your Email for FindNest')
-                    ->view('emails.registration'); // points to views/emails/registration.blade.php
+                    ->view('emails.registration'); 
     }
 }

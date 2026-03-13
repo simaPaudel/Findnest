@@ -31,6 +31,16 @@ class Property extends Model
         'status'
     ];
 
+    protected $casts = [
+        'amenities' => 'array',
+        'photos' => 'array',
+        'furnished' => 'boolean',
+        'is_verified' => 'boolean',
+        'rent_price' => 'decimal:2',
+        'latitude' => 'decimal:7',
+        'longitude' => 'decimal:7',
+    ];
+
     public function owner()
     {
         return $this->belongsTo(User::class, 'owner_id');
