@@ -279,7 +279,7 @@
                 @csrf
 
                 <!-- Hidden Token Field -->
-                <input type="hidden" name="token" value="{{ $request->route('token') }}">
+                <input type="hidden" name="token" value="{{ $token }}">
 
                 <!-- Email Field -->
                 <div class="mb-5">
@@ -288,7 +288,7 @@
                         class="fn-input"
                         id="email"
                         name="email"
-                        value="{{ old('email', $request->email) }}"
+                        value="{{ old('email', $email) }}"
                         placeholder="your.email@example.com"
                         required
                         autofocus>

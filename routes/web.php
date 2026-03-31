@@ -12,11 +12,17 @@ use App\Http\Controllers\User\RoommatePreferenceController;
 use App\Http\Controllers\User\SavedListingController;
 use App\Http\Controllers\ListingsController;
 use App\Http\Controllers\RoommatesController;
+use App\Http\Controllers\RoommateMatchController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\OwnerPropertyController;
 use App\Http\Controllers\Owner\OwnerBookingController;
 use App\Http\Controllers\Owner\OwnerReviewController;
 use App\Http\Controllers\Owner\OwnerProfileController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminPropertyController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminReviewController;
+use App\Http\Controllers\Admin\AdminBookingController;
 use App\Http\Controllers\HomeController;
 
 // Home page
@@ -57,6 +63,12 @@ Route::prefix('user')->middleware(['auth', 'user'])->group(function () {
 
     // Saved Listings
     Route::get('/saved-listings', [SavedListingController::class, 'index'])->name('user.saved-listings.index');
+    Route::delete('/saved-listings/{savedListing}', [SavedListingController::class, 'destroy'])->name('user.saved-listings.destroy');
+    
+    // Save/Unsave Listings (API endpoints)
+    Route::post('/saved-listings/save/{property}', [SavedListingController::class, 'save'])->name('user.saved-listings.save');
+    Route::delete('/saved-listings/unsave/{property}', [SavedListingController::class, 'unsave'])->name('user.saved-listings.unsave');
+    Route::get('/saved-listings/check/{property}', [SavedListingController::class, 'isSaved'])->name('user.saved-listings.check');
 });
 
 // Owner Dashboard 
@@ -86,6 +98,24 @@ Route::prefix('owner')->middleware(['auth', 'owner'])->group(function () {
     Route::put('/profile', [OwnerProfileController::class, 'update'])->name('owner.profile.update');
 });
 
+// Admin Dashboard
+Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
+    Route::get('/properties', [AdminPropertyController::class, 'index'])->name('admin.properties.index');
+    Route::post('/properties/{property}/approve', [AdminPropertyController::class, 'approve'])->name('admin.properties.approve');
+    Route::post('/properties/{property}/reject', [AdminPropertyController::class, 'reject'])->name('admin.properties.reject');
+    Route::post('/properties/{property}/verify', [AdminPropertyController::class, 'verify'])->name('admin.properties.verify');
+
+    Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+
+    Route::get('/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
+    Route::post('/reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('admin.reviews.approve');
+    Route::post('/reviews/{review}/hide', [AdminReviewController::class, 'hide'])->name('admin.reviews.hide');
+
+    Route::get('/bookings', [AdminBookingController::class, 'index'])->name('admin.bookings.index');
+});
+
 // Listings Routes
 Route::get('/listings', [ListingsController::class, 'index'])->name('listings.index');
 Route::get('/listings/{property}', [ListingsController::class, 'show'])->name('listings.show');
@@ -94,3 +124,6 @@ Route::get('/listings/{property}', [ListingsController::class, 'show'])->name('l
 Route::get('/roommates', [RoommatesController::class, 'index'])->name('roommates.index');
 Route::get('/roommates/profile', [RoommatesController::class, 'profile'])->middleware('auth')->name('roommates.profile');
 Route::get('/roommates/matches', [RoommatesController::class, 'matches'])->middleware('auth')->name('roommates.matches');
+
+// Roommate Matching API Route
+Route::get('/roommate/matches', [RoommateMatchController::class, 'getMatches'])->middleware('auth')->name('roommate.matches');

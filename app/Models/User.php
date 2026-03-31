@@ -82,4 +82,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(RoommatePreference::class);
     }
+
+    public function savedListings()
+    {
+        return $this->hasMany(SavedListing::class, 'user_id');
+    }
 }

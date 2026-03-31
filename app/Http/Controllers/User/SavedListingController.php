@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
+use App\Models\SavedListing;
+use App\Models\Property;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class SavedListingController extends Controller
 {
@@ -15,19 +17,135 @@ class SavedListingController extends Controller
      */
     public function index()
     {
-        $savedListings = collect(); // Empty collection by default
-
-        // Check if saved_listings table exists
-        if (Schema::hasTable('saved_listings')) {
-            // TODO: When saved_listings table is created, uncomment and implement:
-            // $savedListings = DB::table('saved_listings')
-            //     ->join('properties', 'saved_listings.property_id', '=', 'properties.id')
-            //     ->where('saved_listings.user_id', auth()->id())
-            //     ->select('properties.*', 'saved_listings.created_at as saved_at')
-            //     ->orderBy('saved_listings.created_at', 'desc')
-            //     ->get();
-        }
+        $savedListings = SavedListing::where('user_id', Auth::id())
+            ->with('property')
+            ->latest()
+            ->paginate(12);
 
         return view('user.saved.index', compact('savedListings'));
+    }
+
+    /**
+     * Save a listing for the authenticated user
+     *
+     * @param Property $property
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function save(Property $property)
+    {
+        try {
+            $userId = Auth::id();
+            
+            // Check if already saved
+            $existing = SavedListing::where('user_id', $userId)
+                ->where('property_id', $property->id)
+                ->first();
+            
+            if ($existing) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Listing already saved',
+                    'is_saved' => true,
+                ], 409);
+            }
+            
+            // Save the listing
+            SavedListing::create([
+                'user_id' => $userId,
+                'property_id' => $property->id,
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Listing saved successfully',
+                'is_saved' => true,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error saving listing: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Unsave a listing for the authenticated user
+     *
+     * @param Property $property
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function unsave(Property $property)
+    {
+        try {
+            $userId = Auth::id();
+            
+            // Delete the saved listing
+            $deleted = SavedListing::where('user_id', $userId)
+                ->where('property_id', $property->id)
+                ->delete();
+            
+            if (!$deleted) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Listing not found in saved',
+                    'is_saved' => false,
+                ], 404);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Listing removed from saved',
+                'is_saved' => false,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error removing listing: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Check if a property is saved by the authenticated user
+     *
+     * @param Property $property
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function isSaved(Property $property)
+    {
+        try {
+            $isSaved = SavedListing::where('user_id', Auth::id())
+                ->where('property_id', $property->id)
+                ->exists();
+            
+            return response()->json([
+                'success' => true,
+                'is_saved' => $isSaved,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error checking saved status: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete a saved listing
+     *
+     * @param SavedListing $savedListing
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(SavedListing $savedListing)
+    {
+        // Ensure user is deleting their own saved listing
+        if ($savedListing->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $savedListing->delete();
+
+        return redirect()->route('user.saved-listings.index')
+            ->with('success', 'Listing removed from saved.');
     }
 }

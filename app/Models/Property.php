@@ -65,4 +65,9 @@ class Property extends Model
     {
         return $this->hasMany(Report::class, 'property_id');
     }
+
+    public function savedBy()
+    {
+        return $this->hasMany(SavedListing::class, 'property_id');
+    }
 }

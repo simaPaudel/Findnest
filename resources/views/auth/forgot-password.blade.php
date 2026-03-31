@@ -261,9 +261,9 @@
             </p>
 
             <!-- Success Message -->
-            @if (session('success'))
+            @if (session('status'))
             <div class="fn-alert-success">
-                {{ session('success') }}
+                {{ session('status') }}
             </div>
             @endif
 

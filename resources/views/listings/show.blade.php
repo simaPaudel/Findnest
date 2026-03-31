@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $property->title }} - FindNest</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -157,6 +158,7 @@
 
         /* Image container */
         .property-image {
+            position: relative;
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -166,6 +168,47 @@
             width: 100%;
             height: 500px;
             object-fit: cover;
+        }
+
+        /* Save Button */
+        .save-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: transparent;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: none;
+            z-index: 10;
+            padding: 0;
+        }
+
+        .save-btn svg {
+            width: 28px;
+            height: 28px;
+            color: white;
+            stroke-width: 2;
+            filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+            transition: all 0.3s ease;
+        }
+
+        .save-btn:hover svg {
+            color: var(--fn-red);
+            transform: scale(1.15);
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+        }
+
+        .save-btn.saved svg {
+            color: var(--fn-red);
+            fill: var(--fn-red);
+            filter: drop-shadow(0 2px 6px rgba(255, 56, 92, 0.4));
         }
 
         /* Info Grid */
@@ -260,6 +303,17 @@
                         @else
                             <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&h=600&fit=crop" alt="{{ $property->title }}">
                         @endif
+
+                        <!-- Save Button (only for authenticated users) -->
+                        @auth
+                            <button class="save-btn save-property-btn" 
+                                    data-property-id="{{ $property->id }}"
+                                    title="Save this listing">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                        @endauth
                     </div>
 
                     <!-- Title and Location -->
@@ -685,5 +739,129 @@
             <p class="fn-text-gray">&copy; 2026 FindNest. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Save Listing Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all save buttons
+            const saveButtons = document.querySelectorAll('.save-property-btn');
+
+            saveButtons.forEach(button => {
+                const propertyId = button.dataset.propertyId;
+
+                // Check if property is already saved
+                checkSaveStatus(propertyId, button);
+
+                // Add click handler
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleSave(propertyId, button);
+                });
+            });
+
+            function checkSaveStatus(propertyId, button) {
+                fetch(`/user/saved-listings/check/${propertyId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_saved) {
+                        button.classList.add('saved');
+                    }
+                })
+                .catch(error => console.error('Error checking save status:', error));
+            }
+
+            function toggleSave(propertyId, button) {
+                const isSaved = button.classList.contains('saved');
+                const url = isSaved 
+                    ? `/user/saved-listings/unsave/${propertyId}`
+                    : `/user/saved-listings/save/${propertyId}`;
+                const method = isSaved ? 'DELETE' : 'POST';
+
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.is_saved) {
+                            button.classList.add('saved');
+                            showNotification('Listing saved successfully!', 'success');
+                        } else {
+                            button.classList.remove('saved');
+                            showNotification('Listing removed from saved', 'info');
+                        }
+                    } else {
+                        showNotification(data.message || 'Error saving listing', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error saving listing', 'error');
+                });
+            }
+
+            function showNotification(message, type) {
+                // Simple notification
+                const notification = document.createElement('div');
+                notification.textContent = message;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 12px 20px;
+                    border-radius: 12px;
+                    font-weight: 500;
+                    z-index: 9999;
+                    animation: slideIn 0.3s ease;
+                    ${type === 'success' ? 'background: #10b981; color: white;' : ''}
+                    ${type === 'error' ? 'background: #ef4444; color: white;' : ''}
+                    ${type === 'info' ? 'background: #3b82f6; color: white;' : ''}
+                `;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+        });
+
+        // Add CSS animation for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
