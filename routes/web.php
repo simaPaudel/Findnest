@@ -12,7 +12,6 @@ use App\Http\Controllers\User\RoommatePreferenceController;
 use App\Http\Controllers\User\SavedListingController;
 use App\Http\Controllers\ListingsController;
 use App\Http\Controllers\RoommatesController;
-use App\Http\Controllers\RoommateMatchController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\OwnerPropertyController;
 use App\Http\Controllers\Owner\OwnerBookingController;
@@ -24,6 +23,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminBookingController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KhaltiPaymentController;
 
 // Home page
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -52,6 +52,7 @@ Route::prefix('user')->middleware(['auth', 'user'])->group(function () {
     // Bookings
     Route::get('/bookings', [UserBookingController::class, 'index'])->name('user.bookings.index');
     Route::post('/bookings/{booking}/cancel', [UserBookingController::class, 'cancel'])->name('user.bookings.cancel');
+    Route::get('/bookings/{booking}/bill', [UserBookingController::class, 'bill'])->name('user.bookings.bill');
 
     // Profile
     Route::get('/profile', [UserProfileController::class, 'edit'])->name('user.profile.edit');
@@ -63,12 +64,6 @@ Route::prefix('user')->middleware(['auth', 'user'])->group(function () {
 
     // Saved Listings
     Route::get('/saved-listings', [SavedListingController::class, 'index'])->name('user.saved-listings.index');
-    Route::delete('/saved-listings/{savedListing}', [SavedListingController::class, 'destroy'])->name('user.saved-listings.destroy');
-    
-    // Save/Unsave Listings (API endpoints)
-    Route::post('/saved-listings/save/{property}', [SavedListingController::class, 'save'])->name('user.saved-listings.save');
-    Route::delete('/saved-listings/unsave/{property}', [SavedListingController::class, 'unsave'])->name('user.saved-listings.unsave');
-    Route::get('/saved-listings/check/{property}', [SavedListingController::class, 'isSaved'])->name('user.saved-listings.check');
 });
 
 // Owner Dashboard 
@@ -120,10 +115,23 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 Route::get('/listings', [ListingsController::class, 'index'])->name('listings.index');
 Route::get('/listings/{property}', [ListingsController::class, 'show'])->name('listings.show');
 
+// Booking Request Route (Auth Required)
+Route::get('/listings/{property}/request-booking', [UserBookingController::class, 'request'])
+    ->middleware(['auth', 'user'])
+    ->name('listings.request-booking');
+
+Route::post('/bookings/create', [UserBookingController::class, 'create'])
+    ->middleware(['auth', 'user'])
+    ->name('user.bookings.create');
+
 // Roommates Routes
 Route::get('/roommates', [RoommatesController::class, 'index'])->name('roommates.index');
 Route::get('/roommates/profile', [RoommatesController::class, 'profile'])->middleware('auth')->name('roommates.profile');
 Route::get('/roommates/matches', [RoommatesController::class, 'matches'])->middleware('auth')->name('roommates.matches');
 
-// Roommate Matching API Route
-Route::get('/roommate/matches', [RoommateMatchController::class, 'getMatches'])->middleware('auth')->name('roommate.matches');
+// Khalti Payment Routes
+Route::middleware(['auth', 'user'])->prefix('payment/khalti')->group(function () {
+    Route::get('/initiate/{bookingId}', [KhaltiPaymentController::class, 'initiate'])->name('payment.khalti.initiate');
+    Route::get('/success', [KhaltiPaymentController::class, 'success'])->name('payment.khalti.success');
+    Route::get('/failure', [KhaltiPaymentController::class, 'failure'])->name('payment.khalti.failure');
+});
