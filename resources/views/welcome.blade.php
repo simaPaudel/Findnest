@@ -258,34 +258,106 @@
             -webkit-line-clamp: 1;
         }
 
-        /* Step Card */
+        /* Step Timeline */
+        .fn-step-timeline {
+            position: relative;
+            width: 100%;
+        }
+
+        .fn-step-track {
+            display: none;
+        }
+
         .fn-step-card {
             position: relative;
-            text-align: center;
-            transition: all 0.2s ease;
+            overflow: hidden;
             background: var(--fn-white);
-            border-radius: 12px;
-            border: 1px solid #E5E7EB;
+            border: 1px solid #e5e7eb;
+            border-radius: 24px;
+            padding: 3.5rem 1.5rem 1.5rem;
+            min-height: 230px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.2s ease, border-color 0.2s ease;
         }
 
         .fn-step-card:hover {
+            transform: translateY(-4px);
             border-color: var(--fn-red);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
-        .fn-step-number {
-            width: 48px;
-            height: 48px;
-            background: var(--fn-red);
-            color: var(--fn-white);
-            border-radius: 50%;
+        .fn-step-icon {
+            position: absolute;
+            left: 50%;
+            top: 1.55rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 999px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: var(--fn-red);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto;
+            transform: translateX(-50%);
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .fn-step-card:hover .fn-step-icon {
+            background: var(--fn-red);
+            border-color: var(--fn-red);
+            color: var(--fn-white);
+        }
+
+        .fn-step-title {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            margin-top: 0.75rem;
+            font-size: 1.05rem;
             font-weight: 700;
-            font-size: 1.2rem;
-            box-shadow: 0 2px 8px rgba(255, 56, 92, 0.15);
+            color: var(--fn-charcoal);
+        }
+
+        .fn-step-copy {
+            position: relative;
+            z-index: 1;
+            margin-top: 0.65rem;
+            color: var(--fn-gray-dark);
+            font-size: 0.95rem;
+            line-height: 1.65;
+            max-width: 20rem;
+        }
+
+        @media (min-width: 1024px) {
+            .fn-step-track {
+                display: block;
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 3.25rem;
+                height: 1px;
+                background: #e2e8f0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .fn-search-bar {
+                flex-direction: column;
+            }
+
+            .fn-step-card {
+                min-height: 0;
+                padding: 3.25rem 1.25rem 1.25rem;
+            }
+
+            .fn-step-icon {
+                top: 1.35rem;
+                width: 52px;
+                height: 52px;
+            }
         }
 
         /* Badge */
@@ -380,14 +452,6 @@
         @media (max-width: 768px) {
             .fn-search-bar {
                 flex-direction: column;
-            }
-            .fn-step-card {
-                padding: 24px 20px;
-            }
-            .fn-step-number {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
             }
         }
     </style>
@@ -507,7 +571,7 @@
     </section>
     <!-- How FindNest Works -->
     <section id="how-it-works" class="bg-slate-50 py-14 lg:py-16">
-        <div class="mx-auto max-w-6xl px-4 lg:px-6">
+        <div class="mx-auto max-w-7xl px-4 lg:px-6">
             <div class="mx-auto max-w-2xl text-center">
                 <span class="inline-flex items-center rounded-full border border-rose-100 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-rose-500 shadow-sm">
                     Simple Process
@@ -516,48 +580,39 @@
                 <p class="mt-3 text-sm leading-7 text-slate-500 lg:text-base">Your journey to the right accommodation in three simple, well-guided steps.</p>
             </div>
 
-            <div class="relative mt-10 lg:mt-12">
-                <div class="pointer-events-none absolute left-[16.5%] right-[16.5%] top-10 hidden h-px bg-gradient-to-r from-slate-200 via-rose-200 to-slate-200 lg:block"></div>
+            <div class="fn-step-timeline relative mt-10 lg:mt-12">
+                <div class="fn-step-track" aria-hidden="true"></div>
 
-                <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:gap-6">
-                    <div class="group relative rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_12px_32px_rgba(15,23,42,0.05)] transition duration-200 hover:-translate-y-1 hover:border-rose-200 hover:shadow-[0_20px_40px_rgba(15,23,42,0.08)]">
-                        <div class="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-500">
-                            Step 1
-                        </div>
-                        <div class="mt-5 flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-rose-500">
+                <div class="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-6 items-stretch">
+                    <article class="fn-step-card group">
+                        <div class="fn-step-icon">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-4.35-4.35m1.35-5.15a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"></path>
                             </svg>
                         </div>
-                        <h3 class="mt-5 text-lg font-semibold text-slate-900">Search &amp; Filter</h3>
-                        <p class="mt-2 text-sm leading-7 text-slate-500">Browse verified properties using smart filters for location, price, and amenities.</p>
-                    </div>
+                        <h3 class="fn-step-title">Search &amp; Filter</h3>
+                        <p class="fn-step-copy">Browse verified properties using smart filters for location, price, and amenities.</p>
+                    </article>
 
-                    <div class="group relative rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_12px_32px_rgba(15,23,42,0.05)] transition duration-200 hover:-translate-y-1 hover:border-rose-200 hover:shadow-[0_20px_40px_rgba(15,23,42,0.08)]">
-                        <div class="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-500">
-                            Step 2
-                        </div>
-                        <div class="mt-5 flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-rose-500">
+                    <article class="fn-step-card group">
+                        <div class="fn-step-icon">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-1a4 4 0 00-5-3.87M17 20H7m10 0v-1c0-.7-.15-1.37-.42-1.98M7 20H2v-1a4 4 0 015-3.87M7 20v-1c0-.7.15-1.37.42-1.98m0 0a5 5 0 019.16 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zM8 10a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
                             </svg>
                         </div>
-                        <h3 class="mt-5 text-lg font-semibold text-slate-900">Connect</h3>
-                        <p class="mt-2 text-sm leading-7 text-slate-500">Find compatible roommates and connect with property owners directly.</p>
-                    </div>
+                        <h3 class="fn-step-title">Connect</h3>
+                        <p class="fn-step-copy">Find compatible roommates and connect with property owners directly.</p>
+                    </article>
 
-                    <div class="group relative rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_12px_32px_rgba(15,23,42,0.05)] transition duration-200 hover:-translate-y-1 hover:border-rose-200 hover:shadow-[0_20px_40px_rgba(15,23,42,0.08)]">
-                        <div class="inline-flex items-center gap-2 rounded-full border border-rose-100 bg-rose-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-500">
-                            Step 3
-                        </div>
-                        <div class="mt-5 flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-rose-500">
+                    <article class="fn-step-card group">
+                        <div class="fn-step-icon">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 11.5l9-7 9 7M5.5 10v9a1 1 0 001 1h3.5v-5a1 1 0 011-1h2a1 1 0 011 1v5h3.5a1 1 0 001-1v-9"></path>
                             </svg>
                         </div>
-                        <h3 class="mt-5 text-lg font-semibold text-slate-900">Move In</h3>
-                        <p class="mt-2 text-sm leading-7 text-slate-500">Book securely with integrated payment and get ready for your new home.</p>
-                    </div>
+                        <h3 class="fn-step-title">Move In</h3>
+                        <p class="fn-step-copy">Book securely with integrated payment and get ready for your new home.</p>
+                    </article>
                 </div>
             </div>
         </div>
@@ -565,20 +620,20 @@
 
     <!-- Roommate Matching Section -->
     <section id="roommates" class="py-14 lg:py-16">
-        <div class="mx-auto max-w-6xl px-4 lg:px-6">
+        <div class="mx-auto max-w-7xl px-4 lg:px-6">
             <div class="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
-                <div class="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
+                <div class="grid grid-cols-1 lg:grid-cols-[1.08fr_0.92fr]">
                     <div class="relative min-h-[300px] overflow-hidden bg-slate-100 lg:min-h-[420px]">
                         <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=900&fit=crop"
                             alt="Roommate Matching"
                             class="absolute inset-0 h-full w-full object-cover transition duration-500 hover:scale-105">
                     </div>
 
-                    <div class="flex flex-col justify-center p-7 sm:p-8 lg:p-10">
+                    <div class="flex flex-col items-start justify-center p-7 text-left sm:p-8 lg:p-12">
                         <span class="inline-flex w-fit items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                             Smart Matching
                         </span>
-                        <h2 class="mt-4 text-3xl font-bold leading-tight tracking-tight text-slate-950 lg:text-[2.5rem]">Find Your Perfect Roommate</h2>
+                        <h2 class="mt-4 text-3xl font-bold leading-tight tracking-tight text-slate-950 lg:text-[2.25rem]">Find Your Perfect Roommate</h2>
                         <p class="mt-4 max-w-xl text-sm leading-7 text-slate-500 lg:text-base">Our intelligent matching algorithm connects you with compatible roommates based on lifestyle and preferences.</p>
 
                         <div class="mt-7 space-y-4">
@@ -628,47 +683,54 @@
 
     <!-- Call-to-Action Section -->
     <section class="bg-slate-50 py-14 lg:py-16">
-        <div class="mx-auto max-w-5xl px-4 lg:px-6">
-            <div class="rounded-[32px] border border-slate-200 bg-white px-6 py-10 text-center shadow-[0_18px_48px_rgba(15,23,42,0.06)] sm:px-8 lg:px-12 lg:py-12">
-                <div class="mx-auto max-w-2xl">
-                    <h2 class="text-3xl font-bold tracking-tight text-slate-950 lg:text-[2.5rem]">Ready to Find Your Perfect Home?</h2>
-                    <p class="mt-4 text-sm leading-7 text-slate-500 lg:text-base">Join thousands of people who have found their ideal accommodation and roommates through FindNest.</p>
-                </div>
+        <div class="mx-auto max-w-7xl px-4 lg:px-6">
+            <div class="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
+                <div class="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
+                    <div class="p-8 text-left sm:p-10 lg:p-12">
+                        <span class="inline-flex items-center rounded-full border border-rose-100 bg-rose-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-rose-500 shadow-sm">
+                            Get Started
+                        </span>
+                        <h2 class="mt-4 text-3xl font-bold tracking-tight text-slate-950 lg:text-[2.5rem]">Ready to Find Your Perfect Home?</h2>
+                        <p class="mt-4 max-w-2xl text-sm leading-7 text-slate-500 lg:text-base">Join thousands of people who have found their ideal accommodation and roommates through FindNest.</p>
 
-                <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                    <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-2xl bg-rose-500 px-7 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(255,56,92,0.22)] transition hover:-translate-y-0.5 hover:bg-rose-600">Create Free Account</a>
-                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-7 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">Sign In</a>
-                </div>
-
-                <div class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-4">
-                        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white text-rose-500 shadow-sm">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A12.01 12.01 0 0112 3c-3.183 0-6.073 1.234-8.235 3.25C3.272 7.62 3 8.298 3 9c0 5.25 3.438 9.94 9 11 5.562-1.06 9-5.75 9-11 0-.702-.272-1.38-.765-1.75z"></path>
-                            </svg>
+                        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                            <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-2xl bg-rose-500 px-7 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(255,56,92,0.22)] transition hover:-translate-y-0.5 hover:bg-rose-600">Create Free Account</a>
+                            <a href="{{ route('login') }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-7 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">Sign In</a>
                         </div>
-                        <p class="mt-3 text-sm font-semibold text-slate-900">Verified Properties</p>
-                        <p class="mt-1 text-xs leading-6 text-slate-500">Trusted listings from approved owners.</p>
                     </div>
 
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-4">
-                        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white text-rose-500 shadow-sm">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V6a5 5 0 10-10 0v1H6a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <p class="mt-3 text-sm font-semibold text-slate-900">Secure Payments</p>
-                        <p class="mt-1 text-xs leading-6 text-slate-500">Book confidently through a safer payment flow.</p>
-                    </div>
+                    <div class="border-t border-slate-200 bg-slate-50/60 p-8 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50 text-rose-500">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A12.01 12.01 0 0112 3c-3.183 0-6.073 1.234-8.235 3.25C3.272 7.62 3 8.298 3 9c0 5.25 3.438 9.94 9 11 5.562-1.06 9-5.75 9-11 0-.702-.272-1.38-.765-1.75z"></path>
+                                    </svg>
+                                </div>
+                                <p class="mt-3 text-sm font-semibold text-slate-900">Verified Properties</p>
+                                <p class="mt-1 text-xs leading-6 text-slate-500">Trusted listings from approved owners.</p>
+                            </div>
 
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-4">
-                        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white text-rose-500 shadow-sm">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M18.364 5.636A9 9 0 105.636 18.364M9 9h.01M15 9h.01M8 13a5 5 0 018 0"></path>
-                            </svg>
+                            <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50 text-rose-500">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2V9a2 2 0 00-2-2h-1V6a5 5 0 10-10 0v1H6a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <p class="mt-3 text-sm font-semibold text-slate-900">Secure Payments</p>
+                                <p class="mt-1 text-xs leading-6 text-slate-500">Book confidently through a safer payment flow.</p>
+                            </div>
+
+                            <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50 text-rose-500">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M18.364 5.636A9 9 0 105.636 18.364M9 9h.01M15 9h.01M8 13a5 5 0 018 0"></path>
+                                    </svg>
+                                </div>
+                                <p class="mt-3 text-sm font-semibold text-slate-900">Helpful Support</p>
+                                <p class="mt-1 text-xs leading-6 text-slate-500">Clear assistance when you need guidance.</p>
+                            </div>
                         </div>
-                        <p class="mt-3 text-sm font-semibold text-slate-900">Helpful Support</p>
-                        <p class="mt-1 text-xs leading-6 text-slate-500">Clear assistance when you need guidance.</p>
                     </div>
                 </div>
             </div>
