@@ -10,6 +10,8 @@ use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Mail\RegistrationEmail;
 
 
@@ -48,7 +50,8 @@ class RegistrationController extends Controller
         // Send verification email
         $mailData = [
             'name' => $user->name,
-            'token' => $verificationToken
+            'token' => $verificationToken,
+            'verification_url' => rtrim($request->root(), '/') . '/verify-email/' . $verificationToken,
         ];
         Mail::to($user->email)->send(new RegistrationEmail($mailData));
 
@@ -58,20 +61,46 @@ class RegistrationController extends Controller
 
     public function verifyEmail($token)
     {
-        $user = User::where('verification_token', $token)->first();
+        try {
+            Log::info('Email verification started', ['token' => substr($token, 0, 10) . '...']);
 
-        if (!$user) {
-            toastr()->error('Invalid or expired verification link.');
-            return redirect()->route('login');
+            // Find user by token
+            $user = User::where('verification_token', $token)->first();
+
+            if (!$user) {
+                Log::warning('Verification token not found', ['token' => substr($token, 0, 10) . '...']);
+                return redirect('/login')->with('error', 'Invalid or expired verification link.');
+            }
+
+            // Check if already verified
+            if ($user->is_verified) {
+                Log::info('User already verified', ['user_id' => $user->id]);
+                return redirect('/login')->with('success', 'Email already verified. You can now log in.');
+            }
+
+            // Update using query builder for more control
+            $updated = DB::table('users')
+                ->where('id', $user->id)
+                ->update([
+                    'is_verified' => 1,
+                    'verification_token' => null,
+                    'email_verified_at' => DB::raw('NOW()'),
+                ]);
+
+            if ($updated) {
+                Log::info('Email verified successfully', ['user_id' => $user->id]);
+                return redirect('/login')->with('success', 'Email verified successfully! You can now log in.');
+            } else {
+                Log::error('Failed to update user during verification', ['user_id' => $user->id]);
+                return redirect('/login')->with('error', 'Verification failed. Please try again.');
+            }
+        } catch (\Throwable $e) {
+            Log::error('Email verification exception', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            return redirect('/login')->with('error', 'An error occurred. Please contact support.');
         }
-
-        $user->update([
-            'is_verified' => 1,
-            'verification_token' => null,
-            'email_verified_at' => now(),
-        ]);
-
-        toastr()->success('Email verified successfully. You can now log in.');
-        return redirect()->route('login');
     }
 }

@@ -5,685 +5,792 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $property->title }} - FindNest</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* FindNest Theme Variables */
-        :root {
-            --fn-red: #FF385C;
-            --fn-red-hover: #E11D48;
-            --fn-white: #FFFFFF;
-            --fn-gray: #F7F7F7;
-            --fn-charcoal: #1F2937;
-            --fn-gray-light: #E5E7EB;
-            --fn-gray-dark: #6B7280;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--fn-white);
-            color: var(--fn-charcoal);
+            color: #0f172a;
+            background: #ffffff;
         }
 
-        .fn-bg-red { background-color: var(--fn-red); }
-        .fn-bg-white { background-color: var(--fn-white); }
-        .fn-bg-gray { background-color: var(--fn-gray); }
-        .fn-text-red { color: var(--fn-red); }
-        .fn-text-charcoal { color: var(--fn-charcoal); }
-        .fn-text-white { color: var(--fn-white); }
-        .fn-text-gray { color: var(--fn-gray-dark); }
-
-        /* Navbar */
-        .fn-navbar {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--fn-gray-light);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+        .surface {
+            border: 1px solid #e2e8f0;
+            border-radius: 22px;
+            background: #ffffff;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
         }
 
-        .fn-nav-link {
-            color: var(--fn-charcoal);
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 500;
+        .muted-surface {
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            background: #f8fafc;
         }
 
-        .fn-nav-link:hover {
-            background: rgba(255, 56, 92, 0.08);
-            color: var(--fn-red);
-        }
-
-        /* Buttons */
-        .fn-btn-primary {
-            background: linear-gradient(135deg, var(--fn-red) 0%, #ff1744 100%);
-            color: var(--fn-white);
-            padding: 14px 32px;
-            border-radius: 16px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 20px rgba(255, 56, 92, 0.25);
-            display: inline-block;
-            text-decoration: none;
-        }
-
-        .fn-btn-primary:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 8px 32px rgba(255, 56, 92, 0.35);
-        }
-
-        .fn-btn-secondary {
-            background: transparent;
-            color: var(--fn-charcoal);
-            padding: 12px 28px;
-            border-radius: 16px;
-            font-weight: 500;
-            border: 2px solid var(--fn-gray-light);
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-block;
-            text-decoration: none;
-        }
-
-        .fn-btn-secondary:hover {
-            border-color: var(--fn-red);
-            background: rgba(255, 56, 92, 0.05);
-            color: var(--fn-red);
-        }
-
-        /* Cards */
-        .fn-glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(229, 231, 235, 0.8);
-            border-radius: 20px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-            padding: 24px;
-        }
-
-        /* Badge */
-        .fn-badge {
+        .tag {
             display: inline-flex;
             align-items: center;
-            padding: 6px 16px;
-            border-radius: 12px;
-            font-size: 0.875rem;
+            border-radius: 999px;
+            padding: 0.5rem 0.9rem;
+            font-size: 0.78rem;
             font-weight: 600;
-            backdrop-filter: blur(8px);
+            line-height: 1;
         }
 
-        .fn-badge-red {
-            background: rgba(255, 56, 92, 0.15);
-            color: var(--fn-red);
-            border: 1px solid rgba(255, 56, 92, 0.3);
-        }
-
-        .fn-badge-gray {
-            background: rgba(107, 114, 128, 0.15);
-            color: var(--fn-gray-dark);
-            border: 1px solid rgba(107, 114, 128, 0.3);
-        }
-
-        .fn-badge-green {
-            background: rgba(16, 185, 129, 0.15);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        /* Star Rating */
-        .star-rating {
+        .btn-primary {
             display: inline-flex;
-            gap: 4px;
-        }
-
-        .star {
-            color: #D1D5DB;
-        }
-
-        .star.filled {
-            color: #FBBF24;
-        }
-
-        /* Image container */
-        .property-image {
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .property-image img {
             width: 100%;
-            height: 500px;
-            object-fit: cover;
-        }
-
-        /* Info Grid */
-        .info-item {
-            display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: var(--fn-gray);
-            border-radius: 12px;
-            transition: all 0.3s ease;
+            justify-content: center;
+            border-radius: 14px;
+            padding: 0.95rem 1.2rem;
+            background: #ff385c;
+            color: #ffffff;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background 0.2s ease;
         }
 
-        .info-item:hover {
-            background: rgba(255, 56, 92, 0.05);
-            transform: translateY(-2px);
+        .btn-primary:hover {
+            background: #e11d48;
         }
 
-        .info-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--fn-red) 0%, #ff1744 100%);
-            border-radius: 12px;
+        .btn-secondary {
+            display: inline-flex;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            padding: 0.95rem 1.2rem;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .gallery-shell {
+            overflow: hidden;
+        }
+
+        .gallery-stage {
+            position: relative;
+            aspect-ratio: 16 / 10;
+            background: #f8fafc;
+            overflow: hidden;
+        }
+
+        .gallery-backdrop {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: blur(28px);
+            transform: scale(1.1);
+            opacity: 0.22;
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(248,250,252,0.55) 100%);
+        }
+
+        .gallery-main {
+            position: relative;
+            z-index: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            width: 100%;
+            height: 100%;
+            padding: 1rem;
         }
 
-        /* Review Card */
-        .review-card {
-            padding: 20px;
-            border: 1px solid var(--fn-gray-light);
+        .gallery-main-image {
+            display: block;
+            border-radius: 18px;
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14);
+            background: #ffffff;
+            image-rendering: auto;
+        }
+
+        .gallery-main-image.landscape {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .gallery-main-image.portrait {
+            height: 100%;
+            width: auto;
+            max-width: min(100%, 72%);
+            object-fit: contain;
+            object-position: center;
+        }
+
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.94);
+            color: #0f172a;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.16);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .gallery-nav:hover {
+            background: #ffffff;
+            transform: translateY(-50%) scale(1.04);
+        }
+
+        .gallery-nav.prev {
+            left: 16px;
+        }
+
+        .gallery-nav.next {
+            right: 16px;
+        }
+
+        .gallery-counter {
+            position: absolute;
+            right: 16px;
+            bottom: 16px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.72);
+            color: #ffffff;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .gallery-thumbs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 0.85rem;
+        }
+
+        .gallery-thumb {
+            border: 2px solid transparent;
             border-radius: 16px;
-            transition: all 0.3s ease;
+            overflow: hidden;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .review-card:hover {
-            border-color: var(--fn-red);
-            box-shadow: 0 4px 16px rgba(255, 56, 92, 0.1);
+        .gallery-thumb:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+        }
+
+        .gallery-thumb.active {
+            border-color: #ff385c;
+            box-shadow: 0 12px 20px rgba(255, 56, 92, 0.12);
+        }
+
+        .gallery-thumb img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            aspect-ratio: 4 / 3;
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="fn-navbar">
-        <div class="max-w-7xl mx-auto px-6 lg:px-12 py-4">
-            <div class="flex items-center justify-between">
-                <a href="{{ route('home') }}" class="flex items-center gap-2 text-2xl font-bold fn-text-red">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                    </svg>
-                    FindNest
+    @include('components.navbar')
+
+    @php
+        $images = $property->orderedImages ?? collect();
+        $galleryItems = $images->map(function ($image) use ($property) {
+            return [
+                'url' => $image->getUrl(),
+                'alt' => $image->alt_text ?: $property->title,
+            ];
+        })->values();
+
+        if ($galleryItems->isEmpty()) {
+            $galleryItems = collect([[
+                'url' => asset('images/property-placeholder.jpg'),
+                'alt' => $property->title,
+            ]]);
+        }
+
+        $heroImageUrl = $galleryItems->first()['url'];
+        $listedRooms = $property->rooms;
+        $availableRooms = $listedRooms->filter(fn ($room) => (bool) $room->is_bookable);
+        $priceSourceRooms = $availableRooms->isNotEmpty() ? $availableRooms : $listedRooms;
+        $minRoomPrice = $priceSourceRooms->min('price');
+        $maxRoomPrice = $priceSourceRooms->max('price');
+
+        if ($property->rental_mode === 'per_room') {
+            if ($minRoomPrice === null || $maxRoomPrice === null) {
+                $headlinePrice = 'Price on request';
+            } elseif ((float) $minRoomPrice === (float) $maxRoomPrice) {
+                $headlinePrice = 'From Rs ' . number_format((float) $minRoomPrice) . ' / month';
+            } else {
+                $headlinePrice = 'Rs ' . number_format((float) $minRoomPrice) . ' - Rs ' . number_format((float) $maxRoomPrice) . ' / month';
+            }
+        } else {
+            $headlinePrice = 'Rs ' . number_format((float) $property->rent_price) . ' / month';
+        }
+
+        $addressLine = $property->address ?: ($property->location ?: $property->city);
+        $propertyAvailabilityClasses = $property->is_property_bookable
+            ? 'bg-emerald-50 text-emerald-700'
+            : 'bg-amber-50 text-amber-700';
+    @endphp
+
+    <main class="py-10 lg:py-12">
+        <div class="mx-auto max-w-7xl px-4 lg:px-6">
+            <div class="space-y-8">
+                <a href="{{ route('home') }}" class="inline-flex items-center text-sm font-medium text-slate-500 transition hover:text-slate-900">
+                    Back to Home
                 </a>
 
-                <div class="flex items-center gap-4">
-                    <a href="{{ route('listings.index') }}" class="fn-nav-link">Browse Listings</a>
-                    @auth
-                        <a href="{{ route('user.dashboard') }}" class="fn-nav-link">Dashboard</a>
-                        <form action="{{ route('logout') }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" class="fn-nav-link">Logout</button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" class="fn-nav-link">Login</a>
-                        <a href="{{ route('register') }}" class="fn-btn-primary">Get Started</a>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </nav>
+                @if(session('success'))
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-700">
+                        {{ session('success') }}
+                    </div>
+                @endif
 
-    <!-- Main Content -->
-    <main class="py-12">
-        <div class="max-w-7xl mx-auto px-6 lg:px-12">
-            <!-- Breadcrumb -->
-            <div class="mb-6">
-                <a href="{{ route('listings.index') }}" class="fn-text-gray hover:fn-text-red transition">← Back to Listings</a>
-            </div>
+                @if(session('error'))
+                    <div class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-700">
+                        {{ session('error') }}
+                    </div>
+                @endif
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Left Column - Property Details -->
-                <div class="lg:col-span-2 space-y-6">
-                    <!-- Image Section -->
-                    <div class="property-image">
-                        @php
-                            $photos = is_array($property->photos) ? $property->photos : (json_decode($property->photos, true) ?? []);
-                            $firstPhoto = $photos[0] ?? null;
-                        @endphp
-                        @if($firstPhoto)
-                            <img src="{{ asset('storage/' . $firstPhoto) }}" alt="{{ $property->title }}">
-                        @else
-                            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&h=600&fit=crop" alt="{{ $property->title }}">
-                        @endif
+                <section class="grid grid-cols-1 gap-8 xl:grid-cols-[1.65fr_0.9fr]">
+                    <div class="space-y-6">
+                        <div class="flex flex-wrap gap-2">
+                            <span class="tag bg-slate-900 text-white">{{ $property->rental_mode === 'per_room' ? 'Individual Rooms' : 'Full Property' }}</span>
+                            <span class="tag bg-slate-100 text-slate-700">{{ $property->getPropertyTypeLabel() }}</span>
+                            <span class="tag {{ $propertyAvailabilityClasses }}">{{ $property->property_availability_label }}</span>
+                            @if($property->is_verified)
+                                <span class="tag bg-emerald-50 text-emerald-700">Verified</span>
+                            @endif
+                            @if($property->furnished)
+                                <span class="tag bg-slate-100 text-slate-700">Furnished</span>
+                            @endif
+                        </div>
+
+                        <div class="space-y-4">
+                            <h1 class="max-w-4xl text-2xl font-semibold leading-tight tracking-tight text-slate-950 lg:text-[2rem]">
+                                {{ $property->title }}
+                            </h1>
+                            <p class="text-base text-slate-500">
+                                {{ $addressLine }}@if($property->city), {{ $property->city }}@endif
+                            </p>
+                        </div>
+
+                        <section class="space-y-4 js-property-gallery" data-images='@json($galleryItems->values())'>
+                            <div class="surface gallery-shell">
+                                <div class="gallery-stage">
+                                    <div class="gallery-backdrop js-gallery-backdrop" style="background-image: url('{{ $galleryItems->first()['url'] }}')"></div>
+                                    <div class="gallery-overlay"></div>
+                                    <div class="gallery-main">
+                                        <img src="{{ $galleryItems->first()['url'] }}" alt="{{ $galleryItems->first()['alt'] }}" class="gallery-main-image landscape js-gallery-main-image" loading="eager" decoding="async">
+                                    </div>
+
+                                    @if($galleryItems->count() > 1)
+                                        <button type="button" class="gallery-nav prev js-gallery-prev" aria-label="Previous image">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                            </svg>
+                                        </button>
+                                        <button type="button" class="gallery-nav next js-gallery-next" aria-label="Next image">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </button>
+                                        <div class="gallery-counter js-gallery-counter">1/{{ $galleryItems->count() }}</div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            @if($galleryItems->count() > 1)
+                                <div class="gallery-thumbs">
+                                    @foreach($galleryItems as $galleryIndex => $galleryItem)
+                                        <button type="button" class="gallery-thumb {{ $galleryIndex === 0 ? 'active' : '' }} js-gallery-thumb" data-index="{{ $galleryIndex }}">
+                                            <img src="{{ $galleryItem['url'] }}" alt="{{ $galleryItem['alt'] }}" loading="lazy" decoding="async">
+                                        </button>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </section>
                     </div>
 
-                    <!-- Title and Location -->
-                    <div class="fn-glass-card">
-                        <div class="flex items-start justify-between mb-4">
-                            <div>
-                                <h1 class="text-3xl font-bold fn-text-charcoal mb-2">{{ $property->title }}</h1>
-                                <p class="fn-text-gray text-lg">
-                                    <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                    {{ $property->city ?? $property->location }}
+                    <aside class="space-y-4 xl:pt-24">
+                        <div class="surface p-6 xl:sticky xl:top-24">
+                            <div class="border-b border-slate-200 pb-5">
+                                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Booking Summary</p>
+                                <p class="mt-3 text-2xl font-semibold leading-tight text-slate-950">{{ $headlinePrice }}</p>
+                                <p class="mt-2 text-sm leading-6 text-slate-500">
+                                    @if($property->canRentRooms())
+                                        Pick a room from the section below and continue to booking.
+                                    @else
+                                        Book the complete property as one monthly rental.
+                                    @endif
                                 </p>
                             </div>
-                            @if($property->is_verified)
-                                <span class="fn-badge fn-badge-green">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    Verified
-                                </span>
-                            @endif
-                        </div>
 
-                        <div class="text-4xl font-bold fn-text-red mb-4">
-                            @npr($property->rent_price)<span class="text-xl fn-text-gray">/month</span>
-                        </div>
-
-                        <!-- Property Info Grid -->
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            <div class="info-item">
-                                <div class="info-icon">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div class="text-sm fn-text-gray">Room Type</div>
-                                    <div class="font-semibold capitalize">{{ $property->room_type ?? 'N/A' }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div class="text-sm fn-text-gray">Gender</div>
-                                    <div class="font-semibold capitalize">{{ $property->gender_preference ?? 'Any' }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div class="text-sm fn-text-gray">Furnished</div>
-                                    <div class="font-semibold">{{ $property->furnished ? 'Yes' : 'No' }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Description -->
-                    @if($property->description)
-                    <div class="fn-glass-card">
-                        <h2 class="text-2xl font-bold fn-text-charcoal mb-4">About This Property</h2>
-                        <p class="fn-text-gray leading-relaxed whitespace-pre-line">{{ $property->description }}</p>
-                    </div>
-                    @endif
-
-                    <!-- Address Details -->
-                    @if($property->address || $property->landmark)
-                    <div class="fn-glass-card">
-                        <h2 class="text-2xl font-bold fn-text-charcoal mb-4">Location Details</h2>
-                        <div class="space-y-2">
-                            @if($property->address)
-                                <p class="fn-text-gray"><strong>Address:</strong> {{ $property->address }}</p>
-                            @endif
-                            @if($property->landmark)
-                                <p class="fn-text-gray"><strong>Nearby Landmark:</strong> {{ $property->landmark }}</p>
-                            @endif
-                        </div>
-                    </div>
-                    @endif
-
-                    <!-- Amenities -->
-                    @if($property->amenities && count($property->amenities) > 0)
-                    <div class="fn-glass-card">
-                        <h2 class="text-2xl font-bold fn-text-charcoal mb-4">Amenities</h2>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            @foreach($property->amenities as $amenity)
-                                <div class="flex items-center gap-2 fn-text-gray">
-                                    <svg class="w-5 h-5 fn-text-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <span class="capitalize">{{ is_array($amenity) ? $amenity['name'] ?? $amenity : $amenity }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
-
-                    <!-- Rules -->
-                    @if($property->rules)
-                    <div class="fn-glass-card">
-                        <h2 class="text-2xl font-bold fn-text-charcoal mb-4">House Rules</h2>
-                        <p class="fn-text-gray leading-relaxed whitespace-pre-line">{{ $property->rules }}</p>
-                    </div>
-                    @endif
-
-                    <!-- Reviews Section -->
-                    <div class="fn-glass-card">
-                        <h2 class="text-2xl font-bold fn-text-charcoal mb-4">
-                            Reviews 
-                            @if($reviewCount > 0)
-                                <span class="fn-text-gray text-lg">({{ $reviewCount }})</span>
-                            @endif
-                        </h2>
-
-                        @if($reviewCount > 0)
-                            <!-- Average Rating -->
-                            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                                <div class="text-3xl font-bold fn-text-red mb-2">{{ number_format($avgRating, 1) }}/5</div>
-                                <div class="star-rating mb-2">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <svg class="w-6 h-6 star {{ $i <= round($avgRating) ? 'filled' : '' }}" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                        </svg>
-                                    @endfor
-                                </div>
-                                <p class="fn-text-gray text-sm">Based on {{ $reviewCount }} {{ $reviewCount == 1 ? 'review' : 'reviews' }}</p>
-                            </div>
-
-                            <!-- Review List -->
-                            <div class="space-y-4">
-                                @foreach($reviews as $review)
-                                    <div class="review-card">
-                                        <div class="flex items-start justify-between mb-3">
-                                            <div>
-                                                <h4 class="font-semibold fn-text-charcoal">{{ $review->user->name ?? 'Anonymous' }}</h4>
-                                                <p class="text-sm fn-text-gray">{{ $review->created_at->format('M d, Y') }}</p>
-                                            </div>
-                                            <div class="star-rating">
-                                                @for($i = 1; $i <= 5; $i++)
-                                                    <svg class="w-4 h-4 star {{ $i <= $review->rating ? 'filled' : '' }}" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                                    </svg>
-                                                @endfor
-                                            </div>
-                                        </div>
-                                        <p class="fn-text-gray">{{ $review->review_text }}</p>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="text-center py-8">
-                                <svg class="w-16 h-16 mx-auto fn-text-gray mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                                </svg>
-                                <p class="fn-text-gray">No reviews yet. Be the first to review this property!</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Right Column - Owner & Booking -->
-                <div class="lg:col-span-1">
-                    <div class="sticky top-24 space-y-6">
-                        <!-- Owner Info Card -->
-                        <div class="fn-glass-card">
-                            <h3 class="text-xl font-bold fn-text-charcoal mb-4">Property Owner</h3>
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="w-16 h-16 rounded-full fn-bg-red flex items-center justify-center text-white text-2xl font-bold">
+                            <div class="mt-5 flex items-center gap-3">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-base font-bold text-rose-500">
                                     {{ strtoupper(substr($property->owner->name ?? 'O', 0, 1)) }}
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold fn-text-charcoal">{{ $property->owner->name ?? 'Owner' }}</h4>
-                                    <p class="text-sm fn-text-gray">Property Owner</p>
+                                    <p class="font-semibold text-slate-900">{{ $property->owner->name ?? 'Owner' }}</p>
+                                    <p class="text-sm text-slate-500">Property owner</p>
                                 </div>
                             </div>
-                            
-                            @auth
-                                @if($property->owner->email)
-                                    <div class="mt-4 p-3 fn-bg-gray rounded-lg">
-                                        <p class="text-sm fn-text-gray mb-1">Contact Email:</p>
-                                        <p class="font-medium fn-text-charcoal">{{ $property->owner->email }}</p>
-                                    </div>
+
+                            <div class="mt-6 space-y-3">
+                                @if($property->canRentRooms())
+                                    <a href="#available-rooms" class="btn-primary">Choose a Room</a>
+                                @elseif(auth()->check())
+                                    <a href="{{ route('listings.request-booking', $property->id) }}" class="btn-primary">Request Booking</a>
+                                @else
+                                    <a href="{{ route('login') }}" class="btn-primary">Sign In to Book</a>
                                 @endif
-                            @else
-                                <div class="mt-4 p-3 fn-bg-gray rounded-lg text-center">
-                                    <p class="text-sm fn-text-gray">
-                                        <svg class="w-5 h-5 inline mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                        </svg>
-                                        Login to view contact details
+                                @auth
+                                    <form action="{{ route('user.saved-listings.save', $property) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn-secondary">Save Listing</button>
+                                    </form>
+                                    @if(auth()->user()->isUser() && auth()->id() !== (int) $property->owner_id)
+                                        <button type="button" class="btn-secondary js-contact-owner" data-property-id="{{ $property->id }}">Contact Owner</button>
+                                    @endif
+                                @else
+                                    <a href="{{ route('login') }}" class="btn-secondary">Sign In to Save</a>
+                                    <a href="{{ route('login') }}" class="btn-secondary">Sign In to Message</a>
+                                @endauth
+                            </div>
+
+                            @if($property->owner->email)
+                                <div class="mt-6 border-t border-slate-200 pt-5">
+                                    <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Contact Email</p>
+                                    <p class="mt-2 break-all text-sm font-medium text-slate-700">{{ $property->owner->email }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    </aside>
+                </section>
+
+                <section class="grid grid-cols-1 gap-8 xl:grid-cols-[1.65fr_0.9fr]">
+                    <div class="space-y-8">
+                        @if($property->canRentRooms())
+                            <section id="available-rooms" class="surface p-7">
+                                <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                                    <div>
+                                        <h2 class="text-2xl font-bold text-slate-950">Room Details</h2>
+                                        <p class="mt-2 text-sm text-slate-500">Choose the room that fits your budget and move-in plan.</p>
+                                    </div>
+                                    <p class="text-sm font-semibold text-slate-700">
+                                        {{ $listedRooms->count() }} {{ $listedRooms->count() === 1 ? 'room listed' : 'rooms listed' }}
+                                        @if($listedRooms->isNotEmpty())
+                                            <span class="text-slate-400">·</span>
+                                            {{ $availableRooms->count() }} {{ $availableRooms->count() === 1 ? 'available' : 'available' }}
+                                        @endif
                                     </p>
                                 </div>
-                            @endauth
-                        </div>
 
-                        <!-- Booking CTA -->
-                        <div class="fn-glass-card">
-                            <h3 class="text-xl font-bold fn-text-charcoal mb-4">Interested?</h3>
-                            @auth
-                                <a href="{{ route('listings.request-booking', $property->id) }}" class="fn-btn-primary w-full text-center block">
-                                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    Request Booking
-                                </a>
-                                <p class="text-sm fn-text-gray mt-3 text-center">Fill your booking details and proceed to payment</p>
-                            @else
-                                <a href="{{ route('login') }}" class="fn-btn-primary w-full text-center block">
-                                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                                    </svg>
-                                    Login to Book
-                                </a>
-                                <p class="text-sm fn-text-gray mt-3 text-center">Create an account to request bookings</p>
-                            @endauth
-                        </div>
+                                @if($listedRooms->isNotEmpty())
+                                    <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        @foreach($listedRooms as $room)
+                                            @php
+                                                $roomImageUrl = $room->getFirstImageUrl();
+                                                $roomAvailabilityLabel = $room->is_bookable ? 'Available' : 'Unavailable';
+                                                $roomAvailabilityClasses = $room->is_bookable
+                                                    ? 'bg-emerald-50 text-emerald-700'
+                                                    : 'bg-amber-50 text-amber-700';
+                                            @endphp
+                                            <div class="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm">
+                                                <div class="aspect-[16/10] bg-slate-100">
+                                                    <img src="{{ $roomImageUrl }}" alt="{{ $room->room_name }}" class="h-full w-full object-cover">
+                                                </div>
+                                                <div class="p-5">
+                                                    <div class="flex items-start justify-between gap-3">
+                                                        <div>
+                                                            <h3 class="text-xl font-bold text-slate-950">{{ $room->room_name }}</h3>
+                                                            <p class="mt-2 text-sm leading-6 text-slate-500">
+                                                                {{ $room->room_features ?: 'Private room option inside this property.' }}
+                                                            </p>
+                                                        </div>
+                                                        <span class="tag {{ $roomAvailabilityClasses }}">{{ $roomAvailabilityLabel }}</span>
+                                                    </div>
 
-                        <!-- Quick Info -->
-                        @if($property->total_rooms)
-                        <div class="fn-glass-card">
-                            <h3 class="text-xl font-bold fn-text-charcoal mb-3">Quick Info</h3>
-                            <div class="space-y-2">
-                                <div class="flex justify-between">
-                                    <span class="fn-text-gray">Total Rooms:</span>
-                                    <span class="font-semibold">{{ $property->total_rooms }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="fn-text-gray">Status:</span>
-                                    <span class="fn-badge fn-badge-green">Available</span>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
+                                                    <div class="mt-5 grid grid-cols-2 gap-3">
+                                                        <div class="muted-surface p-4">
+                                                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Price</p>
+                                                            <p class="mt-2 text-sm font-bold text-slate-900">Rs {{ number_format((float) $room->price) }} / month</p>
+                                                        </div>
+                                                        <div class="muted-surface p-4">
+                                                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Capacity</p>
+                                                            <p class="mt-2 text-sm font-bold text-slate-900">{{ $room->capacity }} {{ $room->capacity === 1 ? 'person' : 'people' }}</p>
+                                                        </div>
+                                                        <div class="muted-surface p-4">
+                                                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Booking Status</p>
+                                                            <p class="mt-2 text-sm font-bold text-slate-900">{{ $roomAvailabilityLabel }}</p>
+                                                        </div>
+                                                        <div class="muted-surface p-4">
+                                                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Location</p>
+                                                            <p class="mt-2 text-sm font-bold text-slate-900">{{ $property->city ?: 'Listed location' }}</p>
+                                                        </div>
+                                                    </div>
 
-            <!-- Roommate Match Section -->
-            <div class="mt-16">
-                <div class="fn-glass-card">
-                    <div class="text-center mb-6">
-                        <h2 class="text-2xl font-bold fn-text-charcoal mb-2">
-                            <svg class="w-8 h-8 inline mr-2 fn-text-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                            </svg>
-                            Roommate Match (Optional)
-                        </h2>
-                        <p class="fn-text-gray">Find compatible roommates for this area and budget.</p>
-                    </div>
-
-                    @auth
-                        @php
-                            $pref = \App\Models\RoommatePreference::where('user_id', auth()->id())->first();
-                        @endphp
-
-                        @if($pref)
-                            <!-- User has preferences -->
-                            <div class="mb-6 p-6 fn-bg-gray rounded-lg">
-                                <h3 class="font-semibold fn-text-charcoal mb-4">Your Roommate Preferences</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    @if($pref->preferred_location)
-                                        <div>
-                                            <div class="flex items-center gap-2 mb-1">
-                                                <svg class="w-5 h-5 fn-text-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                </svg>
-                                                <span class="text-sm fn-text-gray">Preferred Location</span>
+                                                    <div class="mt-5">
+                                                        @if($room->is_bookable)
+                                                            @auth
+                                                                <a href="{{ route('listings.request-booking', ['property' => $property->id, 'room' => $room->id]) }}" class="btn-primary">Book This Room</a>
+                                                            @else
+                                                                <a href="{{ route('login') }}" class="btn-primary">Sign In to Book</a>
+                                                            @endauth
+                                                        @else
+                                                            <span class="inline-flex w-full items-center justify-center rounded-[14px] border border-slate-200 bg-slate-100 px-4 py-[0.95rem] text-sm font-semibold text-slate-400">
+                                                                Unavailable
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <p class="font-medium fn-text-charcoal">{{ $pref->preferred_location }}</p>
-                                        </div>
-                                    @endif
-
-                                    @if($pref->budget_range)
-                                        <div>
-                                            <div class="flex items-center gap-2 mb-1">
-                                                <svg class="w-5 h-5 fn-text-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                                <span class="text-sm fn-text-gray">Budget Range</span>
-                                            </div>
-                                            <p class="font-medium fn-text-charcoal">{{ $pref->budget_range }}</p>
-                                        </div>
-                                    @endif
-
-                                    @if($pref->gender_preference)
-                                        <div>
-                                            <div class="flex items-center gap-2 mb-1">
-                                                <svg class="w-5 h-5 fn-text-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                                </svg>
-                                                <span class="text-sm fn-text-gray">Gender Preference</span>
-                                            </div>
-                                            <p class="font-medium fn-text-charcoal capitalize">{{ $pref->gender_preference }}</p>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                @if($pref->interests)
-                                    <div class="mt-4">
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <svg class="w-5 h-5 fn-text-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                                            </svg>
-                                            <span class="text-sm fn-text-gray">Interests</span>
-                                        </div>
-                                        <p class="fn-text-charcoal">{{ $pref->interests }}</p>
+                                        @endforeach
                                     </div>
-                                @endif
-                            </div>
-
-                            <div class="text-center">
-                                <a href="{{ route('roommates.matches') }}" class="fn-btn-primary">
-                                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                    </svg>
-                                    See My Matches
-                                </a>
-                                <p class="text-sm fn-text-gray mt-3">Find compatible roommates based on your preferences</p>
-                            </div>
-                        @else
-                            <!-- User has no preferences yet -->
-                            <div class="text-center py-8">
-                                <svg class="w-16 h-16 mx-auto fn-text-gray mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                <p class="fn-text-gray mb-6">You haven't set up your roommate preferences yet.</p>
-                                <a href="{{ route('roommates.profile') }}" class="fn-btn-primary">
-                                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                    Set Up Preferences
-                                </a>
-                            </div>
-                        @endif
-                    @else
-                        <!-- User not logged in -->
-                        <div class="text-center py-8">
-                            <svg class="w-16 h-16 mx-auto fn-text-gray mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                            </svg>
-                            <p class="fn-text-gray mb-6">Login to see compatible roommate matches for this area and budget.</p>
-                            <a href="{{ route('login') }}" class="fn-btn-primary">
-                                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                                </svg>
-                                Login to See Roommate Matches
-                            </a>
-                        </div>
-                    @endauth
-                </div>
-            </div>
-
-            <!-- Similar Properties Section -->
-            @if($similar->count() > 0)
-            <div class="mt-16">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold fn-text-charcoal mb-2">Similar Properties</h2>
-                    <p class="fn-text-gray">You might also be interested in these listings</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    @foreach($similar as $p)
-                        @php
-                            $photos = is_array($p->photos) ? $p->photos : (json_decode($p->photos, true) ?? []);
-                            $firstPhoto = $photos[0] ?? null;
-                        @endphp
-                        <a href="{{ route('listings.show', $p->id) }}" class="fn-glass-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
-                            <div class="relative h-48 overflow-hidden rounded-t-lg">
-                                @if($firstPhoto)
-                                    <img src="{{ asset('storage/' . $firstPhoto) }}" 
-                                         alt="{{ $p->title }}" 
-                                         class="w-full h-full object-cover">
                                 @else
-                                    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop" 
-                                         alt="{{ $p->title }}" 
-                                         class="w-full h-full object-cover">
+                                    <div class="mt-6 muted-surface p-6 text-center text-sm text-slate-500">
+                                        No rooms are currently available for booking in this property.
+                                    </div>
                                 @endif
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                            </div>
-                            <div class="p-4">
-                                <h3 class="font-bold fn-text-charcoal text-lg mb-2 truncate">{{ $p->title }}</h3>
-                                <p class="text-sm fn-text-gray mb-3">
-                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                    {{ $p->city ?? $p->location }}
-                                </p>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xl font-bold fn-text-red">@npr($p->rent_price)</span>
-                                    <span class="text-sm fn-text-gray">/month</span>
+                            </section>
+                        @endif
+
+                        @if($property->description)
+                            <section class="surface p-7">
+                                <h2 class="text-2xl font-bold text-slate-950">About This Property</h2>
+                                <p class="mt-4 whitespace-pre-line text-base leading-8 text-slate-600">{{ $property->description }}</p>
+                            </section>
+                        @endif
+
+                        <section class="surface p-7">
+                            <h2 class="text-2xl font-bold text-slate-950">Property Details</h2>
+                            <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div class="muted-surface p-5">
+                                    <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Address</p>
+                                    <p class="mt-2 text-sm font-semibold text-slate-900">{{ $property->address ?: 'Not specified' }}</p>
                                 </div>
-                                @if($p->room_type)
-                                    <div class="mt-3">
-                                        <span class="fn-badge fn-badge-gray text-xs capitalize">{{ $p->room_type }}</span>
+                                <div class="muted-surface p-5">
+                                    <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">City</p>
+                                    <p class="mt-2 text-sm font-semibold text-slate-900">{{ $property->city ?: ($property->location ?: 'Not specified') }}</p>
+                                </div>
+                                @if($property->landmark)
+                                    <div class="muted-surface p-5">
+                                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Nearby Landmark</p>
+                                        <p class="mt-2 text-sm font-semibold text-slate-900">{{ $property->landmark }}</p>
+                                    </div>
+                                @endif
+                                @if($property->total_rooms)
+                                    <div class="muted-surface p-5">
+                                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Total Rooms</p>
+                                        <p class="mt-2 text-sm font-semibold text-slate-900">{{ $property->total_rooms }}</p>
                                     </div>
                                 @endif
                             </div>
-                        </a>
-                    @endforeach
-                </div>
+                        </section>
+
+                        @if(!is_null($property->latitude) && !is_null($property->longitude))
+                            <section class="surface p-7">
+                                @include('components.leaflet-property-map', [
+                                    'mapId' => 'property-show-map',
+                                    'mode' => 'readonly',
+                                    'initialLatitude' => $property->latitude,
+                                    'initialLongitude' => $property->longitude,
+                                    'defaultLatitude' => 27.7172,
+                                    'defaultLongitude' => 85.3240,
+                                    'defaultZoom' => 15,
+                                    'height' => '340px',
+                                    'title' => 'Location Map',
+                                    'helpText' => 'This is the saved location for the listed property.',
+                                ])
+                            </section>
+                        @endif
+
+                        @if($property->amenities && $property->amenities->count() > 0)
+                            <section class="surface p-7">
+                                <h2 class="text-2xl font-bold text-slate-950">Amenities</h2>
+                                <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    @foreach($property->amenities as $amenity)
+                                        <div class="muted-surface px-4 py-4 text-sm font-medium text-slate-700">
+                                            {{ $amenity->name ?? $amenity }}
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </section>
+                        @endif
+
+                        @if($property->rules)
+                            <section class="surface p-7">
+                                <h2 class="text-2xl font-bold text-slate-950">House Rules</h2>
+                                <p class="mt-4 whitespace-pre-line text-base leading-8 text-slate-600">{{ $property->rules }}</p>
+                            </section>
+                        @endif
+
+                        <section class="surface p-7">
+                            <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-slate-950">Reviews</h2>
+                                    <p class="mt-2 text-sm text-slate-500">
+                                        @if($reviewCount > 0)
+                                            {{ $reviewCount }} {{ $reviewCount === 1 ? 'review' : 'reviews' }} from previous tenants
+                                        @else
+                                            No reviews yet for this property
+                                        @endif
+                                    </p>
+                                </div>
+                                @if($reviewCount > 0)
+                                    <div class="text-left md:text-right">
+                                        <p class="text-3xl font-bold text-slate-950">{{ number_format($avgRating, 1) }}</p>
+                                        <p class="text-sm text-slate-500">Average rating</p>
+                                    </div>
+                                @endif
+                            </div>
+
+                            @if($reviewCount > 0)
+                                <div class="mt-6 space-y-5">
+                                    @foreach($reviews as $review)
+                                        <div class="border-b border-slate-200 pb-5 last:border-b-0 last:pb-0">
+                                            <div class="flex items-start justify-between gap-4">
+                                                <div>
+                                                    <p class="font-semibold text-slate-900">{{ $review->user->name ?? 'Anonymous' }}</p>
+                                                    <p class="mt-1 text-sm text-slate-500">{{ $review->created_at->format('M d, Y') }}</p>
+                                                </div>
+                                                <div class="flex items-center gap-1">
+                                                    @for($i = 1; $i <= 5; $i++)
+                                                        <svg class="h-4 w-4 {{ $i <= $review->rating ? 'text-amber-400' : 'text-slate-200' }}" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                        </svg>
+                                                    @endfor
+                                                </div>
+                                            </div>
+                                            <p class="mt-3 text-sm leading-7 text-slate-600">{{ $review->review_text }}</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </section>
+                    </div>
+
+                    <div class="space-y-6">
+                        @auth
+                            @php
+                                $pref = \App\Models\RoommatePreference::where('user_id', auth()->id())->first();
+                            @endphp
+
+                            @if($pref)
+                                <section class="surface p-6">
+                                    <h2 class="text-xl font-bold text-slate-950">Roommate Match Snapshot</h2>
+                                    <p class="mt-2 text-sm leading-6 text-slate-500">Use your saved preferences to explore shared-living matches for this area.</p>
+
+                                    <div class="mt-5 space-y-3">
+                                        @if($pref->preferred_location)
+                                            <div class="muted-surface p-4">
+                                                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Preferred Location</p>
+                                                <p class="mt-2 text-sm font-semibold text-slate-900">{{ $pref->preferred_location }}</p>
+                                            </div>
+                                        @endif
+                                        @if($pref->budget_range)
+                                            <div class="muted-surface p-4">
+                                                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Budget Range</p>
+                                                <p class="mt-2 text-sm font-semibold text-slate-900">{{ $pref->budget_range }}</p>
+                                            </div>
+                                        @endif
+                                        @if($pref->gender_preference)
+                                            <div class="muted-surface p-4">
+                                                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Gender Preference</p>
+                                                <p class="mt-2 text-sm font-semibold capitalize text-slate-900">{{ $pref->gender_preference }}</p>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="mt-5">
+                                        <a href="{{ route('roommates.matches') }}" class="btn-secondary">See Roommate Matches</a>
+                                    </div>
+                                </section>
+                            @endif
+                        @endauth
+                    </div>
+                </section>
+
+                @if($similar->count() > 0)
+                    <section class="space-y-6 border-t border-slate-200 pt-10">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-950">Similar Properties Nearby</h2>
+                            <p class="mt-2 text-sm text-slate-500">A few comparable listings you may also want to explore.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+                            @foreach($similar as $p)
+                                @php
+                                    $similarImage = $p->images->firstWhere('is_primary', true) ?? $p->images->sortBy('order')->first();
+                                    $similarImageUrl = $similarImage ? $similarImage->getUrl() : asset('images/property-placeholder.jpg');
+                                    $similarMin = $p->min_room_price !== null ? (float) $p->min_room_price : null;
+                                    $similarMax = $p->max_room_price !== null ? (float) $p->max_room_price : null;
+
+                                    if ($p->rental_mode === 'per_room') {
+                                        if ($similarMin === null || $similarMax === null) {
+                                            $similarPrice = 'Price on request';
+                                        } elseif ($similarMin === $similarMax) {
+                                            $similarPrice = 'From Rs ' . number_format($similarMin) . ' / month';
+                                        } else {
+                                            $similarPrice = 'Rs ' . number_format($similarMin) . ' - Rs ' . number_format($similarMax) . ' / month';
+                                        }
+                                    } else {
+                                        $similarPrice = 'Rs ' . number_format((float) $p->rent_price) . ' / month';
+                                    }
+                                @endphp
+
+                                <a href="{{ route('listings.show', $p->id) }}" class="block overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                                    <div class="aspect-[4/3] bg-slate-100">
+                                        <img src="{{ $similarImageUrl }}" alt="{{ $p->title }}" class="h-full w-full object-cover">
+                                    </div>
+                                    <div class="p-4">
+                                        <div class="flex flex-wrap gap-2">
+                                            <span class="tag bg-slate-100 text-slate-700">{{ $p->rental_mode === 'per_room' ? 'Per Room' : 'Full Property' }}</span>
+                                        </div>
+                                        <h3 class="mt-3 text-base font-bold leading-6 text-slate-950">{{ $p->title }}</h3>
+                                        <p class="mt-2 text-sm text-slate-500">{{ $p->city ?: ($p->location ?: 'Location not specified') }}</p>
+                                        <p class="mt-4 text-sm font-semibold text-slate-900">{{ $similarPrice }}</p>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
             </div>
-            @endif
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="fn-bg-gray py-8 mt-16">
-        <div class="max-w-7xl mx-auto px-6 lg:px-12 text-center">
-            <p class="fn-text-gray">&copy; 2026 FindNest. All rights reserved.</p>
+    <footer class="mt-10 border-t border-slate-200 py-8">
+        <div class="mx-auto max-w-7xl px-4 text-center text-sm text-slate-500 lg:px-6">
+            &copy; 2026 FindNest. All rights reserved.
         </div>
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.js-property-gallery').forEach(function (gallery) {
+                const images = JSON.parse(gallery.dataset.images || '[]');
+                if (!images.length) return;
+
+                const mainImage = gallery.querySelector('.js-gallery-main-image');
+                const backdrop = gallery.querySelector('.js-gallery-backdrop');
+                const counter = gallery.querySelector('.js-gallery-counter');
+                const prevButton = gallery.querySelector('.js-gallery-prev');
+                const nextButton = gallery.querySelector('.js-gallery-next');
+                const thumbs = Array.from(gallery.querySelectorAll('.js-gallery-thumb'));
+                let index = 0;
+
+                function updateFit() {
+                    if (!mainImage.naturalWidth || !mainImage.naturalHeight) {
+                        mainImage.classList.remove('portrait');
+                        mainImage.classList.add('landscape');
+                        return;
+                    }
+
+                    const portrait = mainImage.naturalHeight > mainImage.naturalWidth;
+                    mainImage.classList.toggle('portrait', portrait);
+                    mainImage.classList.toggle('landscape', !portrait);
+                }
+
+                function render() {
+                    const current = images[index];
+                    if (!current) return;
+
+                    mainImage.src = current.url;
+                    mainImage.alt = current.alt || '';
+                    if (backdrop) {
+                        backdrop.style.backgroundImage = `url('${current.url}')`;
+                    }
+                    if (counter) {
+                        counter.textContent = `${index + 1}/${images.length}`;
+                    }
+
+                    thumbs.forEach(function (thumb, thumbIndex) {
+                        thumb.classList.toggle('active', thumbIndex === index);
+                    });
+                }
+
+                mainImage.addEventListener('load', updateFit);
+
+                if (prevButton) {
+                    prevButton.addEventListener('click', function () {
+                        index = (index - 1 + images.length) % images.length;
+                        render();
+                    });
+                }
+
+                if (nextButton) {
+                    nextButton.addEventListener('click', function () {
+                        index = (index + 1) % images.length;
+                        render();
+                    });
+                }
+
+                thumbs.forEach(function (thumb) {
+                    thumb.addEventListener('click', function () {
+                        index = Number(thumb.dataset.index || 0);
+                        render();
+                    });
+                });
+
+                render();
+            });
+            const contactOwnerButton = document.querySelector('.js-contact-owner');
+            if (contactOwnerButton) {
+                contactOwnerButton.addEventListener('click', async function () {
+                    if (contactOwnerButton.disabled) {
+                        return;
+                    }
+                    contactOwnerButton.disabled = true;
+                    contactOwnerButton.textContent = 'Opening chat...';
+                    try {
+                        const response = await fetch('{{ route('user.conversations.property.create-or-open', ['propertyId' => $property->id]) }}', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        });
+                        const data = await response.json();
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Unable to open conversation.');
+                        }
+                        if (!data.conversation_id) {
+                            throw new Error('Conversation could not be created.');
+                        }
+                        window.location.href = '{{ route('user.messages.index') }}?conversation=' + data.conversation_id;
+                    } catch (error) {
+                        alert(error.message || 'Unable to open conversation right now.');
+                        contactOwnerButton.disabled = false;
+                        contactOwnerButton.textContent = 'Contact Owner';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

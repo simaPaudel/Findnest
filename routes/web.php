@@ -10,6 +10,7 @@ use App\Http\Controllers\User\UserBookingController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\User\RoommatePreferenceController;
 use App\Http\Controllers\User\SavedListingController;
+use App\Http\Controllers\User\ConversationController;
 use App\Http\Controllers\ListingsController;
 use App\Http\Controllers\RoommatesController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
@@ -23,15 +24,25 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminBookingController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\KhaltiPaymentController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Admin\AdminReportController;
 
 // Home page
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/about-us', [PageController::class, 'about'])->name('pages.about');
+Route::get('/faq', [PageController::class, 'faq'])->name('pages.faq');
+Route::get('/help-center', [PageController::class, 'helpCenter'])->name('pages.help-center');
 
 // Auth Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::middleware('auth')->get('/notifications/{notification}/open', [NotificationController::class, 'open'])
+    ->whereNumber('notification')
+    ->name('notifications.open');
 
 Route::get('/register', [RegistrationController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegistrationController::class, 'register']);
@@ -45,14 +56,99 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('p
 // Email Verification directly in RegistrationController
 Route::get('/verify-email/{token}', [RegistrationController::class, 'verifyEmail'])->name('verify.email');
 
+// Debug endpoint (remove in production)
+Route::get('/debug/verify/{token}', function ($token) {
+    try {
+        \Illuminate\Support\Facades\Log::info('Debug: Attempting to find user with token', ['token' => substr($token, 0, 10) . '...']);
+
+        $user = \App\Models\User::where('verification_token', $token)->first();
+
+        if ($user) {
+            return [
+                'found' => true,
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'is_verified' => $user->is_verified,
+                'current_token' => substr($user->verification_token ?? '', 0, 10),
+            ];
+        }
+
+        return [
+            'found' => false,
+            'message' => 'User not found with this token',
+            'checked_token' => substr($token, 0, 10) . '...',
+        ];
+    } catch (\Exception $e) {
+        return [
+            'error' => true,
+            'message' => $e->getMessage(),
+        ];
+    }
+});
+
+// Test update endpoint
+Route::get('/debug/test-update/{token}', function ($token) {
+    try {
+        $startTime = microtime(true);
+        \Illuminate\Support\Facades\Log::info('Debug: Starting verification update test', ['token' => substr($token, 0, 10) . '...']);
+
+        $user = \App\Models\User::where('verification_token', $token)->first();
+
+        if (!$user) {
+            return [
+                'error' => 'User not found',
+            ];
+        }
+
+        $beforeUpdate = microtime(true);
+
+        // Try direct update
+        $result = \Illuminate\Support\Facades\DB::table('users')
+            ->where('id', $user->id)
+            ->update([
+                'is_verified' => 1,
+                'verification_token' => null,
+                'email_verified_at' => now(),
+            ]);
+
+        $afterUpdate = microtime(true);
+        $totalTime = $afterUpdate - $startTime;
+        $updateTime = $afterUpdate - $beforeUpdate;
+
+        return [
+            'success' => true,
+            'rows_updated' => $result,
+            'user_id' => $user->id,
+            'total_time_ms' => ($totalTime * 1000),
+            'update_time_ms' => ($updateTime * 1000),
+        ];
+    } catch (\Exception $e) {
+        return [
+            'error' => true,
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ];
+    }
+});
+
 // User Dashboard 
 Route::prefix('user')->middleware(['auth', 'user'])->group(function () {
-    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+    // Redirect old dashboard to listings (new main flow)
+    Route::get('/dashboard', function () {
+        return redirect()->route('listings.index');
+    })->name('user.dashboard');
 
     // Bookings
     Route::get('/bookings', [UserBookingController::class, 'index'])->name('user.bookings.index');
-    Route::post('/bookings/{booking}/cancel', [UserBookingController::class, 'cancel'])->name('user.bookings.cancel');
+    Route::get('/bookings/{booking}', [UserBookingController::class, 'show'])->name('user.bookings.show');
+    Route::get('/bookings/{booking}/edit', [UserBookingController::class, 'edit'])->name('user.bookings.edit');
+    Route::put('/bookings/{booking}', [UserBookingController::class, 'update'])->name('user.bookings.update');
+    Route::put('/bookings/{booking}/cancel', [UserBookingController::class, 'cancel'])->name('user.bookings.cancel');
     Route::get('/bookings/{booking}/bill', [UserBookingController::class, 'bill'])->name('user.bookings.bill');
+    Route::get('/bookings/{booking}/invoice/download', [UserBookingController::class, 'downloadInvoice'])->name('user.bookings.download-invoice');
+    Route::post('/bookings/{booking}/review', [UserBookingController::class, 'storeReview'])->name('user.bookings.review');
+    Route::post('/bookings/check-availability', [UserBookingController::class, 'checkAvailability'])->name('user.bookings.check-availability');
+    Route::get('/bookings/available-dates', [UserBookingController::class, 'getAvailableDates'])->name('user.bookings.available-dates');
 
     // Profile
     Route::get('/profile', [UserProfileController::class, 'edit'])->name('user.profile.edit');
@@ -64,6 +160,30 @@ Route::prefix('user')->middleware(['auth', 'user'])->group(function () {
 
     // Saved Listings
     Route::get('/saved-listings', [SavedListingController::class, 'index'])->name('user.saved-listings.index');
+    Route::post('/saved-listings/save/{property}', [SavedListingController::class, 'save'])->name('user.saved-listings.save');
+    Route::delete('/saved-listings/unsave/{property}', [SavedListingController::class, 'unsave'])->name('user.saved-listings.unsave');
+    Route::get('/saved-listings/check/{property}', [SavedListingController::class, 'isSaved'])->name('user.saved-listings.check');
+    Route::delete('/saved-listings/{savedListing}', [SavedListingController::class, 'destroy'])->name('user.saved-listings.destroy');
+
+    // Messaging
+    Route::get('/messages', [ConversationController::class, 'inbox'])
+        ->name('user.messages.index');
+    Route::post('/conversations/property/{propertyId}', [ConversationController::class, 'createOrOpenPropertyConversation'])
+        ->whereNumber('propertyId')
+        ->name('user.conversations.property.create-or-open');
+    Route::post('/conversations/roommate/{userId}', [ConversationController::class, 'createOrOpenRoommateConversation'])
+        ->whereNumber('userId')
+        ->name('user.conversations.roommate.create-or-open');
+    Route::get('/conversations/unread-count', [ConversationController::class, 'getUnreadCount'])
+        ->name('user.conversations.unread-count');
+    Route::get('/conversations/poll', [ConversationController::class, 'pollNewMessages'])
+        ->name('user.conversations.poll');
+    Route::get('/conversations/{conversationId}', [ConversationController::class, 'showConversation'])
+        ->whereNumber('conversationId')
+        ->name('user.conversations.show');
+    Route::post('/conversations/{conversationId}/messages', [ConversationController::class, 'sendMessage'])
+        ->whereNumber('conversationId')
+        ->name('user.conversations.messages.send');
 });
 
 // Owner Dashboard 
@@ -80,6 +200,22 @@ Route::prefix('owner')->middleware(['auth', 'owner'])->group(function () {
     Route::delete('/listings/{property}', [OwnerPropertyController::class, 'destroy'])->name('owner.listings.destroy');
     Route::patch('/listings/{property}/toggle', [OwnerPropertyController::class, 'toggleStatus'])->name('owner.listings.toggle');
 
+    // Image Management
+    Route::delete('/listings/{property}/images/{image}', [OwnerPropertyController::class, 'deleteImage'])->name('owner.listings.delete-image');
+    Route::patch('/listings/{property}/images/{image}/primary', [OwnerPropertyController::class, 'setPrimaryImage'])->name('owner.listings.set-primary-image');
+
+    // Room Management
+    Route::get('/listings/{property}/rooms', [OwnerPropertyController::class, 'roomsIndex'])->name('owner.rooms.index');
+    Route::get('/listings/{property}/rooms/create', [OwnerPropertyController::class, 'createRoom'])->name('owner.rooms.create');
+    Route::post('/listings/{property}/rooms', [OwnerPropertyController::class, 'storeRoom'])->name('owner.rooms.store');
+    Route::get('/listings/{property}/rooms/{room}/edit', [OwnerPropertyController::class, 'editRoom'])->name('owner.rooms.edit');
+    Route::put('/listings/{property}/rooms/{room}', [OwnerPropertyController::class, 'updateRoom'])->name('owner.rooms.update');
+    Route::delete('/listings/{property}/rooms/{room}', [OwnerPropertyController::class, 'destroyRoom'])->name('owner.rooms.destroy');
+
+    // Room Image Management
+    Route::delete('/listings/{property}/rooms/{room}/images/{image}', [OwnerPropertyController::class, 'deleteRoomImage'])->name('owner.rooms.delete-image');
+    Route::patch('/listings/{property}/rooms/{room}/images/{image}/primary', [OwnerPropertyController::class, 'setRoomPrimaryImage'])->name('owner.rooms.set-primary-image');
+
     // Bookings Management
     Route::get('/bookings', [OwnerBookingController::class, 'index'])->name('owner.bookings.index');
     Route::post('/bookings/{booking}/accept', [OwnerBookingController::class, 'accept'])->name('owner.bookings.accept');
@@ -88,10 +224,38 @@ Route::prefix('owner')->middleware(['auth', 'owner'])->group(function () {
     // Reviews
     Route::get('/reviews', [OwnerReviewController::class, 'index'])->name('owner.reviews.index');
 
+    // Messaging
+    Route::get('/messages', [ConversationController::class, 'inbox'])->name('owner.messages.index');
+    Route::get('/conversations/unread-count', [ConversationController::class, 'getUnreadCount'])
+        ->name('owner.conversations.unread-count');
+    Route::get('/conversations/poll', [ConversationController::class, 'pollNewMessages'])
+        ->name('owner.conversations.poll');
+    Route::get('/conversations/{conversationId}', [ConversationController::class, 'showConversation'])
+        ->whereNumber('conversationId')
+        ->name('owner.conversations.show');
+    Route::post('/conversations/{conversationId}/messages', [ConversationController::class, 'sendMessage'])
+        ->whereNumber('conversationId')
+        ->name('owner.conversations.messages.send');
+
     // Profile Management
     Route::get('/profile', [OwnerProfileController::class, 'edit'])->name('owner.profile.edit');
     Route::put('/profile', [OwnerProfileController::class, 'update'])->name('owner.profile.update');
+    
+    // DEBUG: Test endpoint for form submission debugging
+    Route::post('/listings-debug', function (\Illuminate\Http\Request $request) {
+        \Illuminate\Support\Facades\Log::info('DEBUG: Raw form data received', [
+            'method' => $request->method(),
+            'all_input' => $request->all(),
+            'has_files' => $request->hasAnyFile(),
+            'file_keys' => $request->files->keys(),
+            'content_type' => $request->header('Content-Type'),
+            'user_id' => auth()->id(),
+        ]);
+        
+        return response()->json(['status' => 'received', 'timestamp' => now()]);
+    })->name('owner.listings.debug');
 });
+
 
 // Admin Dashboard
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
@@ -109,6 +273,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::post('/reviews/{review}/hide', [AdminReviewController::class, 'hide'])->name('admin.reviews.hide');
 
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('admin.bookings.index');
+    Route::post('/bookings/{booking}/release', [AdminBookingController::class, 'release'])->name('admin.bookings.release');
+
+    // Reports Management
+    Route::get('/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
+    Route::get('/reports/{report}', [AdminReportController::class, 'show'])->name('admin.reports.show');
+    Route::post('/reports/{report}/review', [AdminReportController::class, 'review'])->name('admin.reports.review');
+    Route::get('/reports/{report}/resolve', [AdminReportController::class, 'editResolution'])->name('admin.reports.edit-resolution');
+    Route::put('/reports/{report}/resolve', [AdminReportController::class, 'updateResolution'])->name('admin.reports.update-resolution');
+    Route::post('/reports/{report}/dismiss', [AdminReportController::class, 'dismiss'])->name('admin.reports.dismiss');
+    Route::get('/reports/statistics', [AdminReportController::class, 'statistics'])->name('admin.reports.statistics');
 });
 
 // Listings Routes
@@ -124,6 +298,14 @@ Route::post('/bookings/create', [UserBookingController::class, 'create'])
     ->middleware(['auth', 'user'])
     ->name('user.bookings.create');
 
+// Report Routes (Auth Required)
+Route::middleware('auth')->prefix('reports')->group(function () {
+    Route::get('/my-reports', [ReportController::class, 'myReports'])->name('report.my-reports');
+    Route::get('/{report}', [ReportController::class, 'show'])->name('report.show');
+    Route::get('/create/{reportableType}/{reportableId}', [ReportController::class, 'create'])->name('report.create');
+    Route::post('/store', [ReportController::class, 'store'])->name('report.store');
+});
+
 // Roommates Routes
 Route::get('/roommates', [RoommatesController::class, 'index'])->name('roommates.index');
 Route::get('/roommates/profile', [RoommatesController::class, 'profile'])->middleware('auth')->name('roommates.profile');
@@ -135,3 +317,4 @@ Route::middleware(['auth', 'user'])->prefix('payment/khalti')->group(function ()
     Route::get('/success', [KhaltiPaymentController::class, 'success'])->name('payment.khalti.success');
     Route::get('/failure', [KhaltiPaymentController::class, 'failure'])->name('payment.khalti.failure');
 });
+

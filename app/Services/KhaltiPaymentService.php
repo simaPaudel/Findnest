@@ -23,18 +23,27 @@ class KhaltiPaymentService
 
     /**
      * Initiate a payment for a booking
+     * 
+     * @param Booking $booking
+     * @return array
+     * @throws Exception
      */
     public function initiatePayment(Booking $booking)
     {
         try {
-            // Validate booking exists and hasn't been paid
+            // Validate booking exists
             if (!$booking) {
                 throw new Exception('Booking not found');
             }
 
+            // Validate booking has required relationships
+            if (!$booking->user_id || !$booking->property_id) {
+                throw new Exception('Booking must have associated user and property');
+            }
+
             // Check if payment already completed
-            $existingPayment = Payment::where('booking_id', $booking->id)
-                ->where('payment_status', 'paid')
+            $existingPayment = $booking->payments()
+                ->where('payment_status', 'success')
                 ->first();
 
             if ($existingPayment) {
@@ -44,6 +53,11 @@ class KhaltiPaymentService
             // Calculate payment amount (20% of total_rent for partial payment)
             $amountInRupees = $booking->total_rent * 0.20;
             
+            // Validate amount is valid
+            if ($amountInRupees <= 0) {
+                throw new Exception('Invalid payment amount. Booking total rent must be greater than 0');
+            }
+
             // Convert to paisa (amount * 100)
             $amountInPaisa = intval($amountInRupees * 100);
 
@@ -66,47 +80,54 @@ class KhaltiPaymentService
 
             Log::info('Khalti API Response', [
                 'status' => $response->status(),
-                'body' => $response->body(),
+                'booking_id' => $booking->id,
             ]);
 
             if (!$response->successful()) {
                 Log::error('Khalti API Error', [
                     'status' => $response->status(),
                     'body' => $response->body(),
+                    'booking_id' => $booking->id,
                 ]);
-                throw new Exception('Failed to initiate payment with Khalti: ' . $response->body());
+                throw new Exception('Failed to initiate payment with Khalti');
             }
 
             $responseData = $response->json();
 
             if (!isset($responseData['pidx']) || !isset($responseData['payment_url'])) {
-                Log::error('Invalid Khalti Response', ['response' => $responseData]);
-                throw new Exception('Invalid response from Khalti');
+                Log::error('Invalid Khalti Response', [
+                    'response' => $responseData,
+                    'booking_id' => $booking->id,
+                ]);
+                throw new Exception('Invalid response from Khalti API');
             }
 
             $pidx = $responseData['pidx'];
             $paymentUrl = $responseData['payment_url'];
 
-            // Store payment record
+            // Store payment record - NO MORE user_id or property_id!
+            // Access them through booking relationship instead
             $payment = Payment::create([
                 'booking_id' => $booking->id,
-                'user_id' => $booking->user_id,
-                'property_id' => $booking->property_id,
                 'amount' => $amountInRupees,
                 'payment_method' => 'khalti',
                 'payment_type' => 'advance',
                 'transaction_id' => $transactionId,
+                'payer_email' => $booking->user?->email,
                 'payment_status' => 'pending',
-                'payment_gateway_response' => json_encode([
+                'payment_gateway_response' => [
                     'pidx' => $pidx,
-                    'initiated_at' => now(),
-                ]),
+                    'initiated_at' => now()->toIso8601String(),
+                    'purchase_order_id' => $transactionId,
+                ],
             ]);
 
             Log::info('Payment initiated successfully', [
                 'booking_id' => $booking->id,
+                'payment_id' => $payment->id,
                 'transaction_id' => $transactionId,
                 'amount' => $amountInRupees,
+                'user_id' => $booking->user_id,
             ]);
 
             return [
@@ -118,6 +139,7 @@ class KhaltiPaymentService
         } catch (Exception $e) {
             Log::error('Payment Initiation Error', [
                 'booking_id' => $booking->id ?? null,
+                'user_id' => $booking->user_id ?? null,
                 'error' => $e->getMessage(),
             ]);
 
@@ -127,12 +149,16 @@ class KhaltiPaymentService
 
     /**
      * Verify payment with Khalti
+     * 
+     * @param string $pidx
+     * @return array
+     * @throws Exception
      */
     public function verifyPayment($pidx)
     {
         try {
             if (!$pidx) {
-                throw new Exception('PIDX not provided');
+                throw new Exception('PIDX not provided for payment verification');
             }
 
             // Send POST request to Khalti lookup endpoint
@@ -145,78 +171,101 @@ class KhaltiPaymentService
             if (!$response->successful()) {
                 Log::error('Khalti Lookup Error', [
                     'status' => $response->status(),
-                    'body' => $response->body(),
                     'pidx' => $pidx,
                 ]);
-                throw new Exception('Failed to verify payment');
+                throw new Exception('Failed to verify payment with Khalti');
             }
 
             $responseData = $response->json();
 
             if (!isset($responseData['status'])) {
-                Log::error('Invalid Khalti Lookup Response', ['response' => $responseData]);
-                throw new Exception('Invalid response from Khalti');
+                Log::error('Invalid Khalti Lookup Response', [
+                    'response' => $responseData,
+                    'pidx' => $pidx,
+                ]);
+                throw new Exception('Invalid response from Khalti API');
+            }
+
+            // Find the payment record by pidx, with fallback for older double-encoded records
+            $payment = Payment::where(function ($query) use ($pidx) {
+                $query->whereJsonContains('payment_gateway_response->pidx', $pidx)
+                    ->orWhere('payment_gateway_response', 'like', "%{$pidx}%")
+                    ->orWhere('transaction_id', $pidx);
+            })->latest('id')->first();
+
+            if (!$payment) {
+                Log::error('Payment record not found', ['pidx' => $pidx]);
+                throw new Exception('Payment record not found in system');
+            }
+
+            // Validate payment has a booking
+            if (!$payment->booking_id) {
+                Log::error('Payment missing booking relationship', ['payment_id' => $payment->id]);
+                throw new Exception('Payment record is incomplete - missing booking');
             }
 
             $paymentStatus = $responseData['status'];
             
-            // Find the payment record by pidx in the response
-            $payment = Payment::whereJsonContains('payment_gateway_response->pidx', $pidx)->first();
-
-            if (!$payment) {
-                Log::error('Payment record not found', ['pidx' => $pidx]);
-                throw new Exception('Payment record not found');
-            }
-
             if ($paymentStatus === 'Completed') {
-                // Update payment status
-                $payment->update([
-                    'payment_status' => 'success',
-                    'paid_at' => now(),
-                    'payment_gateway_response' => json_encode($responseData),
-                ]);
-
-                // Update booking status
-                $booking = $payment->booking;
-                $booking->update([
-                    'status' => 'confirmed',
-                    'payment_status' => 'paid',
-                    'confirmed_at' => now(),
-                ]);
-
-                Log::info('Payment verified and completed', [
-                    'payment_id' => $payment->id,
-                    'booking_id' => $booking->id,
-                ]);
-
-                return [
-                    'success' => true,
-                    'status' => 'completed',
-                    'booking_id' => $booking->id,
-                ];
+                // Use PaymentService to handle success atomically
+                $paymentService = new PaymentService();
+                
+                try {
+                    $booking = $paymentService->handlePaymentSuccess($payment, [
+                        'transaction_id' => $responseData['transaction_id'] ?? null,
+                        'response' => $responseData,
+                    ]);
+                    
+                    Log::info('Payment verified and completed', [
+                        'payment_id' => $payment->id,
+                        'booking_id' => $booking->id,
+                        'user_id' => $booking->user_id,
+                        'amount' => $payment->amount,
+                    ]);
+                    
+                    return [
+                        'success' => true,
+                        'status' => 'completed',
+                        'booking_id' => $booking->id,
+                        'payment_id' => $payment->id,
+                    ];
+                } catch (Exception $e) {
+                    Log::error('Failed to confirm booking after payment', [
+                        'payment_id' => $payment->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                    throw $e;
+                }
             } elseif ($paymentStatus === 'Pending') {
-                Log::info('Payment still pending', ['pidx' => $pidx]);
+                Log::info('Payment still pending', [
+                    'pidx' => $pidx,
+                    'payment_id' => $payment->id,
+                ]);
+                
                 return [
                     'success' => false,
                     'status' => 'pending',
-                    'message' => 'Payment is still pending',
+                    'message' => 'Payment is still pending. Please try again later.',
                 ];
             } else {
-                // Payment failed or in other status
-                $payment->update([
-                    'payment_status' => 'failed',
-                    'payment_gateway_response' => json_encode($responseData),
+                // Payment failed or in other status - use PaymentService for consistency
+                $paymentService = new PaymentService();
+                
+                $paymentService->handlePaymentFailure($payment, [
+                    'reason' => 'Payment status: ' . $paymentStatus,
+                    'response' => $responseData,
                 ]);
 
-                Log::warning('Payment failed', [
+                Log::warning('Payment failed or cancelled', [
                     'payment_id' => $payment->id,
                     'status' => $paymentStatus,
+                    'booking_id' => $payment->booking_id,
                 ]);
 
                 return [
                     'success' => false,
                     'status' => 'failed',
-                    'message' => 'Payment was not completed',
+                    'message' => 'Payment was not completed. Status: ' . $paymentStatus,
                 ];
             }
         } catch (Exception $e) {

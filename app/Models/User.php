@@ -87,4 +87,48 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(SavedListing::class, 'user_id');
     }
+
+    public function notifications()
+    {
+        return $this->hasMany(AppNotification::class);
+    }
+
+    /**
+     * Get all payments made by this user (through bookings).
+     */
+    public function payments()
+    {
+        return $this->hasManyThrough(
+            Payment::class,
+            Booking::class,
+            'user_id',      // Foreign key on bookings table
+            'booking_id',   // Foreign key on payments table
+            'id',           // Local key on users table
+            'id'            // Local key on bookings table
+        );
+    }
+
+    /**
+     * Get all reports filed by this user (as reporter).
+     */
+    public function reportsFiled()
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
+
+    /**
+     * Get all reports about this user (polymorphic).
+     */
+    public function reportsAboutMe()
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
+
+    /**
+     * Get reports reviewed by this user (admin processing reports).
+     */
+    public function reviewedReports()
+    {
+        return $this->hasMany(Report::class, 'reviewed_by');
+    }
 }

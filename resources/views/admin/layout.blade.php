@@ -57,13 +57,17 @@
                     <h1 class="page-title">@yield('page_title', 'Admin Dashboard')</h1>
                 </div>
 
-                <div class="admin-profile">
-                    <div class="admin-avatar">
-                        {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
-                    </div>
-                    <div>
-                        <p class="admin-profile-name">{{ auth()->user()->name ?? 'Admin' }}</p>
-                        <p class="admin-profile-role">Administrator</p>
+                <div class="admin-topbar-actions">
+                    @include('components.notification-dropdown')
+
+                    <div class="admin-profile">
+                        <div class="admin-avatar">
+                            {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                        </div>
+                        <div>
+                            <p class="admin-profile-name">{{ auth()->user()->name ?? 'Admin' }}</p>
+                            <p class="admin-profile-role">Administrator</p>
+                        </div>
                     </div>
                 </div>
             </header>

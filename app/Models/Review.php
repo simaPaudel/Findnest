@@ -9,6 +9,11 @@ class Review extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'is_verified' => 'boolean',
+        'is_approved' => 'boolean',
+    ];
+
     protected $fillable = [
         'user_id',
         'property_id',
@@ -26,8 +31,29 @@ class Review extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * Alias for user() - the reviewer of this review.
+     */
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function property()
     {
         return $this->belongsTo(Property::class, 'property_id');
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('is_approved', true);
+    }
+
+    /**
+     * Get all reports for this review (polymorphic).
+     */
+    public function reports()
+    {
+        return $this->morphMany(Report::class, 'reportable');
     }
 }

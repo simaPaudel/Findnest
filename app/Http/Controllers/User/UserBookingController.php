@@ -3,89 +3,223 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreBookingRequest;
+use App\Http\Requests\StoreReviewRequest;
+use App\Http\Requests\UpdateBookingRequest;
 use App\Models\Booking;
 use App\Models\Property;
+use App\Models\Review;
+use App\Models\Room;
+use App\Services\BookingService;
+use App\Services\NotificationService;
+use App\Services\RoomAvailabilityService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class UserBookingController extends Controller
 {
+    protected BookingService $bookingService;
+
+    public function __construct(BookingService $bookingService)
+    {
+        $this->bookingService = $bookingService;
+    }
+
+    // ==================== USER BOOKING VIEWS ====================
+
     /**
      * Display user's bookings.
-     *
-     * @return \Illuminate\View\View
      */
     public function index()
     {
         $bookings = Booking::where('user_id', Auth::id())
-            ->with('property')
+            ->with(['property', 'room'])
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
 
         return view('user.bookings.index', compact('bookings'));
     }
 
     /**
-     * Show booking request form
+     * Show booking details.
      */
-    public function request(Property $property)
+    public function show(Booking $booking)
     {
-        // Verify property is approved
-        if ($property->status !== 'approved') {
-            abort(404);
+        // Verify booking belongs to authenticated user
+        if ($booking->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
         }
 
-        return view('user.bookings.request', compact('property'));
+        $booking->load(['property', 'room', 'payments']);
+        $existingReview = Review::where('user_id', Auth::id())
+            ->where('property_id', $booking->property_id)
+            ->first();
+
+        $canReviewBooking = ! $booking->isCancelled()
+            && ! $booking->isRejected()
+            && ($booking->hasSuccessfulPayment() || $booking->isConfirmed() || $booking->isCompleted());
+
+        return view('user.bookings.show', compact('booking', 'existingReview', 'canReviewBooking'));
     }
 
     /**
-     * Create a new booking and show bill
+     * Show booking request/creation form.
      */
-    public function create(Request $request)
+    public function request(Request $request, Property $property, RoomAvailabilityService $roomAvailabilityService)
     {
-        $validated = $request->validate([
-            'property_id' => 'required|exists:properties,id',
-            'check_in_date' => 'required|date|after:today',
-        ]);
-
-        $property = Property::findOrFail($validated['property_id']);
-
-        // Verify property is approved
+        // Verify property is approved and available
         if ($property->status !== 'approved') {
-            abort(404);
+            abort(404, 'Property not found');
         }
 
-        // Default duration is 1 month
-        $durationMonths = 1;
+        $roomAvailabilityService->decorateProperty($property);
 
-        // Parse check-in date
-        $checkInDate = \Carbon\Carbon::parse($validated['check_in_date']);
+        $rooms = collect();
+        $selectedRoom = null;
 
-        // Calculate total rent (1 month default)
-        $totalRent = $property->rent_price * $durationMonths;
+        // Get available rooms if property supports room rentals
+        if ($property->canRentRooms()) {
+            $rooms = $property->rooms()
+                ->with(['images' => function ($query) {
+                    $query->ordered();
+                }])
+                ->withCount([
+                    'bookings as active_confirmed_bookings_count' => function ($query) {
+                        $query->where('status', 'confirmed');
+                    }
+                ])
+                ->orderBy('price')
+                ->get();
 
-        // Create booking
-        $booking = Booking::create([
-            'user_id' => Auth::id(),
-            'property_id' => $property->id,
-            'room_id' => null,
-            'status' => 'pending',
-            'check_in_date' => $checkInDate,
-            'check_out_date' => null,
-            'duration_months' => $durationMonths,
-            'advance_payment' => $totalRent * 0.20,
-            'security_deposit' => 0,
-            'total_rent' => $totalRent,
-            'payment_status' => 'unpaid',
-            'special_requests' => null,
-        ]);
+            $rooms = $roomAvailabilityService->decorateCollection($rooms)
+                ->filter(fn (Room $room) => (bool) $room->is_bookable)
+                ->values();
 
-        return redirect()->route('user.bookings.bill', $booking->id)
-            ->with('success', 'Booking created. Review the invoice and proceed to payment.');
+            $selectedRoomId = (int) $request->query('room');
+            if ($selectedRoomId > 0) {
+                $selectedRoom = $rooms->firstWhere('id', $selectedRoomId);
+
+                if (!$selectedRoom) {
+                    return redirect()
+                        ->route('listings.show', $property)
+                        ->with('error', 'This room is already booked right now.');
+                }
+            }
+
+            if (!$selectedRoom && $rooms->isNotEmpty()) {
+                $selectedRoom = $rooms->first();
+            }
+
+            if ($rooms->isEmpty()) {
+                return redirect()
+                    ->route('listings.show', $property)
+                    ->with('error', 'All rooms in this property are already booked right now.');
+            }
+        } elseif (!$property->is_property_bookable) {
+            return redirect()
+                ->route('listings.show', $property)
+                ->with('error', 'This property is already booked right now.');
+        }
+
+        return view('user.bookings.request', compact('property', 'rooms', 'selectedRoom'));
     }
 
     /**
-     * Show booking bill/invoice
+     * Store a new booking.
+     */
+    public function create(StoreBookingRequest $request, RoomAvailabilityService $roomAvailabilityService)
+    {
+        try {
+            $data = $request->validated();
+
+            $property = Property::where('status', 'approved')
+                ->with([
+                    'rooms' => function ($query) {
+                        $query->withCount([
+                            'bookings as active_confirmed_bookings_count' => function ($bookingQuery) {
+                                $bookingQuery->where('status', 'confirmed');
+                            }
+                        ]);
+                    }
+                ])
+                ->findOrFail($data['property_id']);
+
+            $checkInDate = Carbon::parse($data['check_in_date'])->startOfDay();
+            $checkOutDate = $checkInDate->copy()->addMonth();
+
+            if ($property->canRentRooms()) {
+                $selectedRoom = $property->rooms
+                    ->firstWhere('id', $data['room_id'] ?? null);
+
+                if (!$selectedRoom) {
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->with('error', 'Please select an available room.');
+                }
+
+                $roomAvailabilityService->decorate($selectedRoom);
+
+                if (!(bool) $selectedRoom->is_bookable) {
+                    return redirect()
+                        ->route('listings.show', $property)
+                        ->with('error', 'This room is already booked right now.');
+                }
+
+                $monthlyRent = (float) $selectedRoom->price;
+            } else {
+                $hasActiveFullPropertyBooking = $property->bookings()
+                    ->whereNull('room_id')
+                    ->where('status', 'confirmed')
+                    ->exists();
+
+                if ($hasActiveFullPropertyBooking) {
+                    return redirect()
+                        ->route('listings.show', $property)
+                        ->with('error', 'This property is already booked right now.');
+                }
+
+                $monthlyRent = (float) $property->rent_price;
+            }
+
+            $data['check_in_date'] = $checkInDate->toDateString();
+            $data['check_out_date'] = $checkOutDate->toDateString();
+            $data['total_rent'] = round($monthlyRent, 2);
+            $data['advance_payment'] = round($monthlyRent * 0.20, 2);
+            $data['security_deposit'] = 0;
+
+            // Create the booking using service
+            $booking = $this->bookingService->createBooking($data);
+
+            if ($property->owner_id && (int) $property->owner_id !== (int) Auth::id()) {
+                try {
+                    NotificationService::sendNotification(
+                        (int) $property->owner_id,
+                        'booking',
+                        'New booking request',
+                        'A new booking request has been submitted for your property.',
+                        route('owner.bookings.index')
+                    );
+                } catch (\Throwable $notificationError) {
+                    // Notification failures must not block booking creation.
+                }
+            }
+
+            return redirect()
+                ->route('user.bookings.bill', $booking)
+                ->with('success', 'Booking created. Review the invoice and proceed to payment.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Show booking bill/invoice.
      */
     public function bill(Booking $booking)
     {
@@ -94,37 +228,209 @@ class UserBookingController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        // Load relationships
-        $booking->load('property');
+        $booking->load(['property', 'room', 'payments']);
 
-        return view('user.bookings.bill', compact('booking'));
+        return view('user.bookings.bill', $this->buildInvoiceData($booking));
+    }
+
+    /**
+     * Download booking invoice as PDF after successful payment.
+     */
+    public function downloadInvoice(Booking $booking)
+    {
+        if ($booking->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $booking->load(['property', 'room', 'payments']);
+
+        if (!$booking->hasSuccessfulPayment()) {
+            return redirect()
+                ->route('user.bookings.bill', $booking)
+                ->with('error', 'Complete the advance payment first to download the invoice.');
+        }
+
+        $pdf = Pdf::loadView('user.bookings.pdf', $this->buildInvoiceData($booking))
+            ->setPaper('a4');
+
+        return $pdf->download('findnest-invoice-' . $booking->id . '.pdf');
+    }
+
+    /**
+     * Edit booking details (only updatable fields).
+     */
+    public function edit(Booking $booking)
+    {
+        // Verify booking belongs to authenticated user
+        if ($booking->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Can only edit pending bookings
+        if (!$booking->isPending()) {
+            return redirect()->back()->with('error', 'Can only edit pending bookings.');
+        }
+
+        $booking->load(['property', 'room']);
+
+        return view('user.bookings.edit', compact('booking'));
+    }
+
+    /**
+     * Update booking details.
+     */
+    public function update(UpdateBookingRequest $request, Booking $booking)
+    {
+        // Verify booking belongs to authenticated user
+        if ($booking->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Can only edit pending bookings
+        if (!$booking->isPending()) {
+            return redirect()->back()->with('error', 'Can only edit pending bookings.');
+        }
+
+        try {
+            $data = $request->validated();
+            $this->bookingService->updateBooking($booking, $data);
+
+            return redirect()
+                ->route('user.bookings.show', $booking)
+                ->with('success', 'Booking updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
     }
 
     /**
      * Cancel a booking.
-     *
-     * @param  \App\Models\Booking  $booking
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function cancel(Booking $booking)
     {
-        // Verify the booking belongs to the authenticated user
+        // Verify booking belongs to authenticated user
         if ($booking->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
+            abort(403, 'Unauthorized');
         }
 
-        // Allow cancellation for pending or confirmed bookings only
-        if (!in_array($booking->status, ['pending', 'confirmed'])) {
-            return redirect()->back()->with('error', 'Only pending or confirmed bookings can be cancelled.');
+        try {
+            $this->bookingService->cancelBooking($booking);
+
+            return redirect()
+                ->route('user.bookings.index')
+                ->with('success', 'Booking cancelled successfully.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Store or update a property review for a user's booking.
+     */
+    public function storeReview(StoreReviewRequest $request, Booking $booking)
+    {
+        if ($booking->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized');
         }
 
-        // Update booking status to cancelled with timestamp
-        $booking->update([
-            'status' => 'cancelled',
-            'cancelled_at' => now()
+        if ($booking->isCancelled() || $booking->isRejected() || !($booking->hasSuccessfulPayment() || $booking->isConfirmed() || $booking->isCompleted())) {
+            return redirect()
+                ->route('user.bookings.show', $booking)
+                ->with('error', 'You can review this property only after an active paid or confirmed booking.');
+        }
+
+        $review = Review::updateOrCreate(
+            [
+                'user_id' => Auth::id(),
+                'property_id' => $booking->property_id,
+            ],
+            [
+                'review_type' => 'property',
+                'rating' => $request->validated('rating'),
+                'review_text' => $request->validated('review_text'),
+                'is_verified' => $booking->hasSuccessfulPayment(),
+                'is_approved' => false,
+            ]
+        );
+
+        $message = $review->wasRecentlyCreated
+            ? 'Review submitted successfully. It will appear after admin approval.'
+            : 'Review updated successfully. It will appear after admin approval.';
+
+        return redirect()
+            ->route('user.bookings.show', $booking)
+            ->with('success', $message);
+    }
+
+    /**
+     * Check availability for dates.
+     */
+    public function checkAvailability(Request $request)
+    {
+        $validated = $request->validate([
+            'property_id' => 'required|integer|exists:properties,id',
+            'room_id' => 'nullable|integer|exists:rooms,id',
+            'check_in_date' => 'required|date',
+            'check_out_date' => 'required|date|after:check_in_date',
         ]);
 
-        return redirect()->route('user.bookings.index')
-            ->with('success', 'Booking cancelled successfully.');
+        $isAvailable = $this->bookingService->isAvailable(
+            $validated['property_id'],
+            $validated['check_in_date'],
+            $validated['check_out_date'],
+            $validated['room_id'] ?? null
+        );
+
+        return response()->json([
+            'available' => $isAvailable,
+            'message' => $isAvailable ? 'Dates are available' : 'Dates are not available',
+        ]);
+    }
+
+    /**
+     * Get available dates for a property in calendar format.
+     */
+    public function getAvailableDates(Request $request)
+    {
+        $validated = $request->validate([
+            'property_id' => 'required|integer|exists:properties,id',
+            'room_id' => 'nullable|integer|exists:rooms,id',
+            'month' => 'required|integer|min:1|max:12',
+            'year' => 'required|integer|min:2024',
+        ]);
+
+        $availableDates = $this->bookingService->getAvailableDates(
+            $validated['property_id'],
+            str_pad($validated['month'], 2, '0', STR_PAD_LEFT),
+            $validated['year'],
+            $validated['room_id'] ?? null
+        );
+
+        return response()->json([
+            'dates' => $availableDates,
+        ]);
+    }
+
+    /**
+     * Build shared invoice data for screen and PDF views.
+     */
+    protected function buildInvoiceData(Booking $booking): array
+    {
+        return [
+            'booking' => $booking,
+            'durationDays' => $booking->getDurationInDays(),
+            'durationMonths' => $booking->getDurationInMonths(),
+            'totalPaid' => $booking->getTotalPaid(),
+            'amountPending' => $booking->getAmountPending(),
+            'paymentProgress' => $booking->getPaymentProgress(),
+            'bookableName' => $booking->getBookableName(),
+            'dueNow' => round((float) $booking->total_rent * 0.20, 2),
+            'remainingBalance' => max((float) $booking->total_rent - $booking->getTotalPaid(), 0),
+        ];
     }
 }

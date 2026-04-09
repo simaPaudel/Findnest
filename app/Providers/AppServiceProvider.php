@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Services\NotificationService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +26,24 @@ class AppServiceProvider extends ServiceProvider
         // Register NPR currency formatting helper
         Blade::directive('npr', function ($expression) {
             return "<?php echo 'Rs ' . number_format((float)($expression), 0); ?>";
+        });
+
+        View::composer(['components.navbar', 'owner.layout', 'admin.layout'], function ($view) {
+            if (!Auth::check()) {
+                $view->with([
+                    'notificationCount' => 0,
+                    'recentNotifications' => collect(),
+                ]);
+
+                return;
+            }
+
+            $userId = (int) Auth::id();
+
+            $view->with([
+                'notificationCount' => NotificationService::countUnreadNotifications($userId),
+                'recentNotifications' => NotificationService::fetchNotifications($userId, 5),
+            ]);
         });
     }
 }

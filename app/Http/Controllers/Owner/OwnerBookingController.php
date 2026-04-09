@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Property;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
 
 class OwnerBookingController extends Controller
@@ -43,11 +44,27 @@ class OwnerBookingController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        $originalStatus = $booking->status;
+
         // Update booking status
         $booking->update([
             'status' => 'confirmed',
             'confirmed_at' => now(),
         ]);
+
+        if ($originalStatus !== 'confirmed' && $booking->user_id) {
+            try {
+                NotificationService::sendNotification(
+                    (int) $booking->user_id,
+                    'booking',
+                    'Booking request approved',
+                    'Your booking request has been approved.',
+                    route('user.bookings.show', $booking)
+                );
+            } catch (\Throwable $notificationError) {
+                // Notification failures must not block booking updates.
+            }
+        }
 
         return redirect()
             ->route('owner.bookings.index')
@@ -67,11 +84,27 @@ class OwnerBookingController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        $originalStatus = $booking->status;
+
         // Update booking status
         $booking->update([
             'status' => 'cancelled',
             'cancelled_at' => now(),
         ]);
+
+        if ($originalStatus !== 'cancelled' && $booking->user_id) {
+            try {
+                NotificationService::sendNotification(
+                    (int) $booking->user_id,
+                    'booking',
+                    'Booking request rejected',
+                    'Your booking request has been rejected.',
+                    route('user.bookings.show', $booking)
+                );
+            } catch (\Throwable $notificationError) {
+                // Notification failures must not block booking updates.
+            }
+        }
 
         return redirect()
             ->route('owner.bookings.index')

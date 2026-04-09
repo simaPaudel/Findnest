@@ -63,8 +63,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(5deg); }
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-30px) rotate(5deg);
+            }
         }
 
         /* Glassmorphism Card */
@@ -82,6 +89,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             100% {
                 opacity: 1;
                 transform: translateY(0);
@@ -204,6 +212,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             100% {
                 opacity: 1;
                 transform: translateY(0);
@@ -246,7 +255,11 @@
             @endif
 
             <!-- Error Messages -->
-            @if ($errors->any())
+            @if (session('error'))
+            <div class="fn-alert-danger">
+                {{ session('error') }}
+            </div>
+            @elseif ($errors->any())
             <div class="fn-alert-danger">
                 @foreach($errors->all() as $error)
                 <p class="mb-1 last:mb-0">{{ $error }}</p>
@@ -261,25 +274,25 @@
                 <!-- Email Field -->
                 <div class="mb-5">
                     <label for="email" class="fn-label">Email Address</label>
-                    <input type="email" 
-                           class="fn-input" 
-                           id="email" 
-                           name="email" 
-                           value="{{ old('email') }}" 
-                           placeholder="your.email@example.com"
-                           required 
-                           autofocus>
+                    <input type="email"
+                        class="fn-input"
+                        id="email"
+                        name="email"
+                        value="{{ old('email') }}"
+                        placeholder="your.email@example.com"
+                        required
+                        autofocus>
                 </div>
 
                 <!-- Password Field -->
                 <div class="mb-2">
                     <label for="password" class="fn-label">Password</label>
-                    <input type="password" 
-                           class="fn-input" 
-                           id="password" 
-                           name="password" 
-                           placeholder="Enter your password"
-                           required>
+                    <input type="password"
+                        class="fn-input"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        required>
                 </div>
 
                 <!-- Forgot Password Link -->
@@ -298,7 +311,7 @@
             <!-- Footer Links -->
             <div class="mt-6 text-center space-y-2">
                 <p style="color: var(--fn-gray-dark); font-size: 14px;">
-                    Don't have an account? 
+                    Don't have an account?
                     <a href="{{ route('register') }}" class="fn-link">Create Account</a>
                 </p>
                 <p>

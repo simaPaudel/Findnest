@@ -175,6 +175,12 @@ body {
     padding: 8px 14px 8px 8px;
 }
 
+.admin-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .admin-avatar {
     width: 40px;
     height: 40px;
@@ -386,6 +392,38 @@ body {
     padding: 28px 22px;
 }
 
+.admin-action-row {
+    display: grid;
+    gap: 8px;
+}
+
+.admin-action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 56, 92, 0.18);
+    background: rgba(255, 56, 92, 0.08);
+    color: var(--fn-red-hover);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.admin-action-button:hover {
+    background: rgba(255, 56, 92, 0.12);
+    border-color: rgba(255, 56, 92, 0.3);
+}
+
+.admin-meta-note {
+    color: var(--fn-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
 @media (max-width: 1080px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
@@ -412,5 +450,11 @@ body {
     .admin-topbar {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .admin-topbar-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
     }
 }

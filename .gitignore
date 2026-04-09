@@ -22,3 +22,13 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Laravel storage (important)
+ /storage/logs
+ /storage/framework
+ /bootstrap/cache
+
+# User uploads (VERY important for your project)
+ /public/profiles
+
+# Optional (extra safety)
+ *.env

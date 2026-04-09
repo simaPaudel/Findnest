@@ -3,150 +3,242 @@
 @section('title', 'Payment Invoice')
 @section('page-title', 'Payment Invoice')
 
-@section('content')
-<div class="max-w-3xl mx-auto">
-    <!-- Invoice Container -->
-    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-        <!-- Header Section -->
-        <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-8 border-b border-gray-200">
-            <div class="flex justify-between items-start mb-8">
-                <div>
-                    <h1 class="text-4xl font-bold text-gray-900 mb-1">INVOICE</h1>
-                    <p class="text-sm text-gray-500">Booking ID: <span class="font-semibold text-gray-700">#{{ str_pad($booking->id, 6, '0', STR_PAD_LEFT) }}</span></p>
-                </div>
-                <div class="text-right">
-                    <p class="text-3xl font-bold text-red-600">FindNest</p>
-                    <p class="text-sm text-gray-500 mt-1">Payment Due</p>
-                </div>
-            </div>
-
-            <!-- Date & Terms Row -->
-            <div class="grid grid-cols-2 gap-8">
-                <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Invoice Date</p>
-                    <p class="text-lg font-semibold text-gray-900">{{ $booking->created_at->format('M d, Y') }}</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Payment Terms</p>
-                    <p class="text-lg font-semibold text-gray-900">Advance Payment (20%)</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Content Section -->
-        <div class="p-8">
-            <!-- Property Details -->
-            <div class="mb-8 pb-8 border-b border-gray-200">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Property Details</h3>
-                <div class="flex gap-4">
-                    @php
-                        $firstPhoto = !empty($booking->property->photos) ? $booking->property->photos[0] : null;
-                    @endphp
-                    @if($firstPhoto)
-                        <img src="{{ asset('storage/' . $firstPhoto) }}" 
-                             alt="{{ $booking->property->title }}" 
-                             class="w-24 h-24 rounded-lg object-cover"
-                             onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=100&h=100&fit=crop'">
-                    @else
-                        <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=100&h=100&fit=crop" 
-                             alt="{{ $booking->property->title }}" 
-                             class="w-24 h-24 rounded-lg object-cover">
-                    @endif
-                    <div>
-                        <h4 class="text-lg font-bold text-gray-900 mb-1">{{ $booking->property->title }}</h4>
-                        <p class="text-sm text-gray-500 mb-1">{{ $booking->property->location }}, {{ $booking->property->city }}</p>
-                        <p class="text-sm text-blue-600 font-medium">{{ ucfirst($booking->property->room_type) }} Room</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dates Row -->
-            <div class="grid grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-200">
-                <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Move-in Date</p>
-                    <p class="text-lg font-bold text-gray-900">{{ \Carbon\Carbon::parse($booking->check_in_date)->format('M d, Y') }}</p>
-                </div>
-                <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Booking Duration</p>
-                    <p class="text-lg font-bold text-gray-900">{{ $booking->duration_months }} Month{{ $booking->duration_months > 1 ? 's' : '' }}</p>
-                </div>
-            </div>
-
-            <!-- Charges Section -->
-            <div class="mb-8 pb-8 border-b border-gray-200">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Charges</h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="font-medium text-gray-900">Monthly Rent</p>
-                            <p class="text-sm text-gray-500">@npr($booking->property->rent_price) × {{ $booking->duration_months }} month{{ $booking->duration_months > 1 ? 's' : '' }}</p>
-                        </div>
-                        <p class="font-semibold text-gray-900">@npr($booking->total_rent)</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Total Amount -->
-            <div class="mb-8 flex justify-between items-center pb-8 border-b border-gray-200">
-                <p class="text-lg font-bold text-gray-900">Total Amount</p>
-                <p class="text-3xl font-bold text-red-600">@npr($booking->total_rent)</p>
-            </div>
-
-            <!-- Advance Payment Box -->
-            <div class="mb-8 bg-red-50 border-2 border-red-200 rounded-xl p-6">
-                <div class="flex items-start gap-3 mb-4">
-                    <div class="flex-shrink-0">
-                        <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-bold text-gray-900 mb-1">Advance Payment Required</h3>
-                        <p class="text-sm text-gray-600">Pay now to confirm your booking. The remaining 80% will be due before check-in.</p>
-                    </div>
-                </div>
-                <div class="bg-white rounded-lg p-4 mt-4">
-                    <div class="flex justify-between items-center">
-                        <span class="font-semibold text-gray-900">Amount to Pay (20%)</span>
-                        <span class="text-2xl font-bold text-red-600">@npr($booking->total_rent * 0.20)</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Status Badge -->
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8 flex items-center gap-3">
-                <svg class="w-5 h-5 text-yellow-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                </svg>
-                <div>
-                    <p class="font-semibold text-gray-900">Pending Payment</p>
-                    <p class="text-xs text-gray-600">Booking will be confirmed after payment</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer with Buttons -->
-        <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex gap-3">
-            <a href="{{ route('listings.show', $booking->property->id) }}" class="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg text-center font-semibold text-gray-700 hover:bg-gray-100 transition">
-                ← Go Back
-            </a>
-            <a href="{{ route('payment.khalti.initiate', $booking->id) }}" class="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg text-center font-semibold transition shadow-md">
-                💳 Pay @npr($booking->total_rent * 0.20) Now
-            </a>
-        </div>
-
-        <!-- Footer Text -->
-        <div class="text-center py-4 text-xs text-gray-500 bg-gray-50 border-t border-gray-200">
-            Questions? Contact us at support@findnest.com
-        </div>
-    </div>
-</div>
-
+@push('styles')
 <style>
+    @page {
+        size: A4;
+        margin: 14mm;
+    }
+
     @media print {
-        .shadow-lg {
-            box-shadow: none;
+        .fn-navbar,
+        .fn-alert,
+        .no-print {
+            display: none !important;
+        }
+
+        body,
+        main {
+            background: #fff !important;
+        }
+
+        main {
+            padding: 0 !important;
+        }
+
+        .invoice-print-shell {
+            max-width: none !important;
+            margin: 0 !important;
+        }
+
+        .invoice-card {
+            border: none !important;
+            box-shadow: none !important;
         }
     }
 </style>
+@endpush
+
+@section('content')
+@php
+    $propertyImageUrl = $booking->room?->getFirstImageUrl() ?? $booking->property?->getFirstImageUrl() ?? asset('images/property-placeholder.jpg');
+    $bookedItemLabel = $booking->isRoomSpecific() && $booking->room
+        ? $booking->room->room_name
+        : 'Entire property';
+    $totalPaid = (float) $booking->getTotalPaid();
+    $advanceTarget = round((float) $booking->total_rent * 0.20, 2);
+    $payableNow = max($advanceTarget - $totalPaid, 0);
+    $remainingBalance = max((float) $booking->total_rent - $totalPaid, 0);
+    $lastPayment = $booking->lastSuccessfulPayment();
+    $bookingReadyLabel = $booking->isRoomSpecific() ? 'Room booked' : 'Property booked';
+
+    if ($booking->isFullyPaid()) {
+        $paymentHeadline = 'Fully paid';
+        $paymentNote = 'All booking charges recorded successfully.';
+        $accentClasses = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    } elseif ($booking->hasSuccessfulPayment()) {
+        $paymentHeadline = 'Advance payment done';
+        $paymentNote = 'Your booking has been placed. Remaining balance can be settled later.';
+        $accentClasses = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    } else {
+        $paymentHeadline = 'Advance payment required';
+        $paymentNote = 'Pay 20% of the first month rent to place this booking.';
+        $accentClasses = 'bg-amber-50 text-amber-700 border-amber-200';
+    }
+@endphp
+
+<div class="invoice-print-shell max-w-5xl mx-auto">
+    <div class="invoice-card bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <div class="px-6 py-5 border-b border-slate-200">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div class="space-y-2">
+                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">FindNest Invoice</p>
+                    <h2 class="text-2xl font-semibold text-slate-900">Monthly Rental Invoice</h2>
+                    <div class="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                        <span>Reference #{{ str_pad($booking->id, 6, '0', STR_PAD_LEFT) }}</span>
+                        <span class="text-slate-300">|</span>
+                        <span>Issued {{ $booking->created_at->format('M d, Y') }}</span>
+                    </div>
+                </div>
+
+                <div class="min-w-[240px] rounded-2xl border px-5 py-4 {{ $accentClasses }}">
+                    <p class="text-xs font-semibold uppercase tracking-wide">Status</p>
+                    <p class="mt-2 text-lg font-semibold">{{ $paymentHeadline }}</p>
+                    <p class="mt-1 text-sm leading-6">{{ $paymentNote }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-[1.6fr_0.95fr]">
+                <div class="space-y-6">
+                    <section class="border border-slate-200 rounded-2xl overflow-hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-[220px_1fr]">
+                            <div class="h-56 bg-slate-100">
+                                <img
+                                    src="{{ $propertyImageUrl }}"
+                                    alt="{{ $booking->property->title }}"
+                                    class="h-full w-full object-cover"
+                                    onerror="this.src='{{ asset('images/property-placeholder.jpg') }}'">
+                            </div>
+                            <div class="p-5">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+                                        {{ $booking->property->getRentalModeLabel() }}
+                                    </span>
+                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+                                        {{ $booking->property->getPropertyTypeLabel() }}
+                                    </span>
+                                </div>
+
+                                <h3 class="mt-4 text-xl font-semibold text-slate-900">{{ $booking->property->title }}</h3>
+                                <p class="mt-2 text-sm leading-6 text-slate-500">
+                                    {{ $booking->property->address ?: ($booking->property->location ?: $booking->property->city) }}
+                                    @if($booking->property->city)
+                                        , {{ $booking->property->city }}
+                                    @endif
+                                </p>
+
+                                <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                    <div class="rounded-xl border border-slate-200 p-4">
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Booked Unit</p>
+                                        <p class="mt-2 text-sm font-semibold text-slate-900">{{ $bookedItemLabel }}</p>
+                                    </div>
+                                    <div class="rounded-xl border border-slate-200 p-4">
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Move-in Date</p>
+                                        <p class="mt-2 text-sm font-semibold text-slate-900">{{ $booking->check_in_date->format('M d, Y') }}</p>
+                                    </div>
+                                    <div class="rounded-xl border border-slate-200 p-4">
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Booking Term</p>
+                                        <p class="mt-2 text-sm font-semibold text-slate-900">1 month</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="border border-slate-200 rounded-2xl overflow-hidden">
+                        <div class="px-5 py-4 border-b border-slate-200">
+                            <h3 class="text-base font-semibold text-slate-900">Invoice Summary</h3>
+                        </div>
+
+                        <div class="divide-y divide-slate-200">
+                            <div class="flex items-center justify-between gap-4 px-5 py-4 text-sm">
+                                <div>
+                                    <p class="font-medium text-slate-900">One month rent</p>
+                                    <p class="mt-1 text-slate-500">Base rent for the first month of the booking</p>
+                                </div>
+                                <p class="font-semibold text-slate-900">@npr($booking->total_rent)</p>
+                            </div>
+                            <div class="flex items-center justify-between gap-4 px-5 py-4 text-sm">
+                                <div>
+                                    <p class="font-medium text-slate-900">Advance required now</p>
+                                    <p class="mt-1 text-slate-500">20% of the monthly rent</p>
+                                </div>
+                                <p class="font-semibold text-slate-900">@npr($advanceTarget)</p>
+                            </div>
+                            <div class="flex items-center justify-between gap-4 px-5 py-4 text-sm">
+                                <div>
+                                    <p class="font-medium text-slate-900">Advance received</p>
+                                    <p class="mt-1 text-slate-500">Successful payment recorded for this booking</p>
+                                </div>
+                                <p class="font-semibold text-emerald-600">@npr($totalPaid)</p>
+                            </div>
+                            <div class="flex items-center justify-between gap-4 px-5 py-4 text-sm">
+                                <div>
+                                    <p class="font-medium text-slate-900">Remaining balance</p>
+                                    <p class="mt-1 text-slate-500">Outstanding amount after advance payment</p>
+                                </div>
+                                <p class="font-semibold text-slate-900">@npr($remainingBalance)</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="space-y-6">
+                    <section class="border border-slate-200 rounded-2xl p-5">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Booking Status</p>
+                        <p class="mt-2 text-lg font-semibold text-slate-900">
+                            {{ $booking->hasSuccessfulPayment() ? $bookingReadyLabel : 'Waiting for advance payment' }}
+                        </p>
+                        <p class="mt-2 text-sm leading-6 text-slate-500">
+                            @if($booking->hasSuccessfulPayment())
+                                {{ $bookedItemLabel }} has been reserved. The remaining balance is @npr($remainingBalance).
+                            @else
+                                Pay @npr($payableNow) now to place this booking and reserve {{ strtolower($bookedItemLabel) }}.
+                            @endif
+                        </p>
+                    </section>
+
+                    <section class="border border-slate-200 rounded-2xl p-5">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Payment Details</p>
+                        <dl class="mt-4 space-y-3 text-sm">
+                            <div class="flex items-center justify-between gap-4">
+                                <dt class="text-slate-500">Payable now</dt>
+                                <dd class="font-semibold text-slate-900">@npr($payableNow)</dd>
+                            </div>
+                            <div class="flex items-center justify-between gap-4">
+                                <dt class="text-slate-500">Payment method</dt>
+                                <dd class="font-semibold text-slate-900">Khalti</dd>
+                            </div>
+                            @if($lastPayment)
+                                <div class="flex items-center justify-between gap-4">
+                                    <dt class="text-slate-500">Last payment</dt>
+                                    <dd class="font-semibold text-slate-900">{{ $lastPayment->paid_at?->format('M d, Y') ?? $lastPayment->created_at->format('M d, Y') }}</dd>
+                                </div>
+                                <div class="flex items-center justify-between gap-4">
+                                    <dt class="text-slate-500">Transaction</dt>
+                                    <dd class="font-semibold text-slate-900">{{ $lastPayment->transaction_id ?: 'Recorded' }}</dd>
+                                </div>
+                            @endif
+                        </dl>
+                    </section>
+
+                    <section class="border border-slate-200 rounded-2xl p-5 bg-slate-50">
+                        <p class="text-sm font-medium text-slate-900">What this invoice means</p>
+                        <p class="mt-2 text-sm leading-6 text-slate-500">
+                            This page shows the first-month rent, the 20% advance collected now, and the remaining amount left on the booking.
+                        </p>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <div class="no-print flex flex-col gap-3 border-t border-slate-200 px-6 py-5 sm:flex-row">
+            <a href="{{ route('user.bookings.show', $booking) }}" class="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                View Booking Details
+            </a>
+
+            @if($payableNow > 0)
+                <a href="{{ route('payment.khalti.initiate', $booking->id) }}" class="inline-flex flex-1 items-center justify-center rounded-xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">
+                    Pay @npr($payableNow)
+                </a>
+            @else
+                <a href="{{ route('user.bookings.download-invoice', $booking) }}" class="inline-flex flex-1 items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+                    Download Invoice PDF
+                </a>
+            @endif
+        </div>
+    </div>
+</div>
 @endsection

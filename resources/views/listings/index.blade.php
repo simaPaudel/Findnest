@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,11 +12,10 @@
         :root {
             --fn-red: #FF385C;
             --fn-red-hover: #E11D48;
-            --fn-white: #FFFFFF;
-            --fn-gray: #F7F7F7;
             --fn-charcoal: #1F2937;
-            --fn-gray-light: #E5E7EB;
+            --fn-gray-border: #E5E7EB;
             --fn-gray-dark: #6B7280;
+            --fn-gray-soft: #F8FAFC;
         }
 
         * {
@@ -26,390 +26,280 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--fn-white);
+            background: #ffffff;
             color: var(--fn-charcoal);
+            line-height: 1.5;
         }
 
-        .fn-bg-red { background-color: var(--fn-red); }
-        .fn-bg-white { background-color: var(--fn-white); }
-        .fn-bg-gray { background-color: var(--fn-gray); }
-        .fn-text-red { color: var(--fn-red); }
-        .fn-text-charcoal { color: var(--fn-charcoal); }
-        .fn-text-white { color: var(--fn-white); }
-        .fn-text-gray { color: var(--fn-gray-dark); }
-
-        /* Navbar */
-        .fn-navbar {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--fn-gray-light);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+        .search-shell {
+            background: #fff;
+            border: 1px solid var(--fn-gray-border);
+            border-radius: 999px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
         }
 
-        .fn-nav-link {
-            color: var(--fn-charcoal);
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .fn-nav-link:hover {
-            background: rgba(255, 56, 92, 0.08);
-            color: var(--fn-red);
-        }
-
-        /* Buttons */
-        .fn-btn-primary {
-            background: linear-gradient(135deg, var(--fn-red) 0%, #ff1744 100%);
-            color: var(--fn-white);
-            padding: 14px 32px;
-            border-radius: 16px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            box-shadow: 0 4px 20px rgba(255, 56, 92, 0.25);
-            display: inline-block;
+        .listing-card {
+            display: block;
+            color: inherit;
             text-decoration: none;
         }
 
-        .fn-btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 32px rgba(255, 56, 92, 0.35);
+        .listing-card:hover .listing-image {
+            transform: scale(1.04);
         }
 
-        .fn-btn-secondary {
-            background: transparent;
-            color: var(--fn-charcoal);
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 500;
-            border: 2px solid var(--fn-gray-light);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-block;
-            text-decoration: none;
+        .listing-image-wrap {
+            position: relative;
+            overflow: hidden;
+            border-radius: 22px;
+            background: #f1f5f9;
         }
 
-        .fn-btn-secondary:hover {
-            border-color: var(--fn-red);
-            background: rgba(255, 56, 92, 0.05);
-            color: var(--fn-red);
+        .listing-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.35s ease;
         }
 
-        /* Cards */
-        .fn-glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(229, 231, 235, 0.8);
-            border-radius: 20px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-            transition: all 0.4s ease;
-        }
-
-        .fn-glass-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 48px rgba(255, 56, 92, 0.12);
-        }
-
-        /* Badge */
-        .fn-badge {
+        .listing-chip {
             display: inline-flex;
             align-items: center;
-            padding: 6px 16px;
-            border-radius: 12px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            backdrop-filter: blur(8px);
-        }
-
-        .fn-badge-green {
-            background: rgba(16, 185, 129, 0.15);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .fn-badge-gray {
-            background: rgba(107, 114, 128, 0.15);
-            color: var(--fn-gray-dark);
-            border: 1px solid rgba(107, 114, 128, 0.3);
-        }
-
-        /* Search Input */
-        .fn-search-input {
-            background: var(--fn-gray);
-            border: 1px solid transparent;
-            border-radius: 14px;
-            padding: 14px 20px;
-            color: var(--fn-charcoal);
-            outline: none;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .fn-search-input:focus {
-            border-color: var(--fn-red);
-            background: var(--fn-white);
-            box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.1);
-        }
-
-        .fn-image-overlay {
-            background: linear-gradient(180deg, rgba(31, 41, 55, 0) 0%, rgba(31, 41, 55, 0.9) 100%);
-        }
-
-        .property-card {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .property-card img {
-            transition: transform 0.6s ease;
-        }
-
-        .property-card:hover img {
-            transform: scale(1.08);
+            border-radius: 999px;
+            padding: 0.45rem 0.85rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            line-height: 1;
         }
 
         .save-btn {
             position: absolute;
-            top: 12px;
-            right: 12px;
-            background: transparent;
+            top: 14px;
+            right: 14px;
+            width: 40px;
+            height: 40px;
             border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            cursor: pointer;
+            border-radius: 999px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: none;
+            background: rgba(15, 23, 42, 0.32);
+            backdrop-filter: blur(8px);
+            color: white;
+            cursor: pointer;
             z-index: 10;
-            padding: 0;
         }
 
         .save-btn svg {
-            width: 28px;
-            height: 28px;
-            color: white;
+            width: 19px;
+            height: 19px;
             stroke-width: 2;
-            filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
-            transition: all 0.3s ease;
+            transition: transform 0.2s ease;
         }
 
         .save-btn:hover svg {
-            color: var(--fn-red);
-            transform: scale(1.15);
-            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+            transform: scale(1.08);
         }
 
-        .save-btn.saved svg {
-            color: var(--fn-red);
-            fill: var(--fn-red);
-            filter: drop-shadow(0 2px 6px rgba(255, 56, 92, 0.4));
+        .save-btn.saved {
+            background: var(--fn-red);
+        }
+
+        .line-clamp-1,
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .line-clamp-1 {
+            -webkit-line-clamp: 1;
+        }
+
+        .line-clamp-2 {
+            -webkit-line-clamp: 2;
         }
     </style>
 </head>
+
 <body>
-    <!-- Navbar -->
-    <nav class="fn-navbar">
-        <div class="max-w-7xl mx-auto px-6 lg:px-12 py-4">
-            <div class="flex items-center justify-between">
-                <a href="{{ route('home') }}" class="flex items-center gap-2 text-2xl font-bold fn-text-red">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                    </svg>
-                    FindNest
-                </a>
+    @include('components.navbar')
 
-                <div class="flex items-center gap-4">
-                    <a href="{{ route('listings.index') }}" class="fn-nav-link">Browse Listings</a>
-                    @auth
-                        <a href="{{ route('user.dashboard') }}" class="fn-nav-link">Dashboard</a>
-                        <form action="{{ route('logout') }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" class="fn-nav-link">Logout</button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" class="fn-nav-link">Login</a>
-                        <a href="{{ route('register') }}" class="fn-btn-primary">Get Started</a>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="py-12">
-        <div class="max-w-7xl mx-auto px-6 lg:px-12">
-            <!-- Header -->
-            <div class="mb-8">
-                <h1 class="text-4xl font-bold fn-text-charcoal mb-4">Browse Properties</h1>
-                <p class="fn-text-gray text-lg">Find your perfect accommodation from our verified listings</p>
-            </div>
-
-            <!-- Search & Filters -->
-            <div class="fn-glass-card p-6 mb-8">
-                <form action="{{ route('listings.index') }}" method="GET" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium fn-text-charcoal mb-2">Location</label>
-                            <input type="text" name="q" placeholder="City, area, or keyword..." class="fn-search-input" value="{{ request('q') }}">
+    <main>
+        <section class="border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8 py-6">
+            <div class="w-full">
+                <form action="{{ route('listings.index') }}" method="GET" class="max-w-5xl mx-auto">
+                    <div class="search-shell p-2 flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-0">
+                        <div class="flex-1 px-4 py-3 lg:border-r lg:border-slate-200">
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Where</label>
+                            <input type="text" name="q" placeholder="Search destinations" value="{{ request('q') }}" class="w-full bg-transparent outline-none text-sm text-slate-800">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium fn-text-charcoal mb-2">Max Price</label>
-                            <input type="number" name="max_price" placeholder="e.g., 50000" class="fn-search-input" value="{{ request('max_price') }}">
+
+                        <div class="flex-1 px-4 py-3 lg:border-r lg:border-slate-200">
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Max Price</label>
+                            <input type="number" name="max_price" placeholder="Set budget" value="{{ request('max_price') }}" class="w-full bg-transparent outline-none text-sm text-slate-800">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium fn-text-charcoal mb-2">Room Type</label>
-                            <select name="room_type" class="fn-search-input">
-                                <option value="">All Types</option>
-                                <option value="single" {{ request('room_type') == 'single' ? 'selected' : '' }}>Single</option>
-                                <option value="shared" {{ request('room_type') == 'shared' ? 'selected' : '' }}>Shared</option>
-                                <option value="flat" {{ request('room_type') == 'flat' ? 'selected' : '' }}>Flat</option>
+
+                        <div class="flex-1 px-4 py-3 lg:border-r lg:border-slate-200">
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Property Type</label>
+                            <select name="property_type" class="w-full bg-transparent outline-none text-sm text-slate-800">
+                                <option value="">All types</option>
+                                <option value="house" {{ request('property_type') == 'house' ? 'selected' : '' }}>House</option>
+                                <option value="flat" {{ request('property_type') == 'flat' ? 'selected' : '' }}>Flat</option>
+                                <option value="apartment" {{ request('property_type') == 'apartment' ? 'selected' : '' }}>Apartment</option>
+                                <option value="room" {{ request('property_type') == 'room' ? 'selected' : '' }}>Room</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="flex flex-wrap gap-4 items-center">
-                        <button type="submit" class="fn-btn-primary">
-                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                        <div class="px-4 py-3 lg:border-r lg:border-slate-200">
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Sort</label>
+                            <select name="sort" class="w-full bg-transparent outline-none text-sm text-slate-800" onchange="this.form.submit()">
+                                <option value="">Latest</option>
+                                <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest</option>
+                                <option value="price_low" {{ request('sort') == 'price_low' ? 'selected' : '' }}>Price Low</option>
+                                <option value="price_high" {{ request('sort') == 'price_high' ? 'selected' : '' }}>Price High</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="h-12 w-12 shrink-0 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition lg:mr-1">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
-                            Search
                         </button>
-                        @if(request()->hasAny(['q', 'max_price', 'room_type', 'sort']))
-                            <a href="{{ route('listings.index') }}" class="fn-btn-secondary">
-                                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                                Clear Filters
-                            </a>
-                        @endif
-                        <div class="ml-auto">
-                            <select name="sort" class="fn-search-input" onchange="this.form.submit()">
-                                <option value="">Sort By</option>
-                                <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Newest First</option>
-                                <option value="price_low" {{ request('sort') == 'price_low' ? 'selected' : '' }}>Price: Low to High</option>
-                                <option value="price_high" {{ request('sort') == 'price_high' ? 'selected' : '' }}>Price: High to Low</option>
-                            </select>
-                        </div>
                     </div>
                 </form>
             </div>
+        </section>
 
-            <!-- Results Count -->
-            <div class="mb-6 flex items-center justify-between">
-                <p class="fn-text-gray">
-                    Found <span class="font-semibold fn-text-charcoal">{{ $properties->total() }}</span> {{ $properties->total() == 1 ? 'property' : 'properties' }}
-                    @if(request('q'))
-                        matching "<span class="font-semibold fn-text-red">{{ request('q') }}</span>"
+        <section class="px-4 sm:px-6 lg:px-8 py-10">
+            <div class="w-full">
+                <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-950">
+                            @if(request('q'))
+                                Stays in {{ request('q') }}
+                            @else
+                                Explore stays
+                            @endif
+                        </h1>
+                        <p class="mt-2 text-sm text-slate-500">
+                            <span class="font-semibold text-slate-900">{{ $properties->total() }}</span>
+                            {{ $properties->total() === 1 ? 'property' : 'properties' }} available
+                        </p>
+                    </div>
+
+                    @if(request()->hasAny(['q', 'max_price', 'property_type', 'sort']))
+                        <a href="{{ route('listings.index') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-rose-500 hover:text-rose-600">
+                            Clear filters
+                        </a>
                     @endif
-                </p>
-            </div>
+                </div>
 
-            <!-- Property Grid -->
-            @if($properties->count() > 0)
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                    @foreach($properties as $property)
-                        @php
-                            $photos = is_array($property->photos) ? $property->photos : (json_decode($property->photos, true) ?? []);
-                            $firstPhoto = $photos[0] ?? null;
-                        @endphp
-                        <div class="fn-glass-card overflow-hidden property-card group">
-                            <div class="relative h-64 overflow-hidden">
-                                @if($firstPhoto)
-                                    <img src="{{ asset('storage/' . $firstPhoto) }}" 
-                                         alt="{{ $property->title }}" 
-                                         class="w-full h-full object-cover">
-                                @else
-                                    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&h=400&fit=crop" 
-                                         alt="{{ $property->title }}" 
-                                         class="w-full h-full object-cover">
-                                @endif
-                                <div class="absolute inset-0 fn-image-overlay"></div>
-                                
-                                <!-- Save Button (only for authenticated users) -->
-                                @auth
-                                    <button class="save-btn save-property-btn" 
-                                            data-property-id="{{ $property->id }}"
-                                            title="Save this listing">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                        </svg>
-                                    </button>
-                                @endauth
+                @if($properties->count() > 0)
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-10 mb-12 items-start">
+                        @foreach($properties as $property)
+                            @php
+                                $primaryImage = $property->images->firstWhere('is_primary', true) ?? $property->images->sortBy('order')->first();
+                                $imageUrl = $primaryImage ? $primaryImage->getUrl() : asset('images/property-placeholder.jpg');
+                                $minRoomPrice = $property->min_room_price !== null ? (float) $property->min_room_price : ($property->rooms->min('price') !== null ? (float) $property->rooms->min('price') : null);
+                                $maxRoomPrice = $property->max_room_price !== null ? (float) $property->max_room_price : ($property->rooms->max('price') !== null ? (float) $property->rooms->max('price') : null);
+                                $availableRooms = (int) ($property->available_rooms_count ?? 0);
 
-                                <div class="absolute bottom-4 left-4 right-4">
-                                    <h3 class="text-xl font-bold fn-text-white mb-1">{{ $property->title }}</h3>
-                                    <p class="text-sm fn-text-white opacity-90  mb-2">{{ $property->city ?? $property->location }}</p>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-2xl font-bold fn-text-white">@npr($property->rent_price)/mo</span>
-                                        @if($property->room_type)
-                                            <span class="fn-badge fn-badge-gray text-xs capitalize">{{ $property->room_type }}</span>
-                                        @endif
+                                if ($property->rental_mode === 'per_room') {
+                                    if ($minRoomPrice === null || $maxRoomPrice === null) {
+                                        $priceLabel = 'Price on request';
+                                    } elseif ($minRoomPrice === $maxRoomPrice) {
+                                        $priceLabel = 'From Rs ' . number_format($minRoomPrice) . '/month';
+                                    } else {
+                                        $priceLabel = 'Rs ' . number_format($minRoomPrice) . ' - Rs ' . number_format($maxRoomPrice) . '/month';
+                                    }
+
+                                    $subtitle = $property->property_availability_label
+                                        ?? ($availableRooms === 1
+                                            ? '1 room available'
+                                            : ($availableRooms > 1 ? $availableRooms . ' rooms available' : 'No rooms available right now'));
+                                } else {
+                                    $priceLabel = 'Rs ' . number_format((float) $property->rent_price) . '/month';
+                                    $subtitle = $property->property_availability_label ?? 'Available for booking';
+                                }
+                            @endphp
+
+                            <a href="{{ route('listings.show', $property) }}" class="listing-card">
+                                <div class="listing-image-wrap aspect-[4/3] mb-3">
+                                    <img src="{{ $imageUrl }}" alt="{{ $property->title }}" class="listing-image">
+
+                                    <div class="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-3">
+                                        <span class="listing-chip bg-white/92 text-slate-800 shadow-sm">
+                                            {{ $property->rental_mode === 'per_room' ? 'Room choice' : 'Whole place' }}
+                                        </span>
+
+                                        @auth
+                                            <button class="save-btn save-property-btn"
+                                                data-property-id="{{ $property->id }}"
+                                                title="Save this listing"
+                                                onclick="event.preventDefault(); event.stopPropagation();">
+                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                                </svg>
+                                            </button>
+                                        @endauth
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Property Details -->
-                            <a href="{{ route('listings.show', $property) }}" class="block p-4 hover:bg-gray-50 transition">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="text-sm font-medium text-gray-600">View Details</span>
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
+
+                                <div class="space-y-1.5">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <h2 class="text-[15px] font-semibold text-slate-950 leading-6 line-clamp-1">{{ $property->title }}</h2>
+                                        <span class="shrink-0 text-sm font-semibold text-slate-900">{{ $property->city ?: 'Nepal' }}</span>
+                                    </div>
+
+                                    <p class="text-sm text-slate-500 line-clamp-1">{{ $property->address ?: ($property->location ?: 'Location not specified') }}</p>
+                                    @if(!$property->is_property_bookable)
+                                        <div>
+                                            <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+                                                Unavailable
+                                            </span>
+                                        </div>
+                                    @endif
+                                    <p class="text-sm text-slate-500 line-clamp-1">{{ $subtitle }}</p>
+                                    <p class="text-sm text-slate-500 line-clamp-1">{{ $property->getPropertyTypeLabel() }}</p>
+                                    <p class="pt-1 text-[15px] text-slate-900"><span class="font-bold">{{ $priceLabel }}</span></p>
                                 </div>
                             </a>
-                        </div>
-                    @endforeach
-                </div>
+                        @endforeach
+                    </div>
 
-                <!-- Pagination -->
-                <div class="flex justify-center">
-                    {{ $properties->links() }}
-                </div>
-            @else
-                <!-- No Results -->
-                <div class="fn-glass-card p-12 text-center">
-                    <svg class="w-24 h-24 mx-auto fn-text-gray mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <h2 class="text-2xl font-bold fn-text-charcoal mb-4">No Properties Found</h2>
-                    <p class="fn-text-gray mb-6">Try adjusting your search criteria or clearing filters</p>
-                    <a href="{{ route('listings.index') }}" class="fn-btn-primary">View All Properties</a>
-                </div>
-            @endif
-        </div>
+                    <div class="flex justify-center">
+                        {{ $properties->links() }}
+                    </div>
+                @else
+                    <div class="rounded-3xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
+                        <svg class="w-20 h-20 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h2 class="text-2xl font-bold text-slate-900 mb-3">No Properties Found</h2>
+                        <p class="text-slate-500 mb-6">Try adjusting your search criteria or clearing filters.</p>
+                        <a href="{{ route('listings.index') }}" class="inline-flex items-center justify-center rounded-xl bg-rose-500 px-6 py-3 font-semibold text-white hover:bg-rose-600 transition">View All Properties</a>
+                    </div>
+                @endif
+            </div>
+        </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="fn-bg-gray py-8 mt-16">
-        <div class="max-w-7xl mx-auto px-6 lg:px-12 text-center">
-            <p class="fn-text-gray">&copy; 2026 FindNest. All rights reserved.</p>
+    <footer class="border-t border-gray-200 py-10 bg-white">
+        <div class="w-full px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-sm text-slate-500">&copy; 2026 FindNest. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- Save Listing Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Get all save buttons
             const saveButtons = document.querySelectorAll('.save-property-btn');
 
             saveButtons.forEach(button => {
                 const propertyId = button.dataset.propertyId;
 
-                // Check if property is already saved
                 checkSaveStatus(propertyId, button);
 
-                // Add click handler
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -419,57 +309,54 @@
 
             function checkSaveStatus(propertyId, button) {
                 fetch(`/user/saved-listings/check/${propertyId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.is_saved) {
-                        button.classList.add('saved');
-                    }
-                })
-                .catch(error => console.error('Error checking save status:', error));
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.is_saved) {
+                            button.classList.add('saved');
+                        }
+                    })
+                    .catch(error => console.error('Error checking save status:', error));
             }
 
             function toggleSave(propertyId, button) {
                 const isSaved = button.classList.contains('saved');
-                const url = isSaved 
-                    ? `/user/saved-listings/unsave/${propertyId}`
-                    : `/user/saved-listings/save/${propertyId}`;
+                const url = isSaved ? `/user/saved-listings/unsave/${propertyId}` : `/user/saved-listings/save/${propertyId}`;
                 const method = isSaved ? 'DELETE' : 'POST';
 
                 fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        if (data.is_saved) {
-                            button.classList.add('saved');
-                            showNotification('Listing saved successfully!', 'success');
-                        } else {
-                            button.classList.remove('saved');
-                            showNotification('Listing removed from saved', 'info');
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                         }
-                    } else {
-                        showNotification(data.message || 'Error saving listing', 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Error saving listing', 'error');
-                });
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (data.is_saved) {
+                                button.classList.add('saved');
+                                showNotification('Listing saved', 'success');
+                            } else {
+                                button.classList.remove('saved');
+                                showNotification('Listing removed', 'info');
+                            }
+                        } else {
+                            showNotification(data.message || 'Error', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Error saving listing', 'error');
+                    });
             }
 
             function showNotification(message, type) {
-                // Simple notification (you can replace with Toastr if available)
                 const notification = document.createElement('div');
                 notification.textContent = message;
                 notification.style.cssText = `
@@ -477,24 +364,24 @@
                     top: 20px;
                     right: 20px;
                     padding: 12px 20px;
-                    border-radius: 12px;
+                    border-radius: 8px;
                     font-weight: 500;
                     z-index: 9999;
                     animation: slideIn 0.3s ease;
                     ${type === 'success' ? 'background: #10b981; color: white;' : ''}
                     ${type === 'error' ? 'background: #ef4444; color: white;' : ''}
                     ${type === 'info' ? 'background: #3b82f6; color: white;' : ''}
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
                 `;
                 document.body.appendChild(notification);
 
                 setTimeout(() => {
                     notification.style.animation = 'slideOut 0.3s ease';
                     setTimeout(() => notification.remove(), 300);
-                }, 3000);
+                }, 2500);
             }
         });
 
-        // Add CSS animation for notifications
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideIn {
@@ -521,4 +408,5 @@
         document.head.appendChild(style);
     </script>
 </body>
+
 </html>

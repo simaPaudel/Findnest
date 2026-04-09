@@ -37,7 +37,7 @@
                                 </td>
                                 <td>
                                     <span class="status-pill {{ $review->is_approved ? 'status-approved' : 'status-neutral' }}">
-                                        {{ $review->is_approved ? 'Approved' : 'Hidden' }}
+                                        {{ $review->is_approved ? 'Approved' : 'Pending Review' }}
                                     </span>
                                 </td>
                                 <td>{{ optional($review->created_at)->format('M d, Y') ?? 'N/A' }}</td>

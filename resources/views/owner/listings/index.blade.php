@@ -4,130 +4,475 @@
 @section('page-title', 'My Listings')
 
 @section('content')
-<div class="content-card">
-    <div class="card-header">
+<style>
+    .owner-listings-card {
+        overflow: visible;
+    }
+
+    .listing-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1.25rem;
+        padding: 1.25rem;
+        align-items: start;
+    }
+
+    .listing-card {
+        background: #fff;
+        border: 1px solid #e7edf3;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    .listing-card:hover {
+        border-color: #d8e1ea;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        transform: translateY(-1px);
+    }
+
+    .listing-card-media {
+        position: relative;
+        height: 210px;
+        background: #f8fafc;
+    }
+
+    .listing-card-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .listing-card-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-size: 0.88rem;
+        font-weight: 500;
+    }
+
+    .listing-card-badge-wrap {
+        position: absolute;
+        top: 0.9rem;
+        left: 0.9rem;
+    }
+
+    .listing-mode-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        background: rgba(15, 23, 42, 0.74);
+        color: #fff;
+    }
+
+    .listing-card-body {
+        padding: 1rem 1rem 1.05rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        flex: 1;
+    }
+
+    .listing-card-title {
+        font-size: 1.02rem;
+        font-weight: 600;
+        color: #0f172a;
+        line-height: 1.45;
+        letter-spacing: -0.01em;
+    }
+
+    .listing-card-subtitle {
+        margin-top: 0.28rem;
+        color: #64748b;
+        font-size: 0.84rem;
+        line-height: 1.5;
+    }
+
+    .listing-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+    }
+
+    .listing-status-badge,
+    .listing-verified-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.28rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+    }
+
+    .listing-status-badge.pending {
+        background: #fff7ed;
+        color: #b45309;
+    }
+
+    .listing-status-badge.approved {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .listing-status-badge.rejected {
+        background: #fff1f2;
+        color: #b91c1c;
+    }
+
+    .listing-verified-badge.verified {
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    .listing-verified-badge.pending {
+        background: #f8fafc;
+        color: #475569;
+    }
+
+    .listing-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem 1rem;
+        padding-top: 0.2rem;
+        border-top: 1px solid #eef2f7;
+    }
+
+    .listing-meta-label {
+        display: block;
+        font-size: 0.69rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.2rem;
+    }
+
+    .listing-meta-value {
+        color: #0f172a;
+        font-size: 0.88rem;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    .listing-actions {
+        display: flex;
+        gap: 0.55rem;
+        flex-wrap: wrap;
+        margin-top: auto;
+        padding-top: 0.2rem;
+    }
+
+    .listing-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.62rem 0.9rem;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        font-weight: 600;
+        font-size: 0.84rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+        flex: 1;
+        min-width: 88px;
+    }
+
+    .listing-action-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .listing-action-btn.primary {
+        background: #fff3f5;
+        border-color: #ffd4dc;
+        color: #be123c;
+    }
+
+    .listing-action-btn.secondary {
+        background: #fff;
+        border-color: #e5e7eb;
+        color: #475569;
+    }
+
+    .listing-action-btn.danger {
+        background: #fff1f2;
+        border-color: #ffe4e6;
+        color: #dc2626;
+    }
+
+    .listing-actions form {
+        flex: 1;
+    }
+
+    .empty-state-card {
+        text-align: center;
+        padding: 3rem 2rem;
+        border-top: 1px solid #eef2f7;
+    }
+
+    .owner-listings-empty-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .owner-listings-empty-text {
+        margin-top: 0.5rem;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .owner-listings-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.05rem 1.25rem;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .owner-listings-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.62rem 0.9rem;
+        border-radius: 10px;
+        background: #ff385c;
+        color: #fff;
+        text-decoration: none;
+        font-size: 0.84rem;
+        font-weight: 600;
+        transition: background 0.18s ease, transform 0.18s ease;
+    }
+
+    .owner-listings-button:hover {
+        background: #e11d48;
+        transform: translateY(-1px);
+    }
+
+    .owner-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .owner-pagination-info {
+        font-size: 0.82rem;
+        color: #64748b;
+    }
+
+    .owner-pagination-links {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .owner-pagination-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 0.8rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #fff;
+        color: #475569;
+        font-size: 0.82rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    }
+
+    .owner-pagination-link:hover {
+        background: #f8fafc;
+        border-color: #dbe4ee;
+        color: #0f172a;
+    }
+
+    .owner-pagination-link.active {
+        background: #fff3f5;
+        border-color: #ffd4dc;
+        color: #be123c;
+    }
+
+    .owner-pagination-link.disabled {
+        background: #f8fafc;
+        color: #94a3b8;
+        pointer-events: none;
+    }
+
+    @media (max-width: 1200px) {
+        .listing-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 992px) {
+        .listing-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .listing-grid {
+            grid-template-columns: 1fr;
+            padding: 1rem;
+        }
+
+        .owner-listings-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .listing-card-media {
+            height: 195px;
+        }
+
+        .listing-meta {
+            grid-template-columns: 1fr;
+        }
+
+        .listing-actions {
+            flex-direction: column;
+        }
+
+        .listing-actions form,
+        .listing-action-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="content-card owner-listings-card">
+    <div class="owner-listings-header">
         <h2 class="card-title">Property Listings</h2>
-        <a href="{{ route('owner.listings.create') }}" class="btn-primary">
-            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
+        <a href="{{ route('owner.listings.create') }}" class="owner-listings-button">
             Add New Property
         </a>
     </div>
 
-    <div class="table-responsive">
-        @if($properties->count() > 0)
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Property</th>
-                        <th>Location</th>
-                        <th>Rent/Month</th>
-                        <th>Status</th>
-                        <th>Verified</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($properties as $property)
-                        <tr>
-                            <td>
-                                <div class="property-info">
-                                    @php
-                                        // Handle both JSON strings (old data) and arrays (new data with model casting)
-                                        $photos = $property->photos;
-                                        if (is_string($photos)) {
-                                            $photos = json_decode($photos, true) ?? [];
-                                        }
-                                        $photos = $photos ?? [];
-                                        $firstPhoto = !empty($photos) && isset($photos[0]) ? $photos[0] : null;
-                                    @endphp
-                                    
-                                    @if($firstPhoto)
-                                        <img src="{{ asset('storage/' . $firstPhoto) }}" alt="{{ $property->title }}" class="property-thumb">
-                                    @else
-                                        <div class="property-thumb-placeholder">
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                                            </svg>
-                                        </div>
-                                    @endif
-                                    <div>
-                                        <div class="property-title">{{ $property->title }}</div>
-                                        <div class="property-type">{{ ucfirst($property->room_type) }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>{{ $property->city }}</td>
-                            <td class="text-bold">@npr($property->rent_price)</td>
-                            <td>
-                                <span class="badge badge-{{ $property->status }}">
-                                    {{ ucfirst($property->status) }}
-                                </span>
-                            </td>
-                            <td>
-                                @if($property->is_verified)
-                                    <span class="badge badge-verified">Verified</span>
-                                @else
-                                    <span class="badge badge-draft">Pending</span>
-                                @endif
-                            </td>
-                            <td>{{ $property->created_at->format('M d, Y') }}</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a href="{{ route('owner.listings.edit', $property->id) }}" class="btn-icon-sm" title="Edit">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                    </a>
+    @if($properties->count() > 0)
+    <div class="listing-grid">
+        @foreach($properties as $property)
+        @php($listingImage = $property->getFirstImageUrl(false))
+        <article class="listing-card">
+            <div class="listing-card-media">
+                @if($listingImage)
+                <img src="{{ $listingImage }}" alt="{{ $property->title }}">
+                @else
+                <div class="listing-card-placeholder">No image yet</div>
+                @endif
 
-                                    <form method="POST" action="{{ route('owner.listings.toggle', $property->id) }}" style="display: inline;">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="btn-icon-sm" title="{{ $property->status === 'approved' ? 'Set to Pending' : 'Approve' }}">
-                                            @if($property->status === 'published')
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                                                </svg>
-                                            @else
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                                </svg>
-                                            @endif
-                                        </button>
-                                    </form>
-
-                                    <form method="POST" action="{{ route('owner.listings.destroy', $property->id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this property?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-icon-sm btn-danger" title="Delete">
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                            </svg>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-            <div class="pagination-wrapper">
-                {{ $properties->links() }}
+                <div class="listing-card-badge-wrap">
+                    <span class="listing-mode-badge">{{ $property->getRentalModeLabel() }}</span>
+                </div>
             </div>
-        @else
-            <div class="empty-state">
-                <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-                <h3>No Properties Yet</h3>
-                <p>Start by adding your first property listing.</p>
-                <a href="{{ route('owner.listings.create') }}" class="btn-primary">Add New Property</a>
+
+            <div class="listing-card-body">
+                <div>
+                    <h3 class="listing-card-title">{{ $property->title }}</h3>
+                    <p class="listing-card-subtitle">{{ $property->getOwnerListingSummary() }}</p>
+                    <div class="listing-meta-row" style="margin-top: 0.7rem;">
+                        <span class="listing-status-badge {{ $property->status }}">{{ ucfirst($property->status) }}</span>
+                        <span class="listing-verified-badge {{ $property->is_verified ? 'verified' : 'pending' }}">{{ $property->is_verified ? 'Verified' : 'Pending Review' }}</span>
+                    </div>
+                </div>
+
+                <div class="listing-meta">
+                    <div>
+                        <span class="listing-meta-label">Address</span>
+                        <span class="listing-meta-value">{{ $property->address }}</span>
+                    </div>
+                    <div>
+                        <span class="listing-meta-label">City</span>
+                        <span class="listing-meta-value">{{ $property->city }}</span>
+                    </div>
+                    <div>
+                        <span class="listing-meta-label">Price</span>
+                        <span class="listing-meta-value">{{ $property->getOwnerPriceLabel() }}</span>
+                    </div>
+                    <div>
+                        <span class="listing-meta-label">Created</span>
+                        <span class="listing-meta-value">{{ $property->created_at->format('M d, Y') }}</span>
+                    </div>
+                </div>
+
+                <div class="listing-actions">
+                    <a href="{{ route('owner.listings.edit', $property) }}" class="listing-action-btn primary">
+                        Edit
+                    </a>
+
+                    <a href="{{ $property->status === 'approved' ? route('listings.show', $property) : route('owner.listings.edit', $property) }}" class="listing-action-btn secondary">
+                        View
+                    </a>
+
+                    <form method="POST" action="{{ route('owner.listings.destroy', $property) }}" onsubmit="return confirm('Are you sure you want to delete this property?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="listing-action-btn danger">
+                            Delete
+                        </button>
+                    </form>
+                </div>
             </div>
-        @endif
+        </article>
+        @endforeach
     </div>
+
+    <div class="pagination-wrapper" style="margin-top: 0;">
+        <div class="owner-pagination">
+            <p class="owner-pagination-info">
+                Showing {{ $properties->firstItem() }} to {{ $properties->lastItem() }} of {{ $properties->total() }} results
+            </p>
+
+            @if($properties->hasPages())
+            <div class="owner-pagination-links">
+                @if($properties->onFirstPage())
+                    <span class="owner-pagination-link disabled">Previous</span>
+                @else
+                    <a href="{{ $properties->previousPageUrl() }}" class="owner-pagination-link">Previous</a>
+                @endif
+
+                @foreach($properties->getUrlRange(1, $properties->lastPage()) as $page => $url)
+                    @if($page == $properties->currentPage())
+                        <span class="owner-pagination-link active">{{ $page }}</span>
+                    @else
+                        <a href="{{ $url }}" class="owner-pagination-link">{{ $page }}</a>
+                    @endif
+                @endforeach
+
+                @if($properties->hasMorePages())
+                    <a href="{{ $properties->nextPageUrl() }}" class="owner-pagination-link">Next</a>
+                @else
+                    <span class="owner-pagination-link disabled">Next</span>
+                @endif
+            </div>
+            @endif
+        </div>
+    </div>
+    @else
+    <div class="empty-state-card">
+        <h3 class="owner-listings-empty-title">No Properties Yet</h3>
+        <p class="owner-listings-empty-text">Start by adding your first property listing.</p>
+        <a href="{{ route('owner.listings.create') }}" class="owner-listings-button" style="margin-top: 1rem;">Add New Property</a>
+    </div>
+    @endif
 </div>
 @endsection

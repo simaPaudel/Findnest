@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\SavedListing;
 use App\Models\Property;
+use App\Services\RoomAvailabilityService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -15,12 +16,37 @@ class SavedListingController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(RoomAvailabilityService $roomAvailabilityService)
     {
         $savedListings = SavedListing::where('user_id', Auth::id())
-            ->with('property')
+            ->with([
+                'property' => function ($query) {
+                    $query->with([
+                        'images' => function ($imageQuery) {
+                            $imageQuery->ordered();
+                        },
+                        'rooms' => function ($roomQuery) {
+                            $roomQuery->with(['images' => function ($imageQuery) {
+                                $imageQuery->ordered();
+                            }])->withCount([
+                                'bookings as active_confirmed_bookings_count' => function ($bookingQuery) {
+                                    $bookingQuery->where('status', 'confirmed');
+                                }
+                            ]);
+                        },
+                    ]);
+                }
+            ])
             ->latest()
             ->paginate(12);
+
+        $savedListings->getCollection()->transform(function ($saved) use ($roomAvailabilityService) {
+            if ($saved->property) {
+                $roomAvailabilityService->decorateProperty($saved->property);
+            }
+
+            return $saved;
+        });
 
         return view('user.saved.index', compact('savedListings'));
     }
