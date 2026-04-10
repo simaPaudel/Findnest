@@ -26,29 +26,39 @@
                 <a href="{{ route('owner.listings.index') }}" class="owner-nav-link {{ request()->routeIs('owner.listings.index') ? 'active' : '' }}">Properties</a>
                 <a href="{{ route('owner.listings.create') }}" class="owner-nav-link {{ request()->routeIs('owner.listings.create') ? 'active' : '' }}">Add Property</a>
                 <a href="{{ route('owner.bookings.index') }}" class="owner-nav-link {{ request()->routeIs('owner.bookings.*') ? 'active' : '' }}">Booking Requests</a>
-                <a href="{{ route('owner.messages.index') }}" class="owner-nav-link {{ request()->routeIs('owner.messages.*') || request()->routeIs('owner.conversations.*') ? 'active' : '' }}">Messages</a>
                 <a href="{{ route('owner.reviews.index') }}" class="owner-nav-link {{ request()->routeIs('owner.reviews.*') ? 'active' : '' }}">Reviews</a>
-                <a href="{{ route('owner.profile.edit') }}" class="owner-nav-link {{ request()->routeIs('owner.profile.*') ? 'active' : '' }}">Profile</a>
             </div>
 
             <div class="owner-navbar-end">
                 @include('components.notification-dropdown')
 
-                <a href="{{ route('owner.messages.index') }}" class="owner-message-link {{ request()->routeIs('owner.messages.*') || request()->routeIs('owner.conversations.*') ? 'active' : '' }}" title="Messages" aria-label="Messages">
+                <a href="{{ route('owner.messages.index') }}" class="owner-message-link {{ request()->routeIs('owner.messages.*') || request()->routeIs('owner.conversations.*') ? 'active' : '' }}" aria-label="Messages">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m7 6l-3.5-2H7a4 4 0 01-4-4V8a4 4 0 014-4h10a4 4 0 014 4v6a4 4 0 01-4 4h-1.5L12 20z"></path>
                     </svg>
                     <span class="owner-message-badge" id="owner-unread-badge" hidden>0</span>
                 </a>
 
-                <a href="{{ route('owner.profile.edit') }}" class="profile-chip" title="Profile">
-                    @if(auth()->user()->profile_photo)
-                        <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile" class="profile-photo">
-                    @else
-                        <div class="profile-initials">{{ substr(auth()->user()->name, 0, 1) }}</div>
-                    @endif
-                    <span class="profile-name">{{ auth()->user()->name }}</span>
-                </a>
+                <details class="owner-profile-menu">
+                    <summary class="owner-profile-trigger" aria-label="Profile menu">
+                        @if(auth()->user()->profile_photo)
+                            <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile" class="profile-photo">
+                        @else
+                            <svg class="owner-profile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        @endif
+                    </summary>
+
+                    <div class="owner-profile-panel" role="menu" aria-label="Profile menu">
+                        <a href="{{ route('owner.profile.edit') }}" class="owner-profile-item">Profile</a>
+
+                        <form method="POST" action="{{ route('logout') }}" class="owner-profile-logout-form">
+                            @csrf
+                            <button type="submit" class="owner-profile-item owner-profile-logout-button">Logout</button>
+                        </form>
+                    </div>
+                </details>
             </div>
         </div>
     </nav>

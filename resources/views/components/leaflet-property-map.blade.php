@@ -17,27 +17,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <div class="fn-property-map-shell">
-    @if($mode !== 'readonly')
-        <div class="fn-property-map-search">
-            <div class="fn-property-map-search-row">
-                <input
-                    type="search"
-                    class="fn-property-map-search-input"
-                    data-property-map-search-input
-                    placeholder="Search a place or address"
-                    autocomplete="off"
-                >
-                <button type="button" class="fn-property-map-search-button" data-property-map-search-button>
-                    Search
-                </button>
-            </div>
-            <div class="fn-property-map-search-results" data-property-map-search-results hidden></div>
-            <p class="fn-property-map-attribution">
-                Search powered by OpenStreetMap Nominatim. Please keep searches light.
-            </p>
-        </div>
-    @endif
-
     @if($title || $helpText)
         <div class="fn-property-map-copy">
             @if($title)
@@ -49,19 +28,42 @@
         </div>
     @endif
 
-    <div
-        id="{{ $mapId }}"
-        class="fn-property-map"
-        data-mode="{{ $mode }}"
-        data-latitude-input="{{ $latitudeInputId }}"
-        data-longitude-input="{{ $longitudeInputId }}"
-        data-initial-latitude="{{ $initialLatitude }}"
-        data-initial-longitude="{{ $initialLongitude }}"
-        data-default-latitude="{{ $defaultLatitude }}"
-        data-default-longitude="{{ $defaultLongitude }}"
-        data-default-zoom="{{ $defaultZoom }}"
-        style="height: {{ $height }};"
-    ></div>
+    @if($mode !== 'readonly')
+        <div class="fn-property-map-search">
+            <div class="fn-property-map-search-row">
+                <input
+                    type="search"
+                    class="fn-property-map-search-input"
+                    data-property-map-search-input
+                    placeholder="Search place or address"
+                    autocomplete="off"
+                >
+                <button type="button" class="fn-property-map-search-button" data-property-map-search-button>
+                    Find
+                </button>
+            </div>
+            <div class="fn-property-map-search-results" data-property-map-search-results hidden></div>
+            <p class="fn-property-map-attribution">
+                Search powered by OpenStreetMap Nominatim.
+            </p>
+        </div>
+    @endif
+
+    <div class="fn-property-map-stage">
+        <div
+            id="{{ $mapId }}"
+            class="fn-property-map"
+            data-mode="{{ $mode }}"
+            data-latitude-input="{{ $latitudeInputId }}"
+            data-longitude-input="{{ $longitudeInputId }}"
+            data-initial-latitude="{{ $initialLatitude }}"
+            data-initial-longitude="{{ $initialLongitude }}"
+            data-default-latitude="{{ $defaultLatitude }}"
+            data-default-longitude="{{ $defaultLongitude }}"
+            data-default-zoom="{{ $defaultZoom }}"
+            style="height: {{ $height }};"
+        ></div>
+    </div>
 </div>
 
 <style>
@@ -69,28 +71,35 @@
         margin-top: 16px;
     }
 
+    .fn-property-map-stage {
+        position: relative;
+    }
+
     .fn-property-map-search {
-        margin-bottom: 14px;
-        padding: 14px;
+        width: min(360px, 100%);
+        margin: 0 0 12px;
+        padding: 10px 12px;
         border: 1px solid #e2e8f0;
-        border-radius: 18px;
-        background: #fff;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+        backdrop-filter: blur(8px);
     }
 
     .fn-property-map-search-row {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
     }
 
     .fn-property-map-search-input {
         flex: 1;
         min-width: 0;
-        height: 42px;
-        padding: 0 14px;
+        height: 34px;
+        padding: 0 11px;
         border: 1px solid #cbd5e1;
-        border-radius: 12px;
-        font-size: 0.92rem;
+        border-radius: 10px;
+        font-size: 0.84rem;
         color: #0f172a;
         outline: none;
     }
@@ -101,14 +110,14 @@
     }
 
     .fn-property-map-search-button {
-        height: 42px;
-        padding: 0 16px;
+        height: 34px;
+        padding: 0 12px;
         border: 0;
-        border-radius: 12px;
+        border-radius: 10px;
         background: #ff385c;
         color: #fff;
-        font-size: 0.88rem;
-        font-weight: 700;
+        font-size: 0.8rem;
+        font-weight: 600;
         cursor: pointer;
         transition: background 0.18s ease;
         white-space: nowrap;
@@ -125,17 +134,17 @@
 
     .fn-property-map-search-results {
         display: grid;
-        gap: 8px;
-        margin-top: 12px;
+        gap: 6px;
+        margin-top: 8px;
     }
 
     .fn-property-map-search-result {
         width: 100%;
         text-align: left;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
+        border-radius: 10px;
         background: #f8fafc;
-        padding: 10px 12px;
+        padding: 8px 10px;
         cursor: pointer;
         transition: border-color 0.18s ease, background 0.18s ease;
     }
@@ -147,27 +156,27 @@
 
     .fn-property-map-search-result strong {
         display: block;
-        font-size: 0.88rem;
+        font-size: 0.82rem;
         color: #0f172a;
     }
 
     .fn-property-map-search-result span {
         display: block;
         margin-top: 4px;
-        font-size: 0.78rem;
+        font-size: 0.72rem;
         line-height: 1.45;
         color: #64748b;
     }
 
     .fn-property-map-search-empty {
-        padding: 10px 2px 0;
-        font-size: 0.82rem;
+        padding: 8px 2px 0;
+        font-size: 0.76rem;
         color: #64748b;
     }
 
     .fn-property-map-attribution {
         margin: 10px 0 0;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         line-height: 1.5;
         color: #64748b;
     }
@@ -196,6 +205,21 @@
         border-radius: 18px;
         overflow: hidden;
         background: #f8fafc;
+    }
+
+    @media (max-width: 640px) {
+        .fn-property-map-search {
+            width: 100%;
+            padding: 9px 10px;
+        }
+
+        .fn-property-map-search-input {
+            font-size: 0.8rem;
+        }
+
+        .fn-property-map-search-button {
+            padding: 0 10px;
+        }
     }
 </style>
 

@@ -31,6 +31,233 @@ body.owner-sidebar-open {
     overflow: hidden;
 }
 
+.owner-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: #ffffff;
+    border-bottom: 1px solid var(--fn-gray-light);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.owner-navbar-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.owner-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--fn-charcoal);
+    flex-shrink: 0;
+}
+
+.owner-brand-icon {
+    width: 2rem;
+    height: 2rem;
+    color: var(--fn-red);
+    flex-shrink: 0;
+}
+
+.owner-brand-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.owner-brand-badge {
+    margin-left: 0.25rem;
+    border-radius: 999px;
+    background: rgba(255, 56, 92, 0.1);
+    color: var(--fn-red);
+    padding: 4px 8px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.owner-navbar-center {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+}
+
+.owner-nav-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    color: #475569;
+    text-decoration: none;
+    font-size: 0.93rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background 0.18s ease, color 0.18s ease;
+}
+
+.owner-nav-link:hover,
+.owner-nav-link.active {
+    background: rgba(255, 56, 92, 0.06);
+    color: var(--fn-red);
+}
+
+.owner-navbar-end {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.owner-message-link {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--fn-gray-light);
+    background: #fff;
+    color: var(--fn-charcoal);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.owner-message-link svg {
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.owner-message-link:hover,
+.owner-message-link.active {
+    border-color: rgba(255, 56, 92, 0.25);
+    color: var(--fn-red);
+    background: rgba(255, 56, 92, 0.06);
+}
+
+.owner-message-badge {
+    position: absolute;
+    top: -5px;
+    right: -4px;
+    min-width: 17px;
+    height: 17px;
+    border-radius: 999px;
+    background: var(--fn-red);
+    color: #fff;
+    font-size: 0.66rem;
+    font-weight: 700;
+    line-height: 17px;
+    text-align: center;
+    padding: 0 4px;
+    border: 2px solid #fff;
+}
+
+.owner-profile-menu {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.owner-profile-menu > summary {
+    list-style: none;
+}
+
+.owner-profile-menu > summary::-webkit-details-marker {
+    display: none;
+}
+
+.owner-profile-trigger {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--fn-gray-light);
+    background: #fff;
+    color: var(--fn-charcoal);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+    overflow: hidden;
+}
+
+.owner-profile-trigger:hover,
+.owner-profile-menu[open] .owner-profile-trigger {
+    border-color: rgba(255, 56, 92, 0.25);
+    background: rgba(255, 56, 92, 0.06);
+    color: var(--fn-red);
+}
+
+.owner-profile-trigger .profile-photo {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.owner-profile-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.owner-profile-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 170px;
+    max-width: calc(100vw - 24px);
+    padding: 8px;
+    border: 1px solid var(--fn-gray-light);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+    z-index: 1200;
+}
+
+.owner-profile-item {
+    display: flex;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--fn-charcoal);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease;
+}
+
+.owner-profile-item:hover {
+    background: rgba(255, 56, 92, 0.06);
+    color: var(--fn-red);
+}
+
+.owner-profile-logout-form {
+    margin: 0;
+}
+
+.owner-profile-logout-button {
+    width: 100%;
+    background: transparent;
+    color: #be123c;
+}
+
 .owner-layout {
     display: flex;
     min-height: 100vh;
@@ -122,7 +349,7 @@ body.owner-sidebar-open {
 
 .owner-main {
     flex: 1;
-    margin-left: 248px;
+    margin-left: 0;
     min-width: 0;
 }
 
@@ -1600,6 +1827,53 @@ body.owner-sidebar-open {
 }
 
 @media (max-width: 768px) {
+    .owner-navbar-container {
+        padding: 0.85rem 1rem;
+    }
+
+    .owner-brand {
+        gap: 0.4rem;
+    }
+
+    .owner-brand-text {
+        font-size: 1.1rem;
+    }
+
+    .owner-brand-icon {
+        width: 1.75rem;
+        height: 1.75rem;
+    }
+
+    .owner-navbar-center {
+        order: 3;
+        flex-basis: 100%;
+        justify-content: flex-start;
+        gap: 0.35rem;
+        padding-top: 0.25rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .owner-navbar-center::-webkit-scrollbar {
+        display: none;
+    }
+
+    .owner-nav-link {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.88rem;
+    }
+
+    .owner-navbar-end {
+        gap: 0.35rem;
+    }
+
+    .owner-message-link,
+    .owner-profile-trigger {
+        width: 34px;
+        height: 34px;
+    }
+
     .owner-layout {
         display: block;
     }
@@ -1639,37 +1913,8 @@ body.owner-sidebar-open {
         margin-left: 0;
     }
 
-    .owner-topbar {
-        padding: 14px 16px;
-        gap: 12px;
-        align-items: center;
-    }
-
-    .topbar-heading {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .owner-menu-toggle {
-        display: inline-flex;
-    }
-
     .owner-content {
         padding: 18px 16px 24px;
-    }
-
-    .topbar-actions {
-        gap: 8px;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-    }
-
-    .profile-name {
-        display: none;
-    }
-
-    .profile-chip {
-        padding-right: 8px;
     }
 
     .stats-grid {
