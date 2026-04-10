@@ -11,7 +11,7 @@
 </head>
 <body>
     <div class="admin-shell">
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="admin-sidebar" data-admin-sidebar>
             <div class="admin-brand">
                 <a href="{{ route('admin.dashboard') }}" class="brand-link">
                     <span class="brand-mark">FN</span>
@@ -50,11 +50,21 @@
             </div>
         </aside>
 
+        <div class="admin-backdrop" data-admin-backdrop hidden></div>
+
         <main class="admin-main">
             <header class="admin-topbar">
-                <div>
+                <div class="admin-topbar-heading">
+                    <button type="button" class="admin-menu-toggle" data-admin-menu-toggle aria-controls="admin-sidebar" aria-expanded="false" aria-label="Toggle navigation">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+
+                    <div>
                     <p class="page-kicker">Control Center</p>
                     <h1 class="page-title">@yield('page_title', 'Admin Dashboard')</h1>
+                    </div>
                 </div>
 
                 <div class="admin-topbar-actions">
@@ -91,5 +101,47 @@
             </section>
         </main>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.querySelector('[data-admin-sidebar]');
+            const backdrop = document.querySelector('[data-admin-backdrop]');
+            const toggle = document.querySelector('[data-admin-menu-toggle]');
+
+            if (!sidebar || !backdrop || !toggle) {
+                return;
+            }
+
+            const setOpen = (open) => {
+                sidebar.classList.toggle('is-open', open);
+                backdrop.hidden = !open;
+                backdrop.classList.toggle('is-open', open);
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                document.body.classList.toggle('admin-sidebar-open', open);
+            };
+
+            toggle.addEventListener('click', function () {
+                setOpen(!sidebar.classList.contains('is-open'));
+            });
+
+            backdrop.addEventListener('click', function () {
+                setOpen(false);
+            });
+
+            sidebar.querySelectorAll('a, button[type="submit"]').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (window.innerWidth <= 860) {
+                        setOpen(false);
+                    }
+                });
+            });
+
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 860) {
+                    setOpen(false);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

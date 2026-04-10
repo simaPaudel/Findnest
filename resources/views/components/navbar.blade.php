@@ -46,11 +46,6 @@
                         </svg>
                     @endif
                 </a>
-
-                <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
-                    @csrf
-                    <button type="submit" class="fn-nav-link" style="border: none; background: none; cursor: pointer;">Logout</button>
-                </form>
             @else
                 <a href="{{ route('login') }}" class="fn-nav-link">Login</a>
                 <a href="{{ route('register') }}" class="fn-btn-primary">Get Started</a>
@@ -76,6 +71,8 @@
         width: 100%;
         padding: 1rem 1.5rem;
         max-width: 100%;
+        gap: 1rem;
+        flex-wrap: wrap;
     }
 
     .fn-navbar-brand {
@@ -105,6 +102,7 @@
         gap: 0.5rem;
         flex: 1;
         justify-content: center;
+        min-width: 0;
     }
 
     .fn-nav-link {
@@ -132,6 +130,8 @@
         gap: 0.5rem;
         flex-shrink: 0;
         margin-left: auto;
+        flex-wrap: wrap;
+        justify-content: flex-end;
     }
 
     .fn-message-link {
@@ -230,12 +230,54 @@
     }
 
     @media (max-width: 768px) {
+        .fn-navbar-container {
+            padding: 0.85rem 1rem;
+        }
+
+        .fn-navbar-brand {
+            font-size: 1.2rem;
+            gap: 0.4rem;
+        }
+
+        .fn-navbar-brand svg {
+            width: 1.75rem;
+            height: 1.75rem;
+        }
+
         .fn-navbar-center {
+            order: 3;
+            flex-basis: 100%;
+            justify-content: flex-start;
+            gap: 0.35rem;
+            padding-top: 0.25rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .fn-navbar-center::-webkit-scrollbar {
             display: none;
         }
 
-        .fn-navbar-container {
-            gap: 1rem;
+        .fn-navbar-end {
+            margin-left: auto;
+            gap: 0.35rem;
+        }
+
+        .fn-nav-link {
+            white-space: nowrap;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.88rem;
+        }
+
+        .fn-btn-primary {
+            padding: 0.55rem 0.95rem;
+        }
+
+        .fn-message-link,
+        .fn-profile-avatar {
+            width: 34px;
+            height: 34px;
         }
     }
 </style>

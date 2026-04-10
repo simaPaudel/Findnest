@@ -72,6 +72,88 @@
             line-height: 1;
         }
 
+        .listing-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .listing-status-pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 0.3rem 0.65rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .listing-status-pill.available {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .listing-status-pill.unavailable {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .listing-price-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-top: 0.15rem;
+        }
+
+        .listing-price {
+            display: flex;
+            align-items: baseline;
+            gap: 0.2rem;
+            min-width: 0;
+        }
+
+        .listing-price-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .listing-price-value.is-red {
+            color: #e11d48;
+        }
+
+        .listing-price-value.is-muted {
+            color: #64748b;
+        }
+
+        .listing-price-suffix {
+            color: #94a3b8;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .listing-view-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: #ff385c;
+            color: #ffffff;
+            padding: 0.42rem 0.85rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-decoration: none;
+            transition: background 0.2s ease, transform 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .listing-view-btn:hover {
+            background: #e11d48;
+            transform: translateY(-1px);
+        }
+
         .save-btn {
             position: absolute;
             top: 14px;
@@ -207,11 +289,14 @@
 
                                 if ($property->rental_mode === 'per_room') {
                                     if ($minRoomPrice === null || $maxRoomPrice === null) {
-                                        $priceLabel = 'Price on request';
+                                        $priceAmount = 'Price on request';
+                                        $priceSuffix = null;
                                     } elseif ($minRoomPrice === $maxRoomPrice) {
-                                        $priceLabel = 'From Rs ' . number_format($minRoomPrice) . '/month';
+                                        $priceAmount = 'Rs ' . number_format($minRoomPrice);
+                                        $priceSuffix = '/month';
                                     } else {
-                                        $priceLabel = 'Rs ' . number_format($minRoomPrice) . ' - Rs ' . number_format($maxRoomPrice) . '/month';
+                                        $priceAmount = 'Rs ' . number_format($minRoomPrice) . ' - Rs ' . number_format($maxRoomPrice);
+                                        $priceSuffix = '/month';
                                     }
 
                                     $subtitle = $property->property_availability_label
@@ -219,9 +304,14 @@
                                             ? '1 room available'
                                             : ($availableRooms > 1 ? $availableRooms . ' rooms available' : 'No rooms available right now'));
                                 } else {
-                                    $priceLabel = 'Rs ' . number_format((float) $property->rent_price) . '/month';
+                                    $priceAmount = 'Rs ' . number_format((float) $property->rent_price);
+                                    $priceSuffix = '/month';
                                     $subtitle = $property->property_availability_label ?? 'Available for booking';
                                 }
+
+                                $availabilityLabel = $property->is_property_bookable ? 'Available' : 'Unavailable';
+                                $availabilityClass = $property->is_property_bookable ? 'available' : 'unavailable';
+                                $priceToneClass = $priceAmount === 'Price on request' ? 'is-muted' : 'is-red';
                             @endphp
 
                             <a href="{{ route('listings.show', $property) }}" class="listing-card">
@@ -246,23 +336,27 @@
                                     </div>
                                 </div>
 
-                                <div class="space-y-1.5">
+                                <div class="listing-details">
                                     <div class="flex items-start justify-between gap-3">
                                         <h2 class="text-[15px] font-semibold text-slate-950 leading-6 line-clamp-1">{{ $property->title }}</h2>
                                         <span class="shrink-0 text-sm font-semibold text-slate-900">{{ $property->city ?: 'Nepal' }}</span>
                                     </div>
 
                                     <p class="text-sm text-slate-500 line-clamp-1">{{ $property->address ?: ($property->location ?: 'Location not specified') }}</p>
-                                    @if(!$property->is_property_bookable)
-                                        <div>
-                                            <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
-                                                Unavailable
-                                            </span>
-                                        </div>
-                                    @endif
-                                    <p class="text-sm text-slate-500 line-clamp-1">{{ $subtitle }}</p>
+                                    <div class="flex items-center gap-2">
+                                        <span class="listing-status-pill {{ $availabilityClass }}">{{ $availabilityLabel }}</span>
+                                        <p class="text-sm text-slate-500 line-clamp-1">{{ $subtitle }}</p>
+                                    </div>
                                     <p class="text-sm text-slate-500 line-clamp-1">{{ $property->getPropertyTypeLabel() }}</p>
-                                    <p class="pt-1 text-[15px] text-slate-900"><span class="font-bold">{{ $priceLabel }}</span></p>
+                                    <div class="listing-price-row">
+                                        <p class="listing-price">
+                                            <span class="listing-price-value {{ $priceToneClass }}">{{ $priceAmount }}</span>
+                                            @if($priceSuffix)
+                                                <span class="listing-price-suffix">{{ $priceSuffix }}</span>
+                                            @endif
+                                        </p>
+                                        <span class="listing-view-btn">View</span>
+                                    </div>
                                 </div>
                             </a>
                         @endforeach

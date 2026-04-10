@@ -11,104 +11,72 @@
 </head>
 
 <body>
-    <div class="owner-layout">
-        <aside class="owner-sidebar">
-            <div class="sidebar-header">
-                <a href="{{ url('/') }}" class="logo">
-                    <span class="logo-text">FindNest</span>
-                    <span class="logo-badge">Owner</span>
-                </a>
+    <nav class="owner-navbar">
+        <div class="owner-navbar-container">
+            <a href="{{ route('owner.dashboard') }}" class="owner-brand">
+                <svg class="owner-brand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                <span class="owner-brand-text">FindNest</span>
+                <span class="owner-brand-badge">Owner</span>
+            </a>
+
+            <div class="owner-navbar-center">
+                <a href="{{ route('owner.dashboard') }}" class="owner-nav-link {{ request()->routeIs('owner.dashboard') ? 'active' : '' }}">Dashboard</a>
+                <a href="{{ route('owner.listings.index') }}" class="owner-nav-link {{ request()->routeIs('owner.listings.index') ? 'active' : '' }}">Properties</a>
+                <a href="{{ route('owner.listings.create') }}" class="owner-nav-link {{ request()->routeIs('owner.listings.create') ? 'active' : '' }}">Add Property</a>
+                <a href="{{ route('owner.bookings.index') }}" class="owner-nav-link {{ request()->routeIs('owner.bookings.*') ? 'active' : '' }}">Booking Requests</a>
+                <a href="{{ route('owner.messages.index') }}" class="owner-nav-link {{ request()->routeIs('owner.messages.*') || request()->routeIs('owner.conversations.*') ? 'active' : '' }}">Messages</a>
+                <a href="{{ route('owner.reviews.index') }}" class="owner-nav-link {{ request()->routeIs('owner.reviews.*') ? 'active' : '' }}">Reviews</a>
+                <a href="{{ route('owner.profile.edit') }}" class="owner-nav-link {{ request()->routeIs('owner.profile.*') ? 'active' : '' }}">Profile</a>
             </div>
 
-            <nav class="sidebar-nav">
-                <a href="{{ route('owner.dashboard') }}" class="nav-link {{ request()->routeIs('owner.dashboard') ? 'active' : '' }}">
-                    Dashboard
+            <div class="owner-navbar-end">
+                @include('components.notification-dropdown')
+
+                <a href="{{ route('owner.messages.index') }}" class="owner-message-link {{ request()->routeIs('owner.messages.*') || request()->routeIs('owner.conversations.*') ? 'active' : '' }}" title="Messages" aria-label="Messages">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m7 6l-3.5-2H7a4 4 0 01-4-4V8a4 4 0 014-4h10a4 4 0 014 4v6a4 4 0 01-4 4h-1.5L12 20z"></path>
+                    </svg>
+                    <span class="owner-message-badge" id="owner-unread-badge" hidden>0</span>
                 </a>
 
-                <a href="{{ route('owner.listings.index') }}" class="nav-link {{ request()->routeIs('owner.listings.index') ? 'active' : '' }}">
-                    My Listings
+                <a href="{{ route('owner.profile.edit') }}" class="profile-chip" title="Profile">
+                    @if(auth()->user()->profile_photo)
+                        <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile" class="profile-photo">
+                    @else
+                        <div class="profile-initials">{{ substr(auth()->user()->name, 0, 1) }}</div>
+                    @endif
+                    <span class="profile-name">{{ auth()->user()->name }}</span>
                 </a>
+            </div>
+        </div>
+    </nav>
 
-                <a href="{{ route('owner.listings.create') }}" class="nav-link {{ request()->routeIs('owner.listings.create') ? 'active' : '' }}">
-                    Add Listing
-                </a>
+    <main class="owner-main">
+        <div class="owner-content">
+            @if(session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-                <a href="{{ route('owner.bookings.index') }}" class="nav-link {{ request()->routeIs('owner.bookings.*') ? 'active' : '' }}">
-                    Booking Requests
-                </a>
-
-                <a href="{{ route('owner.messages.index') }}" class="nav-link {{ request()->routeIs('owner.messages.*') || request()->routeIs('owner.conversations.*') ? 'active' : '' }}">
-                    Messages
-                </a>
-
-                <a href="{{ route('owner.reviews.index') }}" class="nav-link {{ request()->routeIs('owner.reviews.*') ? 'active' : '' }}">
-                    Reviews
-                </a>
-
-                <a href="{{ route('owner.profile.edit') }}" class="nav-link {{ request()->routeIs('owner.profile.*') ? 'active' : '' }}">
-                    Profile
-                </a>
-
-                <div class="nav-divider"></div>
-
-                <form method="POST" action="{{ route('logout') }}" class="nav-logout-form">
-                    @csrf
-                    <button type="submit" class="nav-link">
-                        Logout
-                    </button>
-                </form>
-            </nav>
-        </aside>
-
-        <div class="owner-main">
-            <header class="owner-topbar">
-                <h1 class="topbar-title">@yield('page-title', 'Dashboard')</h1>
-
-                <div class="topbar-actions">
-                    @include('components.notification-dropdown')
-
-                    <a href="{{ route('owner.messages.index') }}" class="topbar-message-link {{ request()->routeIs('owner.messages.*') || request()->routeIs('owner.conversations.*') ? 'active' : '' }}" title="Messages" aria-label="Messages">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m7 6l-3.5-2H7a4 4 0 01-4-4V8a4 4 0 014-4h10a4 4 0 014 4v6a4 4 0 01-4 4h-1.5L12 20z"></path>
-                        </svg>
-                        <span class="topbar-message-badge" id="owner-unread-badge" hidden>0</span>
-                    </a>
-
-                    <div class="profile-chip">
-                        @if(auth()->user()->profile_photo)
-                            <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile" class="profile-photo">
-                        @else
-                            <div class="profile-initials">{{ substr(auth()->user()->name, 0, 1) }}</div>
-                        @endif
-                        <span class="profile-name">{{ auth()->user()->name }}</span>
+            @if($errors->any())
+                <div class="alert alert-error">
+                    <div>
+                        <strong>There were some errors with your submission:</strong>
+                        <ul>
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
-            </header>
+            @endif
 
-            <main class="owner-content">
-                @if(session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-
-                @if($errors->any())
-                    <div class="alert alert-error">
-                        <div>
-                            <strong>There were some errors with your submission:</strong>
-                            <ul>
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    </div>
-                @endif
-
-                @yield('content')
-            </main>
+            @yield('content')
         </div>
-    </div>
+    </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -150,6 +118,7 @@
             window.setInterval(refreshUnread, 30000);
         });
     </script>
+
 </body>
 
 </html>

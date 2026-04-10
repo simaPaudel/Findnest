@@ -238,6 +238,28 @@
             .fn-grid-2 {
                 grid-template-columns: 1fr;
             }
+
+            body {
+                align-items: flex-start;
+                justify-content: flex-start;
+                padding: 24px 16px 32px;
+            }
+
+            body::before,
+            body::after {
+                width: 360px;
+                height: 360px;
+            }
+
+            .fn-glass-card {
+                border-radius: 20px;
+            }
+
+            .relative.z-10.w-full.max-w-2xl.px-6 {
+                max-width: 100%;
+                padding-left: 0;
+                padding-right: 0;
+            }
         }
     </style>
 </head>
