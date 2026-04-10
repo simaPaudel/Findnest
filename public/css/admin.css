@@ -25,6 +25,11 @@ body {
         radial-gradient(circle at top right, rgba(255, 56, 92, 0.08), transparent 28%),
         linear-gradient(180deg, #fff8f9 0%, var(--fn-bg) 22%, var(--fn-bg) 100%);
     color: var(--fn-charcoal);
+    overflow-x: hidden;
+}
+
+body.admin-sidebar-open {
+    overflow: hidden;
 }
 
 .admin-shell {
@@ -136,6 +141,13 @@ body {
     min-width: 0;
 }
 
+.admin-topbar-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
 .admin-topbar {
     padding: 22px 32px;
     display: flex;
@@ -179,6 +191,36 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.admin-menu-toggle {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--fn-line);
+    border-radius: 12px;
+    background: var(--fn-white);
+    color: var(--fn-charcoal);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s ease;
+    flex-shrink: 0;
+}
+
+.admin-menu-toggle:hover {
+    border-color: rgba(255, 56, 92, 0.25);
+    color: var(--fn-red);
+    background: var(--fn-soft-red);
+}
+
+.admin-menu-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+.admin-backdrop {
+    display: none;
 }
 
 .admin-avatar {
@@ -431,14 +473,40 @@ body {
 }
 
 @media (max-width: 860px) {
-    .admin-shell {
-        flex-direction: column;
+    .admin-sidebar {
+        width: min(84vw, 300px);
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        transform: translateX(-105%);
+        transition: transform 0.28s ease;
+        z-index: 1000;
+        box-shadow: 0 24px 48px rgba(31, 41, 55, 0.18);
     }
 
-    .admin-sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
+    .admin-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    .admin-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.38);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 999;
+    }
+
+    .admin-backdrop.is-open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .admin-main {
+        margin-left: 0;
     }
 
     .admin-topbar,
@@ -450,11 +518,28 @@ body {
     .admin-topbar {
         align-items: flex-start;
         flex-direction: column;
+        gap: 14px;
+    }
+
+    .admin-topbar-heading {
+        width: 100%;
+    }
+
+    .admin-menu-toggle {
+        display: inline-flex;
     }
 
     .admin-topbar-actions {
         width: 100%;
         justify-content: flex-start;
         flex-wrap: wrap;
+    }
+
+    .admin-profile {
+        padding-right: 10px;
+    }
+
+    .admin-profile-role {
+        display: none;
     }
 }

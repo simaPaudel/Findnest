@@ -31,6 +31,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 32px 16px;
         }
 
         .fn-text-red { color: var(--fn-red); }
@@ -79,6 +80,30 @@
             background: radial-gradient(circle, rgba(255, 56, 92, 0.08) 0%, transparent 70%);
             border-radius: 50%;
             animation: pulse 8s ease-in-out infinite;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                align-items: flex-start;
+                justify-content: flex-start;
+                padding: 24px 16px 32px;
+            }
+
+            .fn-glass-card {
+                border-radius: 18px;
+                padding: 1.5rem;
+            }
+
+            .relative.z-10.text-center.px-6.max-w-2xl.mx-auto {
+                max-width: 100%;
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            .pulse-bg::before {
+                width: 320px;
+                height: 320px;
+            }
         }
     </style>
 </head>

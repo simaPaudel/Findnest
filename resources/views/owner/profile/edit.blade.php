@@ -78,5 +78,12 @@
             <button type="submit" class="btn-primary">Update Profile</button>
         </div>
     </form>
+
+    <div class="form-actions">
+        <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+            @csrf
+            <button type="submit" class="btn-danger-outline">Logout</button>
+        </form>
+    </div>
 </div>
 @endsection

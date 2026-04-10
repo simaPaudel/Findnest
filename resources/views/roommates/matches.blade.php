@@ -91,6 +91,35 @@
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
             padding: 24px;
         }
+
+        @media (max-width: 640px) {
+            .fn-navbar .flex.items-center.justify-between.max-w-7xl.mx-auto {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .fn-navbar .flex.items-center.gap-4 {
+                width: 100%;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .fn-nav-link {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+
+            main {
+                padding-top: 3rem;
+                padding-bottom: 3rem;
+            }
+
+            .fn-glass-card {
+                padding: 20px;
+                border-radius: 18px;
+            }
+        }
     </style>
 </head>
 

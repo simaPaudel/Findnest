@@ -218,6 +218,35 @@
         background: rgba(255, 56, 92, 0.05);
     }
 
+    .btn-logout {
+        background: #fff5f7;
+        color: #ff385c;
+        padding: 13px 40px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: 1.5px solid #ffd4dc;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-logout:hover {
+        border-color: #ff385c;
+        background: #fff1f4;
+    }
+
+    .logout-form {
+        margin: 0;
+    }
+
+    .profile-logout-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 16px;
+    }
+
     @media (max-width: 640px) {
         .form-row {
             grid-template-columns: 1fr;
@@ -233,9 +262,15 @@
         }
 
         .btn-save,
-        .btn-cancel {
+        .btn-cancel,
+        .btn-logout,
+        .logout-form {
             width: 100%;
             text-align: center;
+        }
+
+        .profile-logout-row {
+            justify-content: flex-start;
         }
     }
 </style>
@@ -353,15 +388,22 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="action-buttons">
-            <button type="submit" class="btn-save">
-                Save Changes
-            </button>
-            <a href="{{ route('user.dashboard') }}" class="btn-cancel">
-                Cancel
-            </a>
-        </div>
+    <div class="action-buttons">
+        <button type="submit" class="btn-save">
+            Save Changes
+        </button>
+        <a href="{{ route('user.dashboard') }}" class="btn-cancel">
+            Cancel
+        </a>
+    </div>
+</form>
+
+<div class="profile-logout-row">
+    <form method="POST" action="{{ route('logout') }}" class="logout-form">
+        @csrf
+        <button type="submit" class="btn-logout">Logout</button>
     </form>
+</div>
 </div>
 
 @endsection
