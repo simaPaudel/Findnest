@@ -199,23 +199,17 @@ class BookingService
         $query = Booking::where('property_id', $propertyId)
             ->where('status', 'confirmed')
             ->where(function ($q) use ($checkInDate, $checkOutDate) {
-                $q->whereBetween('check_in_date', [$checkInDate, $checkOutDate])
-                    ->orWhereBetween('check_out_date', [$checkInDate, $checkOutDate])
-                    ->orWhere(function ($subQ) use ($checkInDate, $checkOutDate) {
-                        $subQ->where('check_in_date', '<=', $checkInDate)
-                            ->where('check_out_date', '>=', $checkOutDate);
-                    });
+                // Use an exclusive checkout boundary so back-to-back bookings stay valid.
+                $q->whereDate('check_in_date', '<', $checkOutDate)
+                    ->whereDate('check_out_date', '>', $checkInDate);
             });
 
-        // If it's a room-specific booking, check that room
-        if ($roomId) {
+        // If it's a room-specific booking, check that room and any full-property reservation.
+        if ($roomId !== null) {
             $query->where(function ($q) use ($roomId) {
                 $q->where('room_id', $roomId)
-                    ->orWhereNull('room_id'); // Full property bookings conflict with all room bookings
+                    ->orWhereNull('room_id');
             });
-        } else {
-            // Full property booking conflicts with room bookings
-            $query->orWhere('room_id', null);
         }
 
         if ($query->exists()) {
@@ -250,11 +244,14 @@ class BookingService
 
         $bookedDates = Booking::where('property_id', $propertyId)
             ->where('status', 'confirmed')
-            ->whereBetween('check_in_date', [$startDate, $endDate])
-            ->orWhereBetween('check_out_date', [$startDate, $endDate])
-            ->when($roomId, function ($query) use ($roomId) {
-                return $query->where(function ($q) use ($roomId) {
-                    $q->where('room_id', $roomId)->orWhereNull('room_id');
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query->whereDate('check_in_date', '<=', $endDate)
+                    ->whereDate('check_out_date', '>', $startDate);
+            })
+            ->when($roomId !== null, function ($query) use ($roomId) {
+                $query->where(function ($q) use ($roomId) {
+                    $q->where('room_id', $roomId)
+                        ->orWhereNull('room_id');
                 });
             })
             ->get(['check_in_date', 'check_out_date']);

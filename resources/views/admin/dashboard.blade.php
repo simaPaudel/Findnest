@@ -1,6 +1,7 @@
 @extends('admin.layout')
 
 @section('title', 'Dashboard')
+@section('page_kicker', 'Overview')
 @section('page_title', 'Dashboard')
 
 @section('content')

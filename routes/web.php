@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\AdminPropertyController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminBookingController;
+use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\KhaltiPaymentController;
@@ -274,6 +275,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('admin.bookings.index');
     Route::post('/bookings/{booking}/release', [AdminBookingController::class, 'release'])->name('admin.bookings.release');
+
+    // Profile Management
+    Route::get('/profile', [AdminProfileController::class, 'edit'])->name('admin.profile.edit');
+    Route::put('/profile', [AdminProfileController::class, 'update'])->name('admin.profile.update');
 
     // Reports Management
     Route::get('/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');

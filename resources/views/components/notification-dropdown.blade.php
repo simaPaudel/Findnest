@@ -1,4 +1,16 @@
-@auth
+@php
+    $notificationUser = null;
+
+    try {
+        if (auth()->check()) {
+            $notificationUser = auth()->user();
+        }
+    } catch (\Throwable $e) {
+        $notificationUser = null;
+    }
+@endphp
+
+@if($notificationUser)
     @php
         $notifications = $recentNotifications ?? collect();
         $unreadCount = (int) ($notificationCount ?? 0);
@@ -44,7 +56,7 @@
             </div>
         </div>
     </details>
-@endauth
+@endif
 
 <style>
     .fn-notification-menu {

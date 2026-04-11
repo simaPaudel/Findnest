@@ -171,6 +171,37 @@
             color: #0f172a;
         }
 
+        .mn-chat-header-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mn-chat-header-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.88rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .mn-chat-header-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mn-chat-header-copy {
+            min-width: 0;
+        }
+
         .mn-chat-subtitle {
             margin-top: 3px;
             font-size: 0.78rem;
@@ -340,8 +371,8 @@
                             $otherParticipant = $conversation->participants->firstWhere('user_id', '!=', $currentUserId)?->user;
 
                             if ($conversation->type === 'property') {
-                                $threadTitle = $conversation->property->title ?? ($otherParticipant->name ?? 'Property conversation');
-                                $threadSubtitle = $otherParticipant ? 'Owner: ' . $otherParticipant->name : 'Property chat';
+                                $threadTitle = $otherParticipant->name ?? 'Property conversation';
+                                $threadSubtitle = $conversation->property->title ?? 'Property chat';
                             } else {
                                 $threadTitle = $otherParticipant->name ?? 'Roommate conversation';
                                 $threadSubtitle = 'Roommate chat';
@@ -396,19 +427,44 @@
                 @php
                     $selectedOtherParticipant = $selectedConversation->participants->firstWhere('user_id', '!=', $currentUserId)?->user;
                     $chatTitle = $selectedConversation->type === 'property'
-                        ? ($selectedConversation->property->title ?? ($selectedOtherParticipant->name ?? 'Conversation'))
+                        ? ($selectedOtherParticipant->name ?? 'Conversation')
                         : ($selectedOtherParticipant->name ?? 'Roommate conversation');
 
                     $chatSubtitle = $selectedConversation->type === 'property'
-                        ? 'Property chat' . ($selectedOtherParticipant ? ' with ' . $selectedOtherParticipant->name : '')
+                        ? ($selectedConversation->property->title ?? 'Property chat')
                         : 'Roommate chat';
+
+                    $chatAvatarPath = $selectedOtherParticipant?->profile_photo;
+                    $chatAvatarUrl = null;
+
+                    if ($chatAvatarPath) {
+                        if (\Illuminate\Support\Str::startsWith($chatAvatarPath, ['http://', 'https://'])) {
+                            $chatAvatarUrl = $chatAvatarPath;
+                        } elseif (\Illuminate\Support\Str::startsWith($chatAvatarPath, 'storage/')) {
+                            $chatAvatarUrl = asset($chatAvatarPath);
+                        } else {
+                            $chatAvatarUrl = asset('storage/' . $chatAvatarPath);
+                        }
+                    }
 
                     $lastMessageTimestamp = optional($selectedConversation->messages->last()?->created_at)->toIso8601String();
                 @endphp
 
                 <div class="mn-chat-header">
-                    <h3>{{ $chatTitle }}</h3>
-                    <p class="mn-chat-subtitle">{{ $chatSubtitle }}</p>
+                    <div class="mn-chat-header-row">
+                        <div class="mn-chat-header-avatar">
+                            @if($chatAvatarUrl)
+                                <img src="{{ $chatAvatarUrl }}" alt="{{ $chatTitle }}">
+                            @else
+                                {{ strtoupper(substr($chatTitle ?? 'C', 0, 1)) }}
+                            @endif
+                        </div>
+
+                        <div class="mn-chat-header-copy">
+                            <h3>{{ $chatTitle }}</h3>
+                            <p class="mn-chat-subtitle">{{ $chatSubtitle }}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mn-chat-body" id="mn-chat-body">

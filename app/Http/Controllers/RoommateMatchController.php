@@ -35,7 +35,7 @@ class RoommateMatchController extends Controller
             $userId = Auth::id();
 
             // Get matches from the service
-            $matches = $this->matchingService->getMatchesForUser($userId);
+            $matches = $this->matchingService->getRoommateMatches($userId);
 
             return response()->json([
                 'success' => true,

@@ -16,7 +16,7 @@ class RoommatePreferenceController extends Controller
      */
     public function edit()
     {
-        $preference = RoommatePreference::where('user_id', Auth::id())->first();
+        $preference = RoommatePreference::queryForUserId(Auth::id())->first();
         return view('user.roommate.edit', compact('preference'));
     }
 
@@ -51,7 +51,7 @@ class RoommatePreferenceController extends Controller
             $validated
         );
 
-        return redirect()->route('user.roommate-preferences.edit')
+        return redirect()->route('roommates.index')
             ->with('success', 'Roommate preferences saved successfully.');
     }
 }

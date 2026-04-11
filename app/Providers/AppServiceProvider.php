@@ -29,21 +29,28 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer(['components.navbar', 'owner.layout', 'admin.layout'], function ($view) {
-            if (!Auth::check()) {
+            try {
+                if (!Auth::check()) {
+                    $view->with([
+                        'notificationCount' => 0,
+                        'recentNotifications' => collect(),
+                    ]);
+
+                    return;
+                }
+
+                $userId = (int) Auth::id();
+
+                $view->with([
+                    'notificationCount' => NotificationService::countUnreadNotifications($userId),
+                    'recentNotifications' => NotificationService::fetchNotifications($userId, 5),
+                ]);
+            } catch (\Throwable $e) {
                 $view->with([
                     'notificationCount' => 0,
                     'recentNotifications' => collect(),
                 ]);
-
-                return;
             }
-
-            $userId = (int) Auth::id();
-
-            $view->with([
-                'notificationCount' => NotificationService::countUnreadNotifications($userId),
-                'recentNotifications' => NotificationService::fetchNotifications($userId, 5),
-            ]);
         });
     }
 }

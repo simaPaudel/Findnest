@@ -51,7 +51,7 @@ class RegistrationController extends Controller
         $mailData = [
             'name' => $user->name,
             'token' => $verificationToken,
-            'verification_url' => rtrim($request->root(), '/') . '/verify-email/' . $verificationToken,
+            'verification_url' => route('verify.email', ['token' => $verificationToken]),
         ];
         Mail::to($user->email)->send(new RegistrationEmail($mailData));
 

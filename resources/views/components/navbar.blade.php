@@ -1,8 +1,30 @@
-﻿<!-- Reusable Navbar Component -->
+<!-- Reusable Navbar Component -->
+@php
+    $navbarUser = null;
+    $navbarHomeRoute = route('home');
+
+    try {
+        if (auth()->check()) {
+            $navbarUser = auth()->user();
+        }
+    } catch (\Throwable $e) {
+        $navbarUser = null;
+    }
+
+    if ($navbarUser) {
+        if ($navbarUser->isUser()) {
+            $navbarHomeRoute = route('user.dashboard');
+        } elseif ($navbarUser->isOwner()) {
+            $navbarHomeRoute = route('owner.dashboard');
+        } elseif ($navbarUser->isAdmin()) {
+            $navbarHomeRoute = route('admin.dashboard');
+        }
+    }
+@endphp
 <nav class="fn-navbar">
     <div class="fn-navbar-container">
         <!-- Logo - LEFT CORNER -->
-        <a href="@auth{{ route('user.dashboard') }}@else{{ route('home') }}@endauth" class="fn-navbar-brand">
+        <a href="{{ $navbarHomeRoute }}" class="fn-navbar-brand">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
             </svg>
@@ -11,24 +33,24 @@
 
         <!-- Center Navigation -->
         <div class="fn-navbar-center">
-            @auth
+            @if($navbarUser)
                 <a href="{{ route('listings.index') }}" class="fn-nav-link {{ request()->routeIs('listings.index') ? 'active' : '' }}">Find Listings</a>
-                <a href="{{ route('user.roommate-preferences.edit') }}" class="fn-nav-link {{ request()->routeIs('user.roommate*') ? 'active' : '' }}">Find Roommates</a>
+                <a href="{{ route('roommates.index') }}" class="fn-nav-link {{ request()->routeIs('roommates.*', 'user.roommate*') ? 'active' : '' }}">Find Roommates</a>
                 <a href="{{ route('user.saved-listings.index') }}" class="fn-nav-link {{ request()->routeIs('user.saved*') ? 'active' : '' }}">Saved</a>
                 <a href="{{ route('user.bookings.index') }}" class="fn-nav-link {{ request()->routeIs('user.bookings*') ? 'active' : '' }}">My Bookings</a>
             @else
                 <a href="{{ route('home') }}#featured" class="fn-nav-link">Browse Listings</a>
                 <a href="{{ route('home') }}#how-it-works" class="fn-nav-link">How It Works</a>
                 <a href="{{ route('home') }}#roommates" class="fn-nav-link">Find Roommates</a>
-            @endauth
+            @endif
         </div>
 
         <!-- Right Section - RIGHT CORNER -->
         <div class="fn-navbar-end">
-            @auth
+            @if($navbarUser)
                 @include('components.notification-dropdown')
 
-                @if(auth()->user()->isUser())
+                @if($navbarUser && $navbarUser->isUser())
                     <a href="{{ route('user.messages.index') }}" class="fn-message-link {{ request()->routeIs('user.messages.*') ? 'active' : '' }}" title="Messages" aria-label="Messages">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m7 6l-3.5-2H7a4 4 0 01-4-4V8a4 4 0 014-4h10a4 4 0 014 4v6a4 4 0 01-4 4h-1.5L12 20z"></path>
@@ -37,19 +59,30 @@
                     </a>
                 @endif
 
-                <a href="{{ route('user.profile.edit') }}" class="fn-profile-avatar" title="Profile">
-                    @if(auth()->user()->profile_photo)
-                        <img src="{{ asset(auth()->user()->profile_photo) }}" alt="{{ auth()->user()->name }}" />
-                    @else
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                    @endif
-                </a>
+                <details class="fn-profile-menu">
+                    <summary class="fn-profile-avatar" title="Profile" aria-label="Profile menu">
+                        @if($navbarUser && $navbarUser->profile_photo)
+                            <img src="{{ asset($navbarUser->profile_photo) }}" alt="{{ $navbarUser->name }}" />
+                        @else
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        @endif
+                    </summary>
+
+                    <div class="fn-profile-panel" role="menu" aria-label="Profile menu">
+                        <a href="{{ route('user.profile.edit') }}" class="fn-profile-item">Profile</a>
+
+                        <form method="POST" action="{{ route('logout') }}" class="fn-profile-logout-form">
+                            @csrf
+                            <button type="submit" class="fn-profile-item fn-profile-logout-button">Logout</button>
+                        </form>
+                    </div>
+                </details>
             @else
                 <a href="{{ route('login') }}" class="fn-nav-link">Login</a>
                 <a href="{{ route('register') }}" class="fn-btn-primary">Get Started</a>
-            @endauth
+            @endif
         </div>
     </div>
 </nav>
@@ -178,20 +211,21 @@
         border: 2px solid #fff;
     }
 
-    .fn-profile-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: var(--fn-gray-light, #f3f4f6);
-        border: 1px solid var(--fn-gray-border, #e5e7eb);
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--fn-charcoal, #1f2937);
-        text-decoration: none;
-        transition: all 0.2s ease;
-    }
+        .fn-profile-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--fn-gray-light, #f3f4f6);
+            border: 1px solid var(--fn-gray-border, #e5e7eb);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--fn-charcoal, #1f2937);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
     .fn-profile-avatar:hover {
         border-color: var(--fn-red, #ff385c);
@@ -203,11 +237,73 @@
         height: 1.25rem;
     }
 
-    .fn-profile-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+        .fn-profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .fn-profile-menu {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .fn-profile-menu > summary {
+            list-style: none;
+        }
+
+        .fn-profile-menu > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .fn-profile-menu[open] .fn-profile-avatar,
+        .fn-profile-menu .fn-profile-avatar:hover {
+            border-color: var(--fn-red, #ff385c);
+            color: var(--fn-red, #ff385c);
+        }
+
+        .fn-profile-panel {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 170px;
+            padding: 8px;
+            border: 1px solid var(--fn-gray-border, #e5e7eb);
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+            z-index: 1200;
+        }
+
+        .fn-profile-logout-form {
+            margin: 0;
+        }
+
+        .fn-profile-item {
+            display: flex;
+            width: 100%;
+            padding: 10px 12px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--fn-charcoal, #1f2937);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.18s ease, color 0.18s ease;
+        }
+
+        .fn-profile-item:hover {
+            background: rgba(255, 56, 92, 0.06);
+            color: var(--fn-red, #ff385c);
+        }
+
+        .fn-profile-logout-button {
+            color: #be123c;
+        }
 
     .fn-btn-primary {
         background: var(--fn-red, #ff385c);
@@ -279,11 +375,16 @@
             width: 34px;
             height: 34px;
         }
+
+        .fn-profile-panel {
+            right: -4px;
+            width: min(220px, calc(100vw - 24px));
+        }
     }
 </style>
 
-@auth
-    @if(auth()->user()->isUser())
+@if($navbarUser)
+    @if($navbarUser && $navbarUser->isUser())
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const unreadBadge = document.getElementById('fn-user-unread-badge');
@@ -325,4 +426,4 @@
             });
         </script>
     @endif
-@endauth
+@endif

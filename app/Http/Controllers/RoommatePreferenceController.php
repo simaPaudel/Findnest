@@ -10,7 +10,7 @@ class RoommatePreferenceController extends Controller
 {
     public function show()
     {
-        $preference = RoommatePreference::where('student_id', Auth::id())->first();
+        $preference = RoommatePreference::queryForUserId(Auth::id())->first();
         return view('roommate-preferences.show', compact('preference'));
     }
 
@@ -28,10 +28,7 @@ class RoommatePreferenceController extends Controller
             'max_roommates' => 'nullable|integer|min:1'
         ]);
 
-        RoommatePreference::updateOrCreate(
-            ['student_id' => Auth::id()],
-            $request->all()
-        );
+        RoommatePreference::updateOrCreate(['user_id' => Auth::id()], $request->all());
 
         return redirect()->route('roommate-preferences.show')
             ->with('success', 'Preferences saved successfully!');
@@ -39,13 +36,13 @@ class RoommatePreferenceController extends Controller
 
     public function edit()
     {
-        $preference = RoommatePreference::where('student_id', Auth::id())->firstOrFail();
+        $preference = RoommatePreference::queryForUserId(Auth::id())->firstOrFail();
         return view('roommate-preferences.edit', compact('preference'));
     }
 
     public function update(Request $request)
     {
-        $preference = RoommatePreference::where('student_id', Auth::id())->firstOrFail();
+        $preference = RoommatePreference::queryForUserId(Auth::id())->firstOrFail();
 
         $request->validate([
             'budget_range' => 'sometimes|string|max:50',

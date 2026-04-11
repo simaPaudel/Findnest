@@ -626,7 +626,7 @@
                                     </div>
 
                                     <div class="mt-5">
-                                        <a href="{{ route('roommates.matches') }}" class="btn-secondary">See Roommate Matches</a>
+                                        <a href="{{ route('roommates.index') }}" class="btn-secondary">See Roommate Matches</a>
                                     </div>
                                 </section>
                             @endif

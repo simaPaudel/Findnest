@@ -1,409 +1,494 @@
 @extends('user.layout')
 
-@section('title', 'Edit Profile')
-@section('page-title', 'Account Settings')
+@section('title', 'Profile')
+@section('page-title', 'Profile')
 
 @section('content')
-<style>
-    .profile-container {
-        max-width: 700px;
-        margin: 0 auto;
-    }
+    @php
+        $photoUrl = $user->profile_photo ? asset($user->profile_photo) : null;
+    @endphp
 
-    .profile-header {
-        text-align: center;
-        margin-bottom: 48px;
-        padding-bottom: 32px;
-    }
-
-    .profile-avatar {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: #f3f4f6;
-        border: 3px solid #e5e7eb;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 20px;
-    }
-
-    .profile-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .profile-avatar-placeholder {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .profile-avatar-placeholder svg {
-        width: 56px;
-        height: 56px;
-        color: #9ca3af;
-    }
-
-    .profile-info h2 {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 6px;
-    }
-
-    .profile-info p {
-        font-size: 0.95rem;
-        color: #6b7280;
-    }
-
-    .photo-buttons {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        margin-top: 20px;
-    }
-
-    .btn-photo {
-        background: #ff385c;
-        color: white;
-        padding: 10px 24px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .btn-photo:hover {
-        background: #e11d48;
-    }
-
-    .photo-input-hidden {
-        display: none;
-    }
-
-    .settings-section {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 32px;
-        margin-bottom: 24px;
-    }
-
-    .section-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 24px;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group:last-child {
-        margin-bottom: 0;
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-    }
-
-    .form-row-single {
-        grid-template-columns: 1fr;
-    }
-
-    .form-label {
-        display: block;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 8px;
-    }
-
-    .form-input,
-    .form-select,
-    .form-textarea {
-        width: 100%;
-        padding: 12px 14px;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        font-family: 'Inter', sans-serif;
-        color: #1f2937;
-        background: #ffffff;
-        transition: all 0.2s ease;
-    }
-
-    .form-input::placeholder,
-    .form-textarea::placeholder {
-        color: #b0b8c1;
-    }
-
-    .form-input:focus,
-    .form-select:focus,
-    .form-textarea:focus {
-        outline: none;
-        border-color: #ff385c;
-        box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.08);
-    }
-
-    .form-textarea {
-        resize: vertical;
-        min-height: 100px;
-        line-height: 1.5;
-    }
-
-    .form-helper {
-        font-size: 0.8rem;
-        color: #8b92a0;
-        margin-top: 6px;
-    }
-
-    .form-error {
-        color: #dc2626;
-        font-size: 0.8rem;
-        margin-top: 6px;
-        font-weight: 500;
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 12px;
-        margin-top: 32px;
-    }
-
-    .btn-save {
-        background: #ff385c;
-        color: #ffffff;
-        padding: 13px 40px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .btn-save:hover {
-        background: #e11d48;
-    }
-
-    .btn-cancel {
-        background: transparent;
-        color: #6b7280;
-        padding: 13px 40px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        border: 1.5px solid #e5e7eb;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .btn-cancel:hover {
-        border-color: #ff385c;
-        color: #ff385c;
-        background: rgba(255, 56, 92, 0.05);
-    }
-
-    .btn-logout {
-        background: #fff5f7;
-        color: #ff385c;
-        padding: 13px 40px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        border: 1.5px solid #ffd4dc;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .btn-logout:hover {
-        border-color: #ff385c;
-        background: #fff1f4;
-    }
-
-    .logout-form {
-        margin: 0;
-    }
-
-    .profile-logout-row {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 16px;
-    }
-
-    @media (max-width: 640px) {
-        .form-row {
-            grid-template-columns: 1fr;
+    <style>
+        .account-profile-page {
+            display: grid;
             gap: 20px;
         }
 
-        .settings-section {
+        .content-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(31, 41, 55, 0.04);
+        }
+
+        .content-card-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .content-card-header h2 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #1f2937;
+        }
+
+        .content-card-header p {
+            margin: 4px 0 0;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .account-profile-overview {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
             padding: 20px;
         }
 
-        .action-buttons {
-            flex-direction: column;
+        .account-profile-overview-main {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 0;
         }
 
-        .btn-save,
-        .btn-cancel,
-        .btn-logout,
-        .logout-form {
+        .account-profile-avatar {
+            width: 76px;
+            height: 76px;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--fn-gray-border, #e5e7eb);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .account-profile-avatar img {
             width: 100%;
-            text-align: center;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .profile-logout-row {
-            justify-content: flex-start;
+        .account-profile-avatar-fallback {
+            width: 100%;
+            height: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--fn-red, #ff385c);
+            background: rgba(255, 56, 92, 0.08);
         }
-    }
-</style>
 
-<div class="profile-container">
-    <!-- Profile Header with Picture and Update Button -->
-    <div class="profile-header">
-        <div class="profile-avatar">
-            @if($user->profile_photo)
-            <img src="{{ asset($user->profile_photo) }}" alt="{{ $user->name }}" />
-            @else
-            <div class="profile-avatar-placeholder">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
+        .account-profile-heading {
+            min-width: 0;
+        }
+
+        .account-profile-kicker {
+            margin: 0 0 6px;
+            color: var(--fn-red, #ff385c);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .account-profile-heading h2 {
+            margin: 0;
+            font-size: 22px;
+            line-height: 1.2;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .account-profile-heading p {
+            margin: 5px 0 0;
+            color: var(--fn-gray-dark, #6b7280);
+            font-size: 14px;
+        }
+
+        .account-profile-meta {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .account-status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: capitalize;
+            line-height: 1;
+            border: 1px solid rgba(107, 114, 128, 0.08);
+            background: rgba(107, 114, 128, 0.08);
+            color: #4b5563;
+        }
+
+        .account-meta-note {
+            color: var(--fn-gray-dark, #6b7280);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .account-profile-form {
+            padding: 20px;
+            display: grid;
+            gap: 20px;
+        }
+
+        .account-profile-grid {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .account-profile-section {
+            border: 1px solid var(--fn-gray-border, #e5e7eb);
+            border-radius: 12px;
+            background: #fff;
+            padding: 18px;
+        }
+
+        .account-profile-section h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .account-profile-section p {
+            margin: 6px 0 0;
+            color: var(--fn-gray-dark, #6b7280);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .account-photo-block {
+            display: grid;
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .account-photo-preview {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--fn-gray-border, #e5e7eb);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .account-photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .account-photo-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 56, 92, 0.06);
+            color: var(--fn-red, #ff385c);
+        }
+
+        .account-photo-placeholder svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .account-form-fields {
+            display: grid;
+            gap: 14px;
+        }
+
+        .account-form-group {
+            display: grid;
+            gap: 8px;
+        }
+
+        .account-form-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--fn-gray-dark, #6b7280);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .account-form-input,
+        .account-form-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--fn-gray-border, #e5e7eb);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--fn-charcoal, #1f2937);
+            font: inherit;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .account-form-input:focus,
+        .account-form-textarea:focus {
+            outline: none;
+            border-color: rgba(255, 56, 92, 0.35);
+            box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.08);
+        }
+
+        .account-form-input.error,
+        .account-form-textarea.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
+        }
+
+        .account-form-input[disabled] {
+            background: #f9fafb;
+            color: #6b7280;
+        }
+
+        .account-form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .account-form-helper {
+            font-size: 12px;
+            color: var(--fn-gray-dark, #6b7280);
+            line-height: 1.5;
+        }
+
+        .account-form-error {
+            color: #b91c1c;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .account-profile-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding-top: 2px;
+        }
+
+        .account-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 0 14px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            background: #fff;
+            color: var(--fn-charcoal, #1f2937);
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+        }
+
+        .account-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .account-btn-primary {
+            background: var(--fn-red, #ff385c);
+            color: #fff;
+            box-shadow: 0 6px 14px rgba(255, 56, 92, 0.12);
+        }
+
+        .account-btn-primary:hover {
+            background: var(--fn-red-hover, #e11d48);
+        }
+
+        .account-btn-secondary {
+            background: #fff;
+            border-color: var(--fn-gray-border, #e5e7eb);
+            color: #475569;
+        }
+
+        .account-btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #dbe4ee;
+            color: var(--fn-charcoal, #1f2937);
+        }
+
+        @media (max-width: 860px) {
+            .account-profile-overview,
+            .account-profile-form {
+                padding: 18px;
+            }
+
+            .account-profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .account-profile-actions {
+                justify-content: stretch;
+            }
+
+            .account-profile-actions .account-btn {
+                width: 100%;
+            }
+
+            .content-card-header {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+        }
+    </style>
+
+    <div class="account-profile-page">
+        <section class="content-card account-profile-overview">
+            <div class="account-profile-overview-main">
+                <div class="account-profile-avatar">
+                    @if ($photoUrl)
+                        <img src="{{ $photoUrl }}" alt="{{ $user->name }}">
+                    @else
+                        <div class="account-profile-avatar-fallback">
+                            {{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}
+                        </div>
+                    @endif
+                </div>
+
+                <div class="account-profile-heading">
+                    <p class="account-profile-kicker">User Account</p>
+                    <h2>{{ $user->name }}</h2>
+                    <p>{{ $user->email }}</p>
+                </div>
             </div>
-            @endif
-        </div>
 
-        <div class="profile-info">
-            <h2>{{ $user->name }}</h2>
-            <p>Manage your account information and preferences</p>
-        </div>
+            <div class="account-profile-meta">
+                <span class="account-status-pill">User</span>
+                <span class="account-meta-note">Update your account details and roommate preferences.</span>
+            </div>
+        </section>
 
-        <div class="photo-buttons">
-            <button type="button" class="btn-photo" onclick="document.getElementById('profile_photo').click()">
-                Update Photo
-            </button>
-        </div>
+        <section class="content-card">
+            <div class="content-card-header">
+                <div>
+                    <h2>Profile Details</h2>
+                    <p>Keep your account information current and consistent.</p>
+                </div>
+            </div>
+
+            <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data" class="account-profile-form">
+                @csrf
+                @method('PUT')
+
+                <div class="account-profile-grid">
+                    <div class="account-profile-section">
+                        <h3>Profile Photo</h3>
+                        <p>This image appears in your profile menu and on account pages.</p>
+
+                        <div class="account-photo-block">
+                            <div class="account-photo-preview">
+                                @if ($photoUrl)
+                                    <img src="{{ $photoUrl }}" alt="{{ $user->name }}">
+                                @else
+                                    <div class="account-photo-placeholder">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="account-form-group">
+                                <label for="profile_photo" class="account-form-label">Update Photo</label>
+                                <input type="file" id="profile_photo" name="profile_photo" accept="image/jpeg,image/png,image/jpg" class="account-form-input @error('profile_photo') error @enderror">
+                                <div class="account-form-helper">Max size: 2MB. Accepted: JPG, PNG.</div>
+                                @error('profile_photo')
+                                    <div class="account-form-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="account-form-fields">
+                        <div class="account-profile-section">
+                            <h3>Personal Information</h3>
+                            <p>Update the details shown across your user account.</p>
+
+                            <div style="margin-top: 16px; display: grid; gap: 14px;">
+                                <div class="account-form-group">
+                                    <label for="name" class="account-form-label">Full Name *</label>
+                                    <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" class="account-form-input @error('name') error @enderror" required>
+                                    @error('name')
+                                        <div class="account-form-error">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="account-form-group">
+                                    <label for="email" class="account-form-label">Email Address</label>
+                                    <input type="email" id="email" class="account-form-input" value="{{ $user->email }}" disabled>
+                                    <div class="account-form-helper">Email cannot be changed from the profile page.</div>
+                                </div>
+
+                                <div class="account-form-group">
+                                    <label for="phone" class="account-form-label">Phone Number</label>
+                                    <input type="tel" id="phone" name="phone" value="{{ old('phone', $user->phone) }}" class="account-form-input @error('phone') error @enderror" placeholder="+977 9812345678">
+                                    @error('phone')
+                                        <div class="account-form-error">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="account-form-group">
+                                    <label for="gender" class="account-form-label">Gender</label>
+                                    <select id="gender" name="gender" class="account-form-input @error('gender') error @enderror">
+                                        <option value="">Select Gender</option>
+                                        <option value="male" {{ old('gender', $user->gender) === 'male' ? 'selected' : '' }}>Male</option>
+                                        <option value="female" {{ old('gender', $user->gender) === 'female' ? 'selected' : '' }}>Female</option>
+                                        <option value="other" {{ old('gender', $user->gender) === 'other' ? 'selected' : '' }}>Other</option>
+                                    </select>
+                                    @error('gender')
+                                        <div class="account-form-error">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="account-profile-section">
+                            <h3>Bio</h3>
+                            <p>Share a short introduction to help with roommate matching.</p>
+
+                            <div class="account-form-group" style="margin-top: 16px;">
+                                <label for="bio" class="account-form-label">Tell us about yourself</label>
+                                <textarea id="bio" name="bio" class="account-form-textarea @error('bio') error @enderror" placeholder="Share your interests, hobbies, and what you're looking for in roommates...">{{ old('bio', $user->bio) }}</textarea>
+                                <div class="account-form-helper">Maximum 500 characters.</div>
+                                @error('bio')
+                                    <div class="account-form-error">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-profile-actions">
+                    <a href="{{ route('user.dashboard') }}" class="account-btn account-btn-secondary">Cancel</a>
+                    <button type="submit" class="account-btn account-btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </section>
     </div>
-
-    <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
-
-        <!-- Hidden File Input for Photo -->
-        <input type="file" id="profile_photo" name="profile_photo" accept="image/*" class="photo-input-hidden" onchange="this.form.submit()">
-
-        <!-- Personal Information Section -->
-        <div class="settings-section">
-            <h3 class="section-title">Personal Information</h3>
-
-            <div class="form-row">
-                <!-- Full Name -->
-                <div class="form-group">
-                    <label for="name" class="form-label">Full Name *</label>
-                    <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}"
-                        class="form-input" required>
-                    @error('name')
-                    <p class="form-error">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Email -->
-                <div class="form-group">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}"
-                        class="form-input" placeholder="you@example.com">
-                    @error('email')
-                    <p class="form-error">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="form-row">
-                <!-- Phone Number -->
-                <div class="form-group">
-                    <label for="phone" class="form-label">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
-                        class="form-input" placeholder="+977 9812345678">
-                    @error('phone')
-                    <p class="form-error">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Address -->
-                <div class="form-group">
-                    <label for="address" class="form-label">Address</label>
-                    <input type="text" id="address" name="address" value="{{ old('address', $user->address ?? '') }}"
-                        class="form-input" placeholder="Your city or neighborhood">
-                    @error('address')
-                    <p class="form-error">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <!-- Gender -->
-            <div class="form-group">
-                <label for="gender" class="form-label">Gender</label>
-                <select id="gender" name="gender" class="form-select">
-                    <option value="">Select Gender</option>
-                    <option value="male" {{ old('gender', $user->gender) === 'male' ? 'selected' : '' }}>Male</option>
-                    <option value="female" {{ old('gender', $user->gender) === 'female' ? 'selected' : '' }}>Female</option>
-                    <option value="other" {{ old('gender', $user->gender) === 'other' ? 'selected' : '' }}>Other</option>
-                </select>
-                @error('gender')
-                <p class="form-error">{{ $message }}</p>
-                @enderror
-            </div>
-        </div>
-
-        <!-- Bio Section -->
-        <div class="settings-section">
-            <h3 class="section-title">Bio</h3>
-
-            <div class="form-group">
-                <label for="bio" class="form-label">Tell us about yourself</label>
-                <textarea id="bio" name="bio" class="form-textarea"
-                    placeholder="Share your interests, hobbies, and what you're looking for in roommates...">{{ old('bio', $user->bio) }}</textarea>
-                <p class="form-helper">Maximum 500 characters</p>
-                @error('bio')
-                <p class="form-error">{{ $message }}</p>
-                @enderror
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-    <div class="action-buttons">
-        <button type="submit" class="btn-save">
-            Save Changes
-        </button>
-        <a href="{{ route('user.dashboard') }}" class="btn-cancel">
-            Cancel
-        </a>
-    </div>
-</form>
-
-<div class="profile-logout-row">
-    <form method="POST" action="{{ route('logout') }}" class="logout-form">
-        @csrf
-        <button type="submit" class="btn-logout">Logout</button>
-    </form>
-</div>
-</div>
-
 @endsection

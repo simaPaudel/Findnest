@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -7,10 +7,21 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Owner Dashboard') - FindNest</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="{{ asset('css/owner.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/owner.css') }}?v={{ filemtime(public_path('css/owner.css')) }}" rel="stylesheet">
 </head>
 
 <body>
+    @php
+        $ownerLayoutUser = null;
+
+        try {
+            if (auth()->check()) {
+                $ownerLayoutUser = auth()->user();
+            }
+        } catch (\Throwable $e) {
+            $ownerLayoutUser = null;
+        }
+    @endphp
     <nav class="owner-navbar">
         <div class="owner-navbar-container">
             <a href="{{ route('owner.dashboard') }}" class="owner-brand">
@@ -41,8 +52,8 @@
 
                 <details class="owner-profile-menu">
                     <summary class="owner-profile-trigger" aria-label="Profile menu">
-                        @if(auth()->user()->profile_photo)
-                            <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile" class="profile-photo">
+                        @if($ownerLayoutUser && $ownerLayoutUser->profile_photo)
+                            <img src="{{ asset('storage/' . $ownerLayoutUser->profile_photo) }}" alt="Profile" class="profile-photo">
                         @else
                             <svg class="owner-profile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>

@@ -131,7 +131,11 @@
                                     {{ __('View') }}
                                 </a>
 
-                                @if($booking->isPending())
+                                @if($booking->getAmountPending() > 0)
+                                    <a href="{{ route('user.bookings.bill', $booking) }}" class="inline-flex items-center rounded-full bg-rose-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-rose-600">
+                                        {{ __('Pay') }}
+                                    </a>
+                                @elseif($booking->isPending())
                                     <a href="{{ route('user.bookings.edit', $booking) }}" class="text-sm font-semibold text-slate-700 hover:text-slate-900">
                                         {{ __('Edit') }}
                                     </a>

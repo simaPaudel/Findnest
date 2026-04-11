@@ -8,319 +8,546 @@ use App\Models\User;
 class RoommateMatchingService
 {
     /**
-     * Scoring weights for each compatibility criterion
+     * Compatibility weights. Total = 100.
      */
     private const WEIGHTS = [
-        'budget' => 0.20,
-        'location' => 0.15,
-        'cleanliness' => 0.10,
-        'sleep_schedule' => 0.10,
-        'study_habits' => 0.10,
-        'smoking' => 0.10,
-        'alcohol' => 0.05,
-        'gender' => 0.10,
-        'age' => 0.05,
-        'interests' => 0.05,
+        'budget' => 20,
+        'location' => 20,
+        'cleanliness' => 15,
+        'sleep' => 10,
+        'study' => 10,
+        'smoking' => 10,
+        'alcohol' => 5,
+        'age' => 5,
+        'interests' => 5,
     ];
 
     /**
-     * Get top 5 roommate matches for a user based on preferences
+     * Canonical entry point for roommate matching.
      *
-     * @param int $userId
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
-    public function getMatchesForUser($userId)
+    public function getRoommateMatches(int $userId): array
     {
-        // Fetch the current user's preferences
-        $userPreferences = RoommatePreference::where('user_id', $userId)->first();
+        $strictMatches = $this->buildMatches($userId, true);
+        if (!empty($strictMatches)) {
+            return $strictMatches;
+        }
 
-        // If user has no preferences, return empty array
-        if (!$userPreferences) {
+        return $this->buildMatches($userId, false);
+    }
+
+    /**
+     * Backward-compatible alias for existing callers.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getMatchesForUser(int $userId): array
+    {
+        return $this->getRoommateMatches($userId);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildMatches(int $userId, bool $enforceGenderFilter): array
+    {
+        $currentPreference = RoommatePreference::queryForUserId($userId)->first();
+        $currentUser = User::find($userId);
+
+        if (!$currentPreference || !$currentUser) {
             return [];
         }
 
-        // Fetch all other users' preferences (exclude the current user)
-        $otherPreferences = RoommatePreference::where('user_id', '!=', $userId)->get();
-
+        $candidatePreferences = RoommatePreference::query()->get();
         $matches = [];
 
-        // Score each user
-        foreach ($otherPreferences as $otherPreference) {
-            $score = $this->calculateCompatibilityScore($userPreferences, $otherPreference);
+        foreach ($candidatePreferences as $candidatePreference) {
+            $candidateUserId = RoommatePreference::resolveUserId($candidatePreference);
+
+            if ($candidateUserId === null || $candidateUserId === $userId) {
+                continue;
+            }
+
+            $candidateUser = User::find($candidateUserId);
+            if (!$candidateUser) {
+                continue;
+            }
+
+            if ($enforceGenderFilter && !$this->passesGenderFilter($currentUser, $currentPreference, $candidateUser, $candidatePreference)) {
+                continue;
+            }
+
+            $criteria = [
+                'budget' => $this->evaluateBudgetMatch($currentPreference->budget_range, $candidatePreference->budget_range),
+                'location' => $this->evaluateLocationMatch($currentPreference->preferred_location, $candidatePreference->preferred_location),
+                'cleanliness' => $this->evaluateOrderedMatch(
+                    $this->normalizePreferenceValue('cleanliness', $currentPreference->cleanliness_level),
+                    $this->normalizePreferenceValue('cleanliness', $candidatePreference->cleanliness_level),
+                    ['very_clean', 'clean', 'moderate', 'relaxed'],
+                    'Cleanliness preferences match',
+                    'Cleanliness preferences are close'
+                ),
+                'sleep' => $this->evaluateOrderedMatch(
+                    $this->normalizePreferenceValue('sleep', $currentPreference->sleep_schedule),
+                    $this->normalizePreferenceValue('sleep', $candidatePreference->sleep_schedule),
+                    ['early_bird', 'flexible', 'night_owl'],
+                    'Sleep schedules match',
+                    'Sleep schedules are close'
+                ),
+                'study' => $this->evaluateOrderedMatch(
+                    $this->normalizePreferenceValue('study', $currentPreference->study_habits),
+                    $this->normalizePreferenceValue('study', $candidatePreference->study_habits),
+                    ['quiet', 'moderate', 'social'],
+                    'Study habits match',
+                    'Study habits are close'
+                ),
+                'smoking' => $this->evaluateOrderedMatch(
+                    $this->normalizePreferenceValue('smoking', $currentPreference->smoking_preference),
+                    $this->normalizePreferenceValue('smoking', $candidatePreference->smoking_preference),
+                    ['no', 'outside_only', 'yes'],
+                    'Smoking preferences match',
+                    'Smoking preferences are flexible'
+                ),
+                'alcohol' => $this->evaluateOrderedMatch(
+                    $this->normalizePreferenceValue('alcohol', $currentPreference->alcohol_preference),
+                    $this->normalizePreferenceValue('alcohol', $candidatePreference->alcohol_preference),
+                    ['no', 'occasionally', 'yes'],
+                    'Alcohol preferences match',
+                    'Alcohol preferences are flexible'
+                ),
+                'age' => $this->evaluateAgeMatch(
+                    $currentPreference->age_range_min,
+                    $currentPreference->age_range_max,
+                    $candidatePreference->age_range_min,
+                    $candidatePreference->age_range_max
+                ),
+                'interests' => $this->evaluateInterestsMatch(
+                    $currentPreference->interests,
+                    $candidatePreference->interests
+                ),
+            ];
 
             $matches[] = [
-                'user_id' => $otherPreference->user_id,
-                'compatibility_score' => round($score, 2),
+                'user_id' => $candidateUser->id,
+                'name' => $candidateUser->name,
+                'email' => $candidateUser->email,
+                'profile_photo' => $candidateUser->profile_photo,
+                'gender' => $candidateUser->gender,
+                'bio' => $candidateUser->bio,
+                'preferred_location' => $candidatePreference->preferred_location,
+                'budget_range' => $candidatePreference->budget_range,
+                'preferences' => [
+                    'budget_range' => $candidatePreference->budget_range,
+                    'preferred_location' => $candidatePreference->preferred_location,
+                    'gender_preference' => $candidatePreference->gender_preference,
+                    'cleanliness_level' => $candidatePreference->cleanliness_level,
+                    'sleep_schedule' => $candidatePreference->sleep_schedule,
+                    'study_habits' => $candidatePreference->study_habits,
+                    'smoking_preference' => $candidatePreference->smoking_preference,
+                    'alcohol_preference' => $candidatePreference->alcohol_preference,
+                    'age_range_min' => $candidatePreference->age_range_min,
+                    'age_range_max' => $candidatePreference->age_range_max,
+                    'interests' => $this->normalizeInterestList($candidatePreference->interests),
+                ],
+                'compatibility_score' => (int) round($this->calculateWeightedScore($criteria)),
+                'reasons' => $this->buildReasons($criteria),
+                'gender_match_mode' => $enforceGenderFilter ? 'strict' : 'fallback',
             ];
         }
 
-        // Sort matches by score in descending order
-        usort($matches, function ($a, $b) {
-            return $b['compatibility_score'] <=> $a['compatibility_score'];
+        usort($matches, static function (array $left, array $right): int {
+            return $right['compatibility_score'] <=> $left['compatibility_score'];
         });
 
-        // Return top 5 matches
-        return array_slice($matches, 0, 5);
+        return $matches;
+    }
+
+    private function passesGenderFilter(
+        User $currentUser,
+        RoommatePreference $currentPreference,
+        User $candidateUser,
+        RoommatePreference $candidatePreference
+    ): bool {
+        $currentGenderPreference = $this->normalizePreferenceGender($currentPreference->gender_preference);
+        $candidateGenderPreference = $this->normalizePreferenceGender($candidatePreference->gender_preference);
+        $currentGender = $this->normalizeUserGender($currentUser->gender);
+        $candidateGender = $this->normalizeUserGender($candidateUser->gender);
+
+        if ($currentGenderPreference !== 'any' && $candidateGender !== $currentGenderPreference) {
+            return false;
+        }
+
+        if ($candidateGenderPreference !== 'any' && $currentGender !== $candidateGenderPreference) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
-     * Calculate compatibility score between two users based on their preferences
-     *
-     * @param RoommatePreference $userPref
-     * @param RoommatePreference $otherPref
-     * @return float
+     * @param array<string, array{score: float, reason: ?string}> $criteria
      */
-    private function calculateCompatibilityScore($userPref, $otherPref)
+    private function calculateWeightedScore(array $criteria): float
     {
-        $totalScore = 0;
+        $score = 0.0;
 
-        // Budget range match
-        $totalScore += $this->scoreBudgetMatch($userPref->budget_range, $otherPref->budget_range) * self::WEIGHTS['budget'];
+        foreach (self::WEIGHTS as $key => $weight) {
+            $criterionScore = (float) ($criteria[$key]['score'] ?? 0);
+            $score += $criterionScore * $weight;
+        }
 
-        // Location match
-        $totalScore += $this->scoreLocationMatch($userPref->preferred_location, $otherPref->preferred_location) * self::WEIGHTS['location'];
-
-        // Cleanliness level match
-        $totalScore += $this->scoreMatch($userPref->cleanliness_level, $otherPref->cleanliness_level) * self::WEIGHTS['cleanliness'];
-
-        // Sleep schedule match
-        $totalScore += $this->scoreMatch($userPref->sleep_schedule, $otherPref->sleep_schedule) * self::WEIGHTS['sleep_schedule'];
-
-        // Study habits match
-        $totalScore += $this->scoreMatch($userPref->study_habits, $otherPref->study_habits) * self::WEIGHTS['study_habits'];
-
-        // Smoking preference match
-        $totalScore += $this->scoreMatch($userPref->smoking_preference, $otherPref->smoking_preference) * self::WEIGHTS['smoking'];
-
-        // Alcohol preference match
-        $totalScore += $this->scoreMatch($userPref->alcohol_preference, $otherPref->alcohol_preference) * self::WEIGHTS['alcohol'];
-
-        // Gender preference match
-        $totalScore += $this->scoreGenderPreferenceMatch($userPref, $otherPref) * self::WEIGHTS['gender'];
-
-        // Age range overlap
-        $totalScore += $this->scoreAgeRangeMatch($userPref, $otherPref) * self::WEIGHTS['age'];
-
-        // Interests similarity
-        $totalScore += $this->scoreInterestsSimilarity($userPref->interests, $otherPref->interests) * self::WEIGHTS['interests'];
-
-        // Normalize score to be between 0 and 1
-        return min($totalScore, 1.0);
+        return min(100.0, max(0.0, $score));
     }
 
     /**
-     * Score budget range match
-     * Returns 1.0 if ranges overlap, 0.0 if they don't
-     *
-     * @param string|null $budget1
-     * @param string|null $budget2
-     * @return float
+     * @param array<string, array{score: float, reason: ?string}> $criteria
+     * @return array<int, string>
      */
-    private function scoreBudgetMatch($budget1, $budget2)
+    private function buildReasons(array $criteria): array
     {
-        if ($budget1 === null || $budget2 === null) {
-            return 0.5; // Neutral score for missing data
+        $reasons = [];
+
+        foreach ($criteria as $criterion) {
+            $score = (float) ($criterion['score'] ?? 0);
+            $reason = $criterion['reason'] ?? null;
+
+            if ($score > 0 && is_string($reason) && $reason !== '') {
+                $reasons[] = [
+                    'score' => $score,
+                    'reason' => $reason,
+                ];
+            }
         }
 
-        // Check if budget preferences are compatible
-        // Assuming budget_range is stored as strings like "5000-10000"
-        $budgets1 = $this->parseBudgetRange($budget1);
-        $budgets2 = $this->parseBudgetRange($budget2);
-
-        if (!$budgets1 || !$budgets2) {
-            return 0.5;
+        if (empty($reasons)) {
+            return [];
         }
 
-        // Check if ranges overlap
-        $min1 = $budgets1['min'];
-        $max1 = $budgets1['max'];
-        $min2 = $budgets2['min'];
-        $max2 = $budgets2['max'];
+        usort($reasons, static function (array $left, array $right): int {
+            return $right['score'] <=> $left['score'];
+        });
 
-        // If they overlap, return 1.0
-        if ($min1 <= $max2 && $min2 <= $max1) {
-            return 1.0;
+        $uniqueReasons = [];
+        foreach ($reasons as $reason) {
+            if (!in_array($reason['reason'], $uniqueReasons, true)) {
+                $uniqueReasons[] = $reason['reason'];
+            }
         }
 
-        // If they don't overlap, check proximity (partial match)
-        if ($min1 > $max2) {
-            $diff = $min1 - $max2;
-        } else {
-            $diff = $min2 - $max1;
-        }
-
-        // Return a score based on proximity
-        return max(0, 1.0 - ($diff / 50000)); // Normalize by a factor
+        return array_slice($uniqueReasons, 0, 3);
     }
 
     /**
-     * Parse budget range string
+     * Budget compatibility:
+     * - full points when ranges overlap or are identical
+     * - half points when ranges are close
+     * - zero otherwise
      *
-     * @param string $budgetStr
-     * @return array|null
+     * @return array{score: float, reason: ?string}
      */
-    private function parseBudgetRange($budgetStr)
+    private function evaluateBudgetMatch(?string $currentBudget, ?string $candidateBudget): array
     {
-        if (strpos($budgetStr, '-') !== false) {
-            [$min, $max] = explode('-', $budgetStr);
-            return [
-                'min' => (int)trim($min),
-                'max' => (int)trim($max),
-            ];
+        $currentRange = $this->parseBudgetRange($currentBudget);
+        $candidateRange = $this->parseBudgetRange($candidateBudget);
+
+        if (!$currentRange || !$candidateRange) {
+            return ['score' => 0.0, 'reason' => null];
         }
 
-        return null;
+        if ($currentRange['min'] <= $candidateRange['max'] && $candidateRange['min'] <= $currentRange['max']) {
+            return ['score' => 1.0, 'reason' => 'Budget ranges overlap'];
+        }
+
+        $gap = $currentRange['min'] > $candidateRange['max']
+            ? $currentRange['min'] - $candidateRange['max']
+            : $candidateRange['min'] - $currentRange['max'];
+
+        $threshold = max(5000, (int) round(max($currentRange['max'], $candidateRange['max']) * 0.1));
+
+        if ($gap <= $threshold) {
+            return ['score' => 0.5, 'reason' => 'Budget ranges are close'];
+        }
+
+        return ['score' => 0.0, 'reason' => null];
     }
 
     /**
-     * Score location match
-     * Returns 1.0 if locations are the same, 0.0 if different
-     *
-     * @param string|null $location1
-     * @param string|null $location2
-     * @return float
+     * @return array{min: int, max: int}|null
      */
-    private function scoreLocationMatch($location1, $location2)
+    private function parseBudgetRange(?string $budget): ?array
     {
-        if ($location1 === null || $location2 === null) {
-            return 0.5; // Neutral score for missing data
+        if (!$budget) {
+            return null;
         }
 
-        // Normalize to lowercase for comparison
-        $location1 = strtolower(trim($location1));
-        $location2 = strtolower(trim($location2));
-
-        return $location1 === $location2 ? 1.0 : 0.0;
-    }
-
-    /**
-     * Generic match scoring for exact string matches
-     * Returns 1.0 if values match, 0.0 if they don't
-     *
-     * @param mixed $value1
-     * @param mixed $value2
-     * @return float
-     */
-    private function scoreMatch($value1, $value2)
-    {
-        if ($value1 === null || $value2 === null) {
-            return 0.5; // Neutral score for missing data
-        }
-
-        return $value1 === $value2 ? 1.0 : 0.0;
-    }
-
-    /**
-     * Score gender preference match
-     * Checks if preferences are compatible
-     *
-     * @param RoommatePreference $pref1
-     * @param RoommatePreference $pref2
-     * @return float
-     */
-    private function scoreGenderPreferenceMatch($pref1, $pref2)
-    {
-        $gender1 = $pref1->gender_preference;
-        $gender2 = $pref2->gender_preference;
-
-        if ($gender1 === null || $gender2 === null) {
-            return 0.5; // Neutral score for missing data
-        }
-
-        // Check mutual compatibility
-        // "any" is compatible with everything
-        if ($gender1 === 'any' || $gender2 === 'any') {
-            return 1.0;
-        }
-
-        // Same gender preference
-        if ($gender1 === $gender2) {
-            return 1.0;
-        }
-
-        // Different preferences (incompatible)
-        return 0.0;
-    }
-
-    /**
-     * Score age range overlap
-     * Returns 1.0 if age ranges overlap, scaled down if they don't
-     *
-     * @param RoommatePreference $pref1
-     * @param RoommatePreference $pref2
-     * @return float
-     */
-    private function scoreAgeRangeMatch($pref1, $pref2)
-    {
-        $min1 = $pref1->age_range_min;
-        $max1 = $pref1->age_range_max;
-        $min2 = $pref2->age_range_min;
-        $max2 = $pref2->age_range_max;
-
-        // If any age range is null, return neutral score
-        if ($min1 === null || $max1 === null || $min2 === null || $max2 === null) {
-            return 0.5;
-        }
-
-        // Check if ranges overlap
-        if ($min1 <= $max2 && $min2 <= $max1) {
-            return 1.0;
-        }
-
-        // If they don't overlap, return partial score based on proximity
-        if ($min1 > $max2) {
-            $gap = $min1 - $max2;
-        } else {
-            $gap = $min2 - $max1;
-        }
-
-        // Scaled down score based on age gap
-        return max(0, 1.0 - ($gap / 50));
-    }
-
-    /**
-     * Calculate interests similarity
-     * Based on common interests / total unique interests
-     *
-     * @param string|null $interests1
-     * @param string|null $interests2
-     * @return float
-     */
-    private function scoreInterestsSimilarity($interests1, $interests2)
-    {
-        if ($interests1 === null || $interests2 === null) {
-            return 0.5; // Neutral score for missing data
-        }
-
-        // Parse interests (comma-separated values)
-        $interests1Array = array_map('trim', explode(',', $interests1));
-        $interests2Array = array_map('trim', explode(',', $interests2));
-
-        // Remove empty strings
-        $interests1Array = array_filter($interests1Array);
-        $interests2Array = array_filter($interests2Array);
-
-        // If either has no interests, return neutral score
-        if (empty($interests1Array) || empty($interests2Array)) {
-            return 0.5;
-        }
-
-        // Calculate common interests
-        $commonInterests = array_intersect(
-            array_map('strtolower', $interests1Array),
-            array_map('strtolower', $interests2Array)
+        preg_match_all('/\d[\d,]*/', $budget, $matches);
+        $numbers = array_map(
+            static fn (string $value): int => (int) str_replace(',', '', $value),
+            $matches[0] ?? []
         );
 
-        // Calculate total unique interests
-        $uniqueInterests = array_unique(array_merge(
-            array_map('strtolower', $interests1Array),
-            array_map('strtolower', $interests2Array)
-        ));
+        if (empty($numbers)) {
+            return null;
+        }
 
-        // Return similarity score
-        $commonCount = count($commonInterests);
-        $totalCount = count($uniqueInterests);
+        sort($numbers);
 
-        return $totalCount > 0 ? $commonCount / $totalCount : 0.0;
+        return [
+            'min' => $numbers[0],
+            'max' => $numbers[count($numbers) - 1],
+        ];
+    }
+
+    /**
+     * Location compatibility:
+     * - full points for exact match
+     * - half points for partial overlap
+     * - zero otherwise
+     *
+     * @return array{score: float, reason: ?string}
+     */
+    private function evaluateLocationMatch(?string $currentLocation, ?string $candidateLocation): array
+    {
+        if (!$currentLocation || !$candidateLocation) {
+            return ['score' => 0.0, 'reason' => null];
+        }
+
+        $normalizedCurrent = $this->normalizeText($currentLocation);
+        $normalizedCandidate = $this->normalizeText($candidateLocation);
+
+        if ($normalizedCurrent === $normalizedCandidate) {
+            return ['score' => 1.0, 'reason' => 'Preferred locations match'];
+        }
+
+        $currentTokens = $this->tokenizeLocation($normalizedCurrent);
+        $candidateTokens = $this->tokenizeLocation($normalizedCandidate);
+        $sharedTokens = array_values(array_intersect($currentTokens, $candidateTokens));
+
+        if (!empty($sharedTokens)) {
+            return ['score' => 0.5, 'reason' => 'Preferred locations overlap'];
+        }
+
+        if (
+            $normalizedCurrent !== '' &&
+            $normalizedCandidate !== '' &&
+            (
+                str_contains($normalizedCurrent, $normalizedCandidate) ||
+                str_contains($normalizedCandidate, $normalizedCurrent)
+            )
+        ) {
+            return ['score' => 0.5, 'reason' => 'Preferred areas overlap'];
+        }
+
+        return ['score' => 0.0, 'reason' => null];
+    }
+
+    /**
+     * Ordered compatibility for preference fields with nearby values.
+     *
+     * @param array<int, string> $ordering
+     * @return array{score: float, reason: ?string}
+     */
+    private function evaluateOrderedMatch(
+        ?string $currentValue,
+        ?string $candidateValue,
+        array $ordering,
+        string $exactReason,
+        string $partialReason
+    ): array {
+        if (!$currentValue || !$candidateValue) {
+            return ['score' => 0.0, 'reason' => null];
+        }
+
+        if ($currentValue === $candidateValue) {
+            return ['score' => 1.0, 'reason' => $exactReason];
+        }
+
+        $currentIndex = array_search($currentValue, $ordering, true);
+        $candidateIndex = array_search($candidateValue, $ordering, true);
+
+        if ($currentIndex === false || $candidateIndex === false) {
+            return ['score' => 0.0, 'reason' => null];
+        }
+
+        if (abs($currentIndex - $candidateIndex) === 1) {
+            return ['score' => 0.5, 'reason' => $partialReason];
+        }
+
+        return ['score' => 0.0, 'reason' => null];
+    }
+
+    /**
+     * Age compatibility:
+     * - full points when ranges overlap
+     * - half points when ranges are close
+     * - zero otherwise
+     *
+     * @return array{score: float, reason: ?string}
+     */
+    private function evaluateAgeMatch(
+        ?int $currentMin,
+        ?int $currentMax,
+        ?int $candidateMin,
+        ?int $candidateMax
+    ): array {
+        if ($currentMin === null || $currentMax === null || $candidateMin === null || $candidateMax === null) {
+            return ['score' => 0.0, 'reason' => null];
+        }
+
+        if ($currentMin <= $candidateMax && $candidateMin <= $currentMax) {
+            return ['score' => 1.0, 'reason' => 'Age ranges overlap'];
+        }
+
+        $gap = $currentMin > $candidateMax
+            ? $currentMin - $candidateMax
+            : $candidateMin - $currentMax;
+
+        if ($gap <= 5) {
+            return ['score' => 0.5, 'reason' => 'Age ranges are close'];
+        }
+
+        return ['score' => 0.0, 'reason' => null];
+    }
+
+    /**
+     * Interests compatibility:
+     * - full points if interests lists match
+     * - half points if there is any overlap
+     * - zero if there is no overlap
+     *
+     * @return array{score: float, reason: ?string}
+     */
+    private function evaluateInterestsMatch(mixed $currentInterests, mixed $candidateInterests): array
+    {
+        $currentList = $this->normalizeInterestList($currentInterests);
+        $candidateList = $this->normalizeInterestList($candidateInterests);
+
+        if (empty($currentList) || empty($candidateList)) {
+            return ['score' => 0.0, 'reason' => null];
+        }
+
+        $shared = array_values(array_intersect($currentList, $candidateList));
+
+        if (empty($shared)) {
+            return ['score' => 0.0, 'reason' => null];
+        }
+
+        sort($currentList);
+        sort($candidateList);
+
+        if ($currentList === $candidateList) {
+            return ['score' => 1.0, 'reason' => 'Interests match'];
+        }
+
+        return [
+            'score' => 0.5,
+            'reason' => 'Shared interests: ' . implode(', ', array_slice($shared, 0, 3)),
+        ];
+    }
+
+    private function normalizeText(string $value): string
+    {
+        $value = strtolower(trim($value));
+        $value = preg_replace('/[^a-z0-9\s]+/i', ' ', $value) ?? $value;
+        $value = preg_replace('/\s+/', ' ', $value) ?? $value;
+
+        return trim($value);
+    }
+
+    private function normalizePreferenceGender(mixed $value): string
+    {
+        $value = strtolower(trim((string) $value));
+
+        return match ($value) {
+            'male', 'female', 'any' => $value,
+            default => 'any',
+        };
+    }
+
+    private function normalizeUserGender(mixed $value): string
+    {
+        $value = strtolower(trim((string) $value));
+
+        return match ($value) {
+            'male', 'female', 'other' => $value,
+            default => $value === '' ? 'other' : $value,
+        };
+    }
+
+    private function normalizePreferenceValue(string $type, mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = strtolower(trim((string) $value));
+
+        return match ($type) {
+            'cleanliness' => match ($value) {
+                '1', 'very_clean' => 'very_clean',
+                '2', 'clean' => 'clean',
+                '3', 'moderate' => 'moderate',
+                '4', '5', 'relaxed' => 'relaxed',
+                default => $value,
+            },
+            'sleep' => match ($value) {
+                'early', 'early_bird' => 'early_bird',
+                'late', 'night_owl' => 'night_owl',
+                'flexible' => 'flexible',
+                default => $value,
+            },
+            'study' => match ($value) {
+                'quiet' => 'quiet',
+                'group', 'social' => 'social',
+                'both', 'moderate' => 'moderate',
+                default => $value,
+            },
+            'smoking' => match ($value) {
+                'no' => 'no',
+                'outside_only', 'neutral' => 'outside_only',
+                'yes' => 'yes',
+                default => $value,
+            },
+            'alcohol' => match ($value) {
+                'no' => 'no',
+                'occasionally', 'neutral' => 'occasionally',
+                'yes' => 'yes',
+                default => $value,
+            },
+            default => $value,
+        };
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function tokenizeLocation(string $value): array
+    {
+        $tokens = preg_split('/\s+/', $value) ?: [];
+        $tokens = array_filter($tokens, static fn (string $token): bool => strlen($token) > 2);
+
+        return array_values(array_unique($tokens));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function normalizeInterestList(mixed $value): array
+    {
+        if (is_array($value)) {
+            $parts = $value;
+        } else {
+            $parts = explode(',', (string) $value);
+        }
+
+        $parts = array_map(
+            static fn ($item): string => strtolower(trim((string) $item)),
+            $parts
+        );
+
+        $parts = array_filter($parts, static fn (string $item): bool => $item !== '');
+
+        return array_values(array_unique($parts));
     }
 }

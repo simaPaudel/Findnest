@@ -10,78 +10,79 @@
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 </head>
 <body>
-    <div class="admin-shell">
-        <aside class="admin-sidebar" id="admin-sidebar" data-admin-sidebar>
-            <div class="admin-brand">
-                <a href="{{ route('admin.dashboard') }}" class="brand-link">
+    @php
+        $adminNavUser = null;
+
+        try {
+            if (auth()->check()) {
+                $adminNavUser = auth()->user();
+            }
+        } catch (\Throwable $e) {
+            $adminNavUser = null;
+        }
+    @endphp
+    <div class="admin-page">
+        <nav class="admin-navbar">
+            <div class="admin-navbar-container">
+                <a href="{{ route('admin.dashboard') }}" class="admin-brand">
                     <span class="brand-mark">FN</span>
                     <span>
                         <span class="brand-name">FindNest</span>
                         <span class="brand-badge">Admin</span>
                     </span>
                 </a>
-            </div>
 
-            <nav class="admin-nav">
-                <a href="{{ route('admin.dashboard') }}" class="admin-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <span>Dashboard</span>
-                </a>
-                <a href="{{ route('admin.properties.index') }}" class="admin-nav-link {{ request()->routeIs('admin.properties.*') ? 'active' : '' }}">
-                    <span>Properties</span>
-                </a>
-                <a href="{{ route('admin.users.index') }}" class="admin-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                    <span>Users</span>
-                </a>
-                <a href="{{ route('admin.reviews.index') }}" class="admin-nav-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
-                    <span>Reviews</span>
-                </a>
-                <a href="{{ route('admin.bookings.index') }}" class="admin-nav-link {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">
-                    <span>Bookings</span>
-                </a>
-            </nav>
-
-            <div class="admin-sidebar-footer">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="admin-nav-link admin-nav-link-button">
-                        <span>Logout</span>
-                    </button>
-                </form>
-            </div>
-        </aside>
-
-        <div class="admin-backdrop" data-admin-backdrop hidden></div>
-
-        <main class="admin-main">
-            <header class="admin-topbar">
-                <div class="admin-topbar-heading">
-                    <button type="button" class="admin-menu-toggle" data-admin-menu-toggle aria-controls="admin-sidebar" aria-expanded="false" aria-label="Toggle navigation">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-
-                    <div>
-                    <p class="page-kicker">Control Center</p>
-                    <h1 class="page-title">@yield('page_title', 'Admin Dashboard')</h1>
-                    </div>
+                <div class="admin-navbar-center">
+                    <a href="{{ route('admin.dashboard') }}" class="admin-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
+                    <a href="{{ route('admin.properties.index') }}" class="admin-nav-link {{ request()->routeIs('admin.properties.*') ? 'active' : '' }}">Properties</a>
+                    <a href="{{ route('admin.users.index') }}" class="admin-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Users</a>
+                    <a href="{{ route('admin.reviews.index') }}" class="admin-nav-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">Reviews</a>
+                    <a href="{{ route('admin.bookings.index') }}" class="admin-nav-link {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">Bookings</a>
                 </div>
 
-                <div class="admin-topbar-actions">
+                <div class="admin-navbar-end">
                     @include('components.notification-dropdown')
 
-                    <div class="admin-profile">
-                        <div class="admin-avatar">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
-                        </div>
-                        <div>
-                            <p class="admin-profile-name">{{ auth()->user()->name ?? 'Admin' }}</p>
-                            <p class="admin-profile-role">Administrator</p>
-                        </div>
-                    </div>
-                </div>
-            </header>
+                    <a href="{{ route('admin.reports.index') }}" class="admin-message-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" title="Reports" aria-label="Reports">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 14a2 2 0 01-2 2H8l-4 4v-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8z"></path>
+                        </svg>
+                    </a>
 
+                    <details class="admin-profile-menu">
+                        <summary class="admin-profile-trigger {{ request()->routeIs('admin.profile.*') ? 'is-active' : '' }}" aria-label="Profile menu">
+                            <div class="admin-avatar">
+                                {{ strtoupper(substr(data_get($adminNavUser, 'name', 'A'), 0, 1)) }}
+                            </div>
+                            <svg class="admin-profile-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </summary>
+
+                        <div class="admin-profile-panel" role="menu" aria-label="Profile menu">
+                            <a href="{{ route('admin.profile.edit') }}" class="admin-profile-item {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">Profile</a>
+                            <form method="POST" action="{{ route('logout') }}" class="admin-profile-logout-form">
+                                @csrf
+                                <button type="submit" class="admin-profile-item admin-profile-logout-button">Logout</button>
+                            </form>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </nav>
+
+        <header class="admin-pagebar">
+            <div>
+                <p class="page-kicker">@yield('page_kicker', 'Control Center')</p>
+                <h1 class="page-title">@yield('page_title', 'Admin Dashboard')</h1>
+            </div>
+
+            <div class="admin-pagebar-meta">
+                @yield('page_meta', now()->format('l, F j, Y'))
+            </div>
+        </header>
+
+        <main class="admin-main">
             <section class="admin-content">
                 @if (session('success'))
                     <div class="admin-alert admin-alert-success">
@@ -101,47 +102,5 @@
             </section>
         </main>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const sidebar = document.querySelector('[data-admin-sidebar]');
-            const backdrop = document.querySelector('[data-admin-backdrop]');
-            const toggle = document.querySelector('[data-admin-menu-toggle]');
-
-            if (!sidebar || !backdrop || !toggle) {
-                return;
-            }
-
-            const setOpen = (open) => {
-                sidebar.classList.toggle('is-open', open);
-                backdrop.hidden = !open;
-                backdrop.classList.toggle('is-open', open);
-                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-                document.body.classList.toggle('admin-sidebar-open', open);
-            };
-
-            toggle.addEventListener('click', function () {
-                setOpen(!sidebar.classList.contains('is-open'));
-            });
-
-            backdrop.addEventListener('click', function () {
-                setOpen(false);
-            });
-
-            sidebar.querySelectorAll('a, button[type="submit"]').forEach(function (link) {
-                link.addEventListener('click', function () {
-                    if (window.innerWidth <= 860) {
-                        setOpen(false);
-                    }
-                });
-            });
-
-            window.addEventListener('resize', function () {
-                if (window.innerWidth > 860) {
-                    setOpen(false);
-                }
-            });
-        });
-    </script>
 </body>
 </html>
