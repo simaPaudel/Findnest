@@ -74,8 +74,12 @@ class AdminProfileController extends Controller
             return $path;
         }
 
-        if (Str::startsWith($path, 'profiles/') || Str::startsWith($path, 'storage/')) {
+        if (Str::startsWith($path, 'storage/')) {
             return asset($path);
+        }
+
+        if (Str::startsWith($path, 'profiles/')) {
+            return asset('storage/' . ltrim($path, '/'));
         }
 
         return asset('storage/' . ltrim($path, '/'));

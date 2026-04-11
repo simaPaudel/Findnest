@@ -290,6 +290,114 @@
             padding-top: 2px;
         }
 
+        .host-application-panel {
+            padding: 20px;
+            display: grid;
+            gap: 16px;
+        }
+
+        .host-application-banner {
+            display: grid;
+            gap: 12px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #fafafa;
+        }
+
+        .host-application-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .host-application-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            line-height: 1;
+            border: 1px solid transparent;
+        }
+
+        .host-application-pending {
+            background: rgba(245, 158, 11, 0.14);
+            color: #b45309;
+            border-color: rgba(245, 158, 11, 0.16);
+        }
+
+        .host-application-approved {
+            background: rgba(16, 185, 129, 0.12);
+            color: #047857;
+            border-color: rgba(16, 185, 129, 0.16);
+        }
+
+        .host-application-rejected {
+            background: rgba(239, 68, 68, 0.12);
+            color: #b91c1c;
+            border-color: rgba(239, 68, 68, 0.16);
+        }
+
+        .host-application-neutral {
+            background: rgba(107, 114, 128, 0.08);
+            color: #4b5563;
+            border-color: rgba(107, 114, 128, 0.12);
+        }
+
+        .host-application-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .host-application-item {
+            padding: 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        .host-application-item span {
+            display: block;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .host-application-item strong {
+            display: block;
+            margin-top: 6px;
+            color: #111827;
+            font-size: 14px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .host-application-note {
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 56, 92, 0.12);
+            background: rgba(255, 56, 92, 0.04);
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .host-application-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
         .account-btn {
             display: inline-flex;
             align-items: center;
@@ -349,6 +457,10 @@
 
             .account-profile-actions .account-btn {
                 width: 100%;
+            }
+
+            .host-application-grid {
+                grid-template-columns: 1fr;
             }
 
             .content-card-header {
@@ -490,5 +602,83 @@
                 </div>
             </form>
         </section>
+
+        <section class="content-card">
+            <div class="content-card-header">
+                <div>
+                    <h2>Become a Host</h2>
+                    <p>Apply to host properties once your documents are reviewed and approved.</p>
+                </div>
+            </div>
+
+            <div class="host-application-panel">
+                @if ($ownerApplication)
+                    <div class="host-application-banner">
+                        <div class="host-application-row">
+                            <span class="host-application-pill host-application-{{ $ownerApplication->status }}">
+                                {{ ucfirst($ownerApplication->status) }}
+                            </span>
+                            <span class="account-form-helper">
+                                Submitted {{ optional($ownerApplication->submitted_at)->format('M d, Y h:i A') ?? 'N/A' }}
+                            </span>
+                        </div>
+
+                        <p style="margin: 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
+                            @if ($ownerApplication->isPending())
+                                Your host request is waiting for admin review. You do not need to submit another application.
+                            @elseif ($ownerApplication->isApproved())
+                                Your host request has been approved. You can use the owner dashboard to manage properties.
+                            @else
+                                Your previous application was rejected. Please review the note below and submit a new request if needed.
+                            @endif
+                        </p>
+
+                        @if ($ownerApplication->admin_notes)
+                            <div class="host-application-note">
+                                <strong style="display:block; color:#111827; margin-bottom:6px;">Admin Note</strong>
+                                {{ $ownerApplication->admin_notes }}
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="host-application-grid">
+                        <div class="host-application-item">
+                            <span>Full Name</span>
+                            <strong>{{ $ownerApplication->full_name }}</strong>
+                        </div>
+                        <div class="host-application-item">
+                            <span>Phone</span>
+                            <strong>{{ $ownerApplication->phone }}</strong>
+                        </div>
+                        <div class="host-application-item">
+                            <span>Citizenship Number</span>
+                            <strong>{{ $ownerApplication->citizenship_number }}</strong>
+                        </div>
+                    </div>
+                @else
+                    <div class="host-application-banner">
+                        <div class="host-application-row">
+                            <span class="host-application-pill host-application-neutral">No Application</span>
+                        </div>
+                        <p style="margin: 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
+                            You have not submitted a host application yet. Use the button below to open the host application form.
+                        </p>
+                    </div>
+                @endif
+
+                <div class="host-application-actions">
+                    <a href="{{ route('user.host-application.show') }}" class="account-btn account-btn-primary">
+                        @if ($ownerApplication && $ownerApplication->isRejected())
+                            Apply Again
+                        @elseif ($ownerApplication && $ownerApplication->isPending())
+                            View Status
+                        @else
+                            Become a Host
+                        @endif
+                    </a>
+                </div>
+            </div>
+        </section>
+
     </div>
 @endsection

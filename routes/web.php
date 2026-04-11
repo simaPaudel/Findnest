@@ -9,6 +9,7 @@ use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\UserBookingController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\User\RoommatePreferenceController;
+use App\Http\Controllers\User\OwnerApplicationController;
 use App\Http\Controllers\User\SavedListingController;
 use App\Http\Controllers\User\ConversationController;
 use App\Http\Controllers\ListingsController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminBookingController;
 use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\OwnerApplicationController as AdminOwnerApplicationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\KhaltiPaymentController;
@@ -155,6 +157,10 @@ Route::prefix('user')->middleware(['auth', 'user'])->group(function () {
     Route::get('/profile', [UserProfileController::class, 'edit'])->name('user.profile.edit');
     Route::put('/profile', [UserProfileController::class, 'update'])->name('user.profile.update');
 
+    // Become a Host
+    Route::get('/host-application', [OwnerApplicationController::class, 'show'])->name('user.host-application.show');
+    Route::post('/host-application', [OwnerApplicationController::class, 'store'])->name('user.host-application.store');
+
     // Roommate Preferences
     Route::get('/roommate-preferences', [RoommatePreferenceController::class, 'edit'])->name('user.roommate-preferences.edit');
     Route::post('/roommate-preferences', [RoommatePreferenceController::class, 'store'])->name('user.roommate-preferences.store');
@@ -268,6 +274,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::post('/properties/{property}/verify', [AdminPropertyController::class, 'verify'])->name('admin.properties.verify');
 
     Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+
+    Route::get('/owner-applications', [AdminOwnerApplicationController::class, 'index'])->name('admin.owner-applications.index');
+    Route::get('/owner-applications/{ownerApplication}', [AdminOwnerApplicationController::class, 'show'])->name('admin.owner-applications.show');
+    Route::post('/owner-applications/{ownerApplication}/approve', [AdminOwnerApplicationController::class, 'approve'])->name('admin.owner-applications.approve');
+    Route::post('/owner-applications/{ownerApplication}/reject', [AdminOwnerApplicationController::class, 'reject'])->name('admin.owner-applications.reject');
 
     Route::get('/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
     Route::post('/reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('admin.reviews.approve');

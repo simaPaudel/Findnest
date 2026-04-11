@@ -363,15 +363,15 @@
                     </div>
                 </div>
 
-                <!-- Role & Gender -->
+                <!-- Account Type & Gender -->
                 <div class="fn-grid-2 mb-5">
                     <div>
-                        <label for="role" class="fn-label">I am a</label>
-                        <select class="fn-select" id="role" name="role" required>
-                            <option value="">Select your role</option>
-                            <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Regular User</option>
-                            <option value="owner" {{ old('role') == 'owner' ? 'selected' : '' }}>Property Owner</option>
-                        </select>
+                        <label class="fn-label">Account Type</label>
+                        <div class="fn-select" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #f9fafb; font-weight: 600;">
+                            <span>Regular User</span>
+                            <span style="font-size: 12px; color: var(--fn-gray-dark); text-transform: uppercase; letter-spacing: 0.08em;">Hosts apply later</span>
+                        </div>
+                        <input type="hidden" name="role" value="user">
                     </div>
                     <div>
                         <label for="gender" class="fn-label">Gender</label>

@@ -30,7 +30,6 @@ class RegistrationController extends Controller
             'last_name' => 'required|string|max:50',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|confirmed|min:6',
-            'role' => 'required|in:user,owner',
             'phone' => 'nullable|string|max:20',
             'gender' => 'required|in:male,female,other'
         ]);
@@ -41,7 +40,7 @@ class RegistrationController extends Controller
             'name' => $request->first_name . ' ' . $request->last_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'role' => User::ROLE_USER,
             'phone' => $request->phone,
             'gender' => $request->gender,
             'verification_token' => $verificationToken

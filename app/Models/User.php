@@ -88,6 +88,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(SavedListing::class, 'user_id');
     }
 
+    public function ownerApplications()
+    {
+        return $this->hasMany(OwnerApplication::class);
+    }
+
+    public function latestOwnerApplication()
+    {
+        return $this->hasOne(OwnerApplication::class)->latestOfMany();
+    }
+
     public function notifications()
     {
         return $this->hasMany(AppNotification::class);

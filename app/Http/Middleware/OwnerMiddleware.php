@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,9 +22,16 @@ class OwnerMiddleware
             return redirect()->route('login');
         }
 
-        // Check if user has owner role
-        if (Auth::user()->role !== 'owner') {
-            abort(403, 'Unauthorized. Owner access only.');
+        $user = Auth::user();
+
+        if ($user->role === User::ROLE_ADMIN) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($user->role !== User::ROLE_OWNER) {
+            return redirect()
+                ->route('user.host-application.show')
+                ->with('error', 'Please submit and get approval for your host application before accessing owner pages.');
         }
 
         return $next($request);

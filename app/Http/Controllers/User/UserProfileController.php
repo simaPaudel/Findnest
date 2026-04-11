@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +17,11 @@ class UserProfileController extends Controller
     public function edit()
     {
         $user = Auth::user();
-        return view('user.profile.edit', compact('user'));
+        $ownerApplication = Schema::hasTable('owner_applications')
+            ? $user->ownerApplications()->latest('id')->first()
+            : null;
+
+        return view('user.profile.edit', compact('user', 'ownerApplication'));
     }
 
     /**
