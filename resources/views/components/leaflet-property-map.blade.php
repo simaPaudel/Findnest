@@ -205,6 +205,11 @@
         border-radius: 18px;
         overflow: hidden;
         background: #f8fafc;
+        cursor: grab;
+    }
+
+    .fn-property-map:active {
+        cursor: grabbing;
     }
 
     @media (max-width: 640px) {
@@ -264,13 +269,13 @@
         const map = L.map(mapEl, {
             center,
             zoom: activeLatitude !== null && activeLongitude !== null ? Math.max(defaultZoom, 15) : defaultZoom,
-            scrollWheelZoom: false,
-            zoomControl: mode !== 'readonly',
-            dragging: mode !== 'readonly',
-            touchZoom: mode !== 'readonly',
-            doubleClickZoom: mode !== 'readonly',
-            boxZoom: mode !== 'readonly',
-            keyboard: mode !== 'readonly',
+            scrollWheelZoom: true,
+            zoomControl: true,
+            dragging: true,
+            touchZoom: true,
+            doubleClickZoom: true,
+            boxZoom: true,
+            keyboard: true,
         });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

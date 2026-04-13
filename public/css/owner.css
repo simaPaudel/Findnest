@@ -44,6 +44,8 @@ body.owner-sidebar-open {
     display: flex;
     align-items: center;
     width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
     padding: 1rem 1.5rem;
     gap: 1rem;
     flex-wrap: wrap;
@@ -461,6 +463,9 @@ body.owner-sidebar-open {
 }
 
 .owner-content {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
     padding: 22px 28px 30px;
 }
 
