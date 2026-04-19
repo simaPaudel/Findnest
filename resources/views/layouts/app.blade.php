@@ -45,7 +45,9 @@
 
     <div class="container-center">
         <div class="card-center">
-            <div class="auth-logo">🏠 FindNest</div>
+            <div class="auth-logo">
+                <x-findnest-logo variant="stacked" size="lg" />
+            </div>
 
             @yield('content')
         </div>

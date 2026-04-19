@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\AdminReportController;
 // Home page
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about-us', [PageController::class, 'about'])->name('pages.about');
+Route::get('/contact-us', [PageController::class, 'contact'])->name('pages.contact');
 Route::get('/faq', [PageController::class, 'faq'])->name('pages.faq');
 Route::get('/help-center', [PageController::class, 'helpCenter'])->name('pages.help-center');
 
@@ -333,4 +334,3 @@ Route::middleware(['auth', 'user'])->prefix('payment/khalti')->group(function ()
     Route::get('/success', [KhaltiPaymentController::class, 'success'])->name('payment.khalti.success');
     Route::get('/failure', [KhaltiPaymentController::class, 'failure'])->name('payment.khalti.failure');
 });
-

@@ -137,7 +137,7 @@
 @endphp
 <div class="page">
     <div class="header">
-        <div class="brand">FindNest Invoice</div>
+        <div class="brand"><x-findnest-logo variant="inline" size="sm" /></div>
         <h1>Monthly Rental Invoice</h1>
         <div class="meta muted">
             Reference #{{ str_pad($booking->id, 6, '0', STR_PAD_LEFT) }} | Issued {{ $booking->created_at->format('M d, Y') }}

@@ -72,7 +72,7 @@
         <div class="px-6 py-5 border-b border-slate-200">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div class="space-y-2">
-                    <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">FindNest Invoice</p>
+                    <x-findnest-logo variant="inline" size="sm" />
                     <h2 class="text-2xl font-semibold text-slate-900">Monthly Rental Invoice</h2>
                     <div class="flex flex-wrap items-center gap-3 text-sm text-slate-500">
                         <span>Reference #{{ str_pad($booking->id, 6, '0', STR_PAD_LEFT) }}</span>

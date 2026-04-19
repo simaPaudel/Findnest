@@ -41,11 +41,8 @@
         <nav class="admin-navbar">
             <div class="admin-navbar-container">
                 <a href="{{ route('admin.dashboard') }}" class="admin-brand">
-                    <span class="brand-mark">FN</span>
-                    <span>
-                        <span class="brand-name">FindNest</span>
-                        <span class="brand-badge">Admin</span>
-                    </span>
+                    <x-findnest-logo variant="inline" size="sm" />
+                    <span class="brand-badge">Admin</span>
                 </a>
 
                 <div class="admin-navbar-center">

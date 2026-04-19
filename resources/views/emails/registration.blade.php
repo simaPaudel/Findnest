@@ -4,6 +4,10 @@
     <title>Verify Your Email</title>
 </head>
 <body>
+    <div style="margin: 8px 0 24px; text-align: center;">
+        <img src="{{ asset('images/findnest-logo.png') }}" alt="FindNest" style="display:inline-block;width:220px;max-width:100%;height:auto;">
+    </div>
+
     <h2>Hello {{ $mailData['name'] }},</h2>
     <p>Thank you for registering at FindNest.</p>
     <p>Please verify your email by clicking the button below:</p>

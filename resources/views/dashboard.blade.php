@@ -9,7 +9,9 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">🏠 FindNest</a>
+            <a class="navbar-brand" href="/" aria-label="FindNest home">
+                <x-findnest-logo variant="inline" size="sm" />
+            </a>
             <div class="navbar-nav ms-auto">
                 <span class="navbar-text me-3">Welcome, {{ Auth::user()->name }}!</span>
                 <form method="POST" action="/logout" class="d-inline">

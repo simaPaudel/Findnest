@@ -211,18 +211,18 @@
         <section class="border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8 py-6">
             <div class="w-full">
                 <form action="{{ route('listings.index') }}" method="GET" class="max-w-5xl mx-auto">
-                    <div class="search-shell p-2 flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-0">
-                        <div class="flex-1 px-4 py-3 lg:border-r lg:border-slate-200">
+                    <div class="search-shell p-2 flex flex-col gap-2 md:flex-row md:items-center md:gap-0">
+                        <div class="flex-1 px-4 py-3 md:border-r md:border-slate-200">
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Where</label>
                             <input type="text" name="q" placeholder="Search destinations" value="{{ request('q') }}" class="w-full bg-transparent outline-none text-sm text-slate-800">
                         </div>
 
-                        <div class="flex-1 px-4 py-3 lg:border-r lg:border-slate-200">
+                        <div class="flex-1 px-4 py-3 md:border-r md:border-slate-200">
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Max Price</label>
                             <input type="number" name="max_price" placeholder="Set budget" value="{{ request('max_price') }}" class="w-full bg-transparent outline-none text-sm text-slate-800">
                         </div>
 
-                        <div class="flex-1 px-4 py-3 lg:border-r lg:border-slate-200">
+                        <div class="flex-1 px-4 py-3 md:border-r md:border-slate-200">
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Property Type</label>
                             <select name="property_type" class="w-full bg-transparent outline-none text-sm text-slate-800">
                                 <option value="">All types</option>
@@ -233,7 +233,7 @@
                             </select>
                         </div>
 
-                        <div class="px-4 py-3 lg:border-r lg:border-slate-200">
+                        <div class="px-4 py-3 md:border-r md:border-slate-200">
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Sort</label>
                             <select name="sort" class="w-full bg-transparent outline-none text-sm text-slate-800" onchange="this.form.submit()">
                                 <option value="">Latest</option>
@@ -243,7 +243,7 @@
                             </select>
                         </div>
 
-                        <button type="submit" class="h-12 w-12 shrink-0 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition lg:mr-1">
+                        <button type="submit" class="h-12 w-12 shrink-0 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition md:mr-1">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
@@ -379,11 +379,7 @@
         </section>
     </main>
 
-    <footer class="border-t border-gray-200 py-10 bg-white">
-        <div class="w-full px-4 sm:px-6 lg:px-8 text-center">
-            <p class="text-sm text-slate-500">&copy; 2026 FindNest. All rights reserved.</p>
-        </div>
-    </footer>
+    @include('components.footer')
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

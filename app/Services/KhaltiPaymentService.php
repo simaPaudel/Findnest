@@ -64,10 +64,31 @@ class KhaltiPaymentService
             // Generate unique transaction ID
             $transactionId = 'TXN_' . $booking->id . '_' . now()->timestamp;
 
+            // Khalti pidx values are single-use and expire quickly, so retire any
+            // existing pending Khalti session before creating a fresh one.
+            $stalePayments = $booking->payments()
+                ->where('payment_method', 'khalti')
+                ->where('payment_status', 'pending')
+                ->get();
+
+            foreach ($stalePayments as $stalePayment) {
+                $gatewayResponse = $stalePayment->payment_gateway_response ?? [];
+                $gatewayResponse['session_state'] = 'expired';
+                $gatewayResponse['expired_at'] = now()->toIso8601String();
+                $gatewayResponse['replaced_by_transaction_id'] = $transactionId;
+
+                $stalePayment->update([
+                    'payment_status' => 'failed',
+                    'payment_gateway_response' => $gatewayResponse,
+                ]);
+            }
+
+            $baseUrl = rtrim(request()->getSchemeAndHttpHost() . request()->getBaseUrl(), '/');
+
             // Prepare payload for Khalti ePayment
             $payload = [
-                'return_url' => route('payment.khalti.success'),
-                'website_url' => config('app.url'),
+                'return_url' => $baseUrl . route('payment.khalti.success', [], false),
+                'website_url' => $baseUrl,
                 'amount' => $amountInPaisa,
                 'purchase_order_id' => $transactionId,
                 'purchase_order_name' => 'Room Booking',
@@ -208,7 +229,8 @@ class KhaltiPaymentService
             
             if ($paymentStatus === 'Completed') {
                 // Use PaymentService to handle success atomically
-                $paymentService = new PaymentService();
+                /** @var PaymentService $paymentService */
+                $paymentService = app(PaymentService::class);
                 
                 try {
                     $booking = $paymentService->handlePaymentSuccess($payment, [
@@ -249,7 +271,8 @@ class KhaltiPaymentService
                 ];
             } else {
                 // Payment failed or in other status - use PaymentService for consistency
-                $paymentService = new PaymentService();
+                /** @var PaymentService $paymentService */
+                $paymentService = app(PaymentService::class);
                 
                 $paymentService->handlePaymentFailure($payment, [
                     'reason' => 'Payment status: ' . $paymentStatus,

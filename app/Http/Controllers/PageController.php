@@ -43,6 +43,44 @@ class PageController extends Controller
         ]);
     }
 
+    public function contact(): View
+    {
+        return view('pages.info', [
+            'pageTitle' => 'Contact Us',
+            'eyebrow' => 'Contact Us',
+            'heading' => 'Get in touch with the FindNest team.',
+            'intro' => 'Use the details below for booking issues, account questions, or general support. We keep contact simple and easy to follow.',
+            'contactCards' => [
+                [
+                    'title' => 'Email',
+                    'value' => 'support@findnest.com',
+                    'note' => 'Best for booking, account, and listing questions.',
+                    'icon' => '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h16v16H4z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 6 8 6 8-6"></path></svg>',
+                ],
+                [
+                    'title' => 'Location',
+                    'value' => 'Pokhara, Nepal',
+                    'note' => 'FindNest is based in Pokhara and supports users from there and beyond.',
+                    'icon' => '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21s6-4.35 6-10a6 6 0 1 0-12 0c0 5.65 6 10 6 10Z"></path><circle cx="12" cy="11" r="2.5" fill="currentColor" stroke="none"></circle></svg>',
+                ],
+                [
+                    'title' => 'Response time',
+                    'value' => '1 to 2 business days',
+                    'note' => 'We reply as soon as possible during working days.',
+                    'icon' => '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v6l4 2"></path></svg>',
+                ],
+            ],
+            'sections' => [
+                [
+                    'title' => 'What to include in your message',
+                    'body' => [
+                        'If your message is about a booking or payment, include the booking ID, property title, and the email used on the account so the team can trace it faster.',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
     public function faq(): View
     {
         return view('pages.info', [
@@ -97,12 +135,12 @@ class PageController extends Controller
                 ],
                 [
                     'title' => 'Account help',
-                    'text' => 'If you need help with login, profile details, or saved listings, review your account pages first and then contact support if the issue remains.',
+                    'text' => 'If you need help with login, profile details, or saved listings, review your account pages first and then reach out if the issue remains.',
                 ],
             ],
             'sections' => [
                 [
-                    'title' => 'Before contacting support',
+                    'title' => 'Before you reach out',
                     'body' => [
                         'Check whether the issue is already visible in your dashboard, booking page, or invoice. Many status updates such as pending review, payment status, and confirmed stays are already shown there.',
                     ],
@@ -113,7 +151,7 @@ class PageController extends Controller
                     ],
                 ],
                 [
-                    'title' => 'Contact support',
+                    'title' => 'Need more help?',
                     'body' => [
                         'If you still need help, contact the FindNest support team with your booking ID or property title so the issue can be traced faster.',
                     ],

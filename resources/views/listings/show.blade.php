@@ -683,11 +683,7 @@
         </div>
     </main>
 
-    <footer class="mt-10 border-t border-slate-200 py-8">
-        <div class="mx-auto max-w-7xl px-4 text-center text-sm text-slate-500 lg:px-6">
-            &copy; 2026 FindNest. All rights reserved.
-        </div>
-    </footer>
+    @include('components.footer')
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
