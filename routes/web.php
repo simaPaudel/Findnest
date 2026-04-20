@@ -294,6 +294,7 @@ Route::prefix('admin')->middleware(['auth', 'blocked', 'admin'])->group(function
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('admin.bookings.index');
     Route::get('/bookings/{booking}', [AdminBookingController::class, 'show'])->whereNumber('booking')->name('admin.bookings.show');
     Route::post('/bookings/{booking}/release', [AdminBookingController::class, 'release'])->name('admin.bookings.release');
+    Route::post('/payments/{payment}/mark-paid', [AdminBookingController::class, 'markPayoutPaid'])->whereNumber('payment')->name('admin.payments.mark-paid');
 
     // Profile Management
     Route::get('/profile', [AdminProfileController::class, 'edit'])->name('admin.profile.edit');

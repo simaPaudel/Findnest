@@ -707,6 +707,18 @@ a {
     vertical-align: middle;
 }
 
+.admin-booking-payment-cell {
+    display: grid;
+    gap: 6px;
+}
+
+.admin-booking-payment-cell p {
+    margin: 0;
+    color: var(--fn-muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
 .admin-bookings-table tbody tr:hover {
     background: #fbfcfe;
 }
@@ -1263,6 +1275,34 @@ a {
     background: #fff;
 }
 
+.admin-payment-history-item-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+.admin-payment-history-action-form {
+    margin: 0;
+}
+
+.admin-payment-history-action-form .admin-btn {
+    min-height: 32px;
+}
+
+.admin-booking-payout-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    color: var(--fn-muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
 .admin-payment-history-item strong {
     display: block;
     font-size: 14px;
@@ -1646,6 +1686,21 @@ a {
     .admin-booking-actions .admin-booking-release-form {
         width: 100%;
         flex: 1 1 auto;
+    }
+
+    .admin-payment-history-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .admin-payment-history-item-actions {
+        width: 100%;
+        justify-content: flex-start;
+        margin-left: 0;
+    }
+
+    .admin-booking-payment-cell {
+        width: 100%;
     }
 
     .admin-booking-release-form button {
@@ -3257,6 +3312,56 @@ a {
     line-height: 1.5;
 }
 
+.admin-booking-owner-payout {
+    display: grid;
+    gap: 16px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--fn-border);
+}
+
+.admin-booking-owner-payout-extra {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-booking-owner-payout-qr,
+.admin-booking-owner-payout-notes {
+    display: grid;
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid var(--fn-border);
+    border-radius: 16px;
+    background: #fff;
+}
+
+.admin-booking-owner-payout-qr span,
+.admin-booking-owner-payout-notes span {
+    color: var(--fn-muted);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-booking-owner-payout-qr img {
+    display: block;
+    width: 100%;
+    max-width: 220px;
+    border-radius: 14px;
+    border: 1px solid var(--fn-border);
+    background: #fff;
+    object-fit: contain;
+}
+
+.admin-booking-owner-payout-notes p {
+    margin: 0;
+    color: var(--fn-charcoal);
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+
 .admin-users-empty {
     padding: 28px 18px;
     text-align: center;
@@ -3339,6 +3444,10 @@ a {
 
     .admin-user-record-view {
         width: 100%;
+    }
+
+    .admin-booking-owner-payout-extra {
+        grid-template-columns: 1fr;
     }
 
     .admin-user-role-row .admin-btn,

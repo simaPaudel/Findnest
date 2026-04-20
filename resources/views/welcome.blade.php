@@ -590,7 +590,7 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 items-start">
-                @forelse($featuredListings->take(4) as $property)
+                @forelse($featuredListings->take(8) as $property)
                     @php
                         $imageUrl = $property->getFirstImageUrl();
                         $minRoomPrice = $property->min_room_price !== null ? (float) $property->min_room_price : null;

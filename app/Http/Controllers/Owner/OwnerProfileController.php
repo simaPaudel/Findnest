@@ -35,6 +35,11 @@ class OwnerProfileController extends Controller
             'phone' => 'nullable|string|max:20',
             'bio' => 'nullable|string|max:1000',
             'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'payout_method' => 'nullable|in:khalti,esewa,bank',
+            'payout_account_name' => 'nullable|string|max:255',
+            'payout_account_number' => 'nullable|string|max:255',
+            'payout_qr' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'payout_notes' => 'nullable|string|max:2000',
         ]);
 
         // Handle profile photo upload
@@ -49,12 +54,27 @@ class OwnerProfileController extends Controller
             $validated['profile_photo'] = $photoPath;
         }
 
+        // Handle payout QR upload
+        if ($request->hasFile('payout_qr')) {
+            if ($owner->payout_qr) {
+                Storage::disk('public')->delete($owner->payout_qr);
+            }
+
+            $qrPath = $request->file('payout_qr')->store('payout-qr', 'public');
+            $validated['payout_qr'] = $qrPath;
+        }
+
         // Update owner profile
         $owner->update([
             'name' => $validated['name'],
             'phone' => $validated['phone'] ?? $owner->phone,
             'bio' => $validated['bio'] ?? $owner->bio,
             'profile_photo' => $validated['profile_photo'] ?? $owner->profile_photo,
+            'payout_method' => $validated['payout_method'] ?? $owner->payout_method,
+            'payout_account_name' => $validated['payout_account_name'] ?? $owner->payout_account_name,
+            'payout_account_number' => $validated['payout_account_number'] ?? $owner->payout_account_number,
+            'payout_qr' => $validated['payout_qr'] ?? $owner->payout_qr,
+            'payout_notes' => $validated['payout_notes'] ?? $owner->payout_notes,
         ]);
 
         return redirect()

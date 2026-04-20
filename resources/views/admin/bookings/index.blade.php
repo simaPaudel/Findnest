@@ -65,6 +65,18 @@
                                     'failed' => 'status-rejected',
                                     default => 'status-neutral',
                                 };
+
+                                $latestSuccessfulPayment = $booking->payments
+                                    ->where('payment_status', 'success')
+                                    ->sortByDesc('paid_at')
+                                    ->first();
+
+                                $payoutState = $latestSuccessfulPayment?->payout_status ?? 'not_applicable';
+                                $payoutClass = match ($payoutState) {
+                                    'completed' => 'status-approved',
+                                    'pending' => 'status-pending',
+                                    default => 'status-neutral',
+                                };
                             @endphp
 
                             <tr>
@@ -118,7 +130,15 @@
                                     <span class="status-pill {{ $statusClass }}">{{ $booking->getStatusLabel() }}</span>
                                 </td>
                                 <td>
-                                    <span class="status-pill {{ $paymentClass }}">{{ $paymentState === 'paid' ? 'Paid' : ucfirst($paymentState) }}</span>
+                                    <div class="admin-booking-payment-cell">
+                                        <span class="status-pill {{ $paymentClass }}">{{ $paymentState === 'paid' ? 'Paid' : ucfirst($paymentState) }}</span>
+                                        <p>
+                                            Payout:
+                                            <span class="status-pill {{ $payoutClass }}">
+                                                {{ $latestSuccessfulPayment ? $latestSuccessfulPayment->getPayoutStatusLabel() : 'N/A' }}
+                                            </span>
+                                        </p>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="admin-booking-table-actions">

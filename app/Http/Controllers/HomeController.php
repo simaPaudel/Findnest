@@ -99,7 +99,7 @@ class HomeController extends Controller
                     $query->where('property_type', $request->property_type);
                 })
                 ->latest()
-                ->limit(4)
+                ->limit(8)
                 ->get();
 
             $featuredListings = $roomAvailabilityService->decoratePropertyCollection($featuredListings);

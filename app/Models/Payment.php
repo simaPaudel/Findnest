@@ -17,6 +17,7 @@ class Payment extends Model
         'transaction_id',
         'payer_email',
         'payment_status',
+        'payout_status',
         'payment_gateway_response',
         'paid_at'
     ];
@@ -25,6 +26,10 @@ class Payment extends Model
         'amount' => 'decimal:2',
         'payment_gateway_response' => 'json',
         'paid_at' => 'datetime',
+    ];
+
+    protected $attributes = [
+        'payout_status' => 'pending',
     ];
 
     /**
@@ -80,6 +85,22 @@ class Payment extends Model
     public function scopePaid($query)
     {
         return $query->where('payment_status', 'success');
+    }
+
+    /**
+     * Scope to filter payments whose owner payout is still pending.
+     */
+    public function scopePayoutPending($query)
+    {
+        return $query->where('payout_status', 'pending');
+    }
+
+    /**
+     * Scope to filter payments whose owner payout is completed.
+     */
+    public function scopePayoutCompleted($query)
+    {
+        return $query->where('payout_status', 'completed');
     }
 
     /**
@@ -174,6 +195,22 @@ class Payment extends Model
     }
 
     /**
+     * Check if payout to the owner is pending.
+     */
+    public function isPayoutPending(): bool
+    {
+        return ($this->payout_status ?? 'pending') === 'pending';
+    }
+
+    /**
+     * Check if payout to the owner is completed.
+     */
+    public function isPayoutCompleted(): bool
+    {
+        return ($this->payout_status ?? 'pending') === 'completed';
+    }
+
+    /**
      * Get human-readable payment status label.
      */
     public function getStatusLabel(): string
@@ -186,6 +223,19 @@ class Payment extends Model
         ];
 
         return $labels[$this->payment_status] ?? $this->payment_status;
+    }
+
+    /**
+     * Get human-readable payout status label.
+     */
+    public function getPayoutStatusLabel(): string
+    {
+        $labels = [
+            'pending' => 'Pending',
+            'completed' => 'Completed',
+        ];
+
+        return $labels[$this->payout_status ?? 'pending'] ?? ucfirst((string) ($this->payout_status ?? 'pending'));
     }
 
     /**
@@ -254,6 +304,16 @@ class Payment extends Model
     {
         $this->update([
             'payment_status' => 'refunded',
+        ]);
+    }
+
+    /**
+     * Mark owner payout as completed.
+     */
+    public function markAsPaidOut(): void
+    {
+        $this->update([
+            'payout_status' => 'completed',
         ]);
     }
 

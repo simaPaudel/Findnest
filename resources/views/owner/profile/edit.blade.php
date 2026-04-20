@@ -5,6 +5,7 @@
 @section('content')
     @php
         $photoUrl = $owner->profile_photo ? asset('storage/' . $owner->profile_photo) : null;
+        $payoutQrUrl = method_exists($owner, 'payoutQrUrl') ? $owner->payoutQrUrl() : null;
     @endphp
 
     <style>
@@ -183,6 +184,18 @@
             color: var(--fn-red, #ff385c);
         }
 
+        .account-payout-qr-preview {
+            width: min(100%, 190px);
+            aspect-ratio: 1 / 1;
+            justify-self: start;
+        }
+
+        .account-payout-qr-preview img {
+            object-fit: contain;
+            background: #fff;
+            padding: 8px;
+        }
+
         .account-photo-placeholder svg {
             width: 48px;
             height: 48px;
@@ -207,6 +220,7 @@
         }
 
         .account-form-input,
+        .account-form-select,
         .account-form-textarea {
             width: 100%;
             padding: 12px 14px;
@@ -219,6 +233,7 @@
         }
 
         .account-form-input:focus,
+        .account-form-select:focus,
         .account-form-textarea:focus {
             outline: none;
             border-color: rgba(255, 56, 92, 0.35);
@@ -234,6 +249,11 @@
         .account-form-input[disabled] {
             background: #f9fafb;
             color: #6b7280;
+        }
+
+        .account-form-select {
+            appearance: none;
+            background: #fff;
         }
 
         .account-form-textarea {
@@ -433,6 +453,71 @@
                                 @error('bio')
                                     <div class="account-form-error">{{ $message }}</div>
                                 @enderror
+                            </div>
+                        </div>
+
+                        <div class="account-profile-section">
+                            <h3>Payout Details</h3>
+                            <p>Share the payout route admin should use when sending your earnings.</p>
+
+                            <div style="margin-top: 16px; display: grid; gap: 14px;">
+                                <div class="account-form-group">
+                                    <label for="payout_method" class="account-form-label">Payout Method</label>
+                                    <select name="payout_method" id="payout_method" class="account-form-input account-form-select @error('payout_method') error @enderror">
+                                        <option value="">Select method</option>
+                                        <option value="khalti" {{ old('payout_method', $owner->payout_method) === 'khalti' ? 'selected' : '' }}>Khalti</option>
+                                        <option value="esewa" {{ old('payout_method', $owner->payout_method) === 'esewa' ? 'selected' : '' }}>eSewa</option>
+                                        <option value="bank" {{ old('payout_method', $owner->payout_method) === 'bank' ? 'selected' : '' }}>Bank Transfer</option>
+                                    </select>
+                                    @error('payout_method')
+                                        <div class="account-form-error">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="account-form-group">
+                                    <label for="payout_account_name" class="account-form-label">Account Name</label>
+                                    <input type="text" name="payout_account_name" id="payout_account_name" class="account-form-input @error('payout_account_name') error @enderror" value="{{ old('payout_account_name', $owner->payout_account_name) }}">
+                                    @error('payout_account_name')
+                                        <div class="account-form-error">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="account-form-group">
+                                    <label for="payout_account_number" class="account-form-label">Account Number</label>
+                                    <input type="text" name="payout_account_number" id="payout_account_number" class="account-form-input @error('payout_account_number') error @enderror" value="{{ old('payout_account_number', $owner->payout_account_number) }}">
+                                    @error('payout_account_number')
+                                        <div class="account-form-error">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="account-form-group">
+                                    <label for="payout_qr" class="account-form-label">QR Upload</label>
+                                    <div class="account-photo-preview account-payout-qr-preview">
+                                        @if ($payoutQrUrl)
+                                            <img src="{{ $payoutQrUrl }}" alt="Payout QR">
+                                        @else
+                                            <div class="account-photo-placeholder">
+                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5V7.5A2.5 2.5 0 015.5 5h13A2.5 2.5 0 0121 7.5v9A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5zM8 12l2.5 2.5L16 9"></path>
+                                                </svg>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <input type="file" name="payout_qr" id="payout_qr" class="account-form-input @error('payout_qr') error @enderror" accept="image/jpeg,image/png,image/jpg,image/webp">
+                                    <div class="account-form-helper">Optional. JPG, PNG, WEBP. Max size: 2MB.</div>
+                                    @error('payout_qr')
+                                        <div class="account-form-error">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="account-form-group">
+                                    <label for="payout_notes" class="account-form-label">Notes</label>
+                                    <textarea name="payout_notes" id="payout_notes" class="account-form-textarea @error('payout_notes') error @enderror" maxlength="2000">{{ old('payout_notes', $owner->payout_notes) }}</textarea>
+                                    <div class="account-form-helper">Optional. Add any payout instructions for the admin.</div>
+                                    @error('payout_notes')
+                                        <div class="account-form-error">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
                     </div>

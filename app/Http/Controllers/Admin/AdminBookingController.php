@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Payment;
 use App\Models\Property;
 use App\Models\Report;
 use App\Models\User;
 use App\Services\BookingService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class AdminBookingController extends Controller
@@ -93,5 +95,38 @@ class AdminBookingController extends Controller
                 ->route('admin.bookings.index')
                 ->with('error', $e->getMessage());
         }
+    }
+
+    public function markPayoutPaid(Payment $payment)
+    {
+        $payment->loadMissing(['booking.property.owner']);
+
+        if ($payment->payment_status !== 'success') {
+            return back()->with('error', 'Only successful payments can be marked as paid.');
+        }
+
+        if ($payment->isPayoutCompleted()) {
+            return back()->with('success', 'Payout is already marked as completed.');
+        }
+
+        $payment->markAsPaidOut();
+
+        try {
+            $owner = $payment->booking?->property?->owner;
+
+            if ($owner) {
+                NotificationService::sendNotification(
+                    (int) $owner->id,
+                    'payout',
+                    'Payout completed',
+                    'Payout for booking #' . $payment->booking->id . ' has been marked as paid.',
+                    route('owner.bookings.index')
+                );
+            }
+        } catch (\Throwable $e) {
+            // Notification failures must not block payout updates.
+        }
+
+        return back()->with('success', 'Payout marked as completed.');
     }
 }

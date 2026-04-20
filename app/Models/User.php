@@ -25,6 +25,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'gender',
         'bio',
         'profile_photo',
+        'payout_method',
+        'payout_account_name',
+        'payout_account_number',
+        'payout_qr',
+        'payout_notes',
         'trust_points',
         'is_verified',
         'is_blocked',
@@ -105,6 +110,37 @@ class User extends Authenticatable implements MustVerifyEmail
     public function avatarInitial(): string
     {
         return strtoupper(Str::substr(trim((string) ($this->name ?: 'U')), 0, 1));
+    }
+
+    public function payoutQrUrl(): ?string
+    {
+        if (! $this->payout_qr) {
+            return null;
+        }
+
+        if (Str::startsWith($this->payout_qr, ['http://', 'https://', '//'])) {
+            return $this->payout_qr;
+        }
+
+        $path = ltrim($this->payout_qr, '/');
+
+        if (file_exists(public_path($path))) {
+            return asset($path);
+        }
+
+        if (Str::startsWith($path, 'storage/')) {
+            return asset($path);
+        }
+
+        if (file_exists(storage_path('app/public/' . $path))) {
+            return asset('storage/' . $path);
+        }
+
+        if (Str::startsWith($path, 'payout-qr/')) {
+            return asset('storage/' . $path);
+        }
+
+        return asset($path);
     }
 
     // Relationships
