@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Brian2694\Toastr\Facades\Toastr;
 use Closure;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -23,6 +24,15 @@ class OwnerMiddleware
         }
 
         $user = Auth::user();
+
+        if ($user?->isBlocked()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            Toastr::error('Your account has been deactivated. Please contact support.');
+
+            return redirect()->route('login');
+        }
 
         if ($user->role === User::ROLE_ADMIN) {
             return redirect()->route('admin.dashboard');

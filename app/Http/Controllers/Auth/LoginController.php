@@ -26,8 +26,18 @@ class LoginController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
+            if ($user->isBlocked()) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                Toastr::error('Your account has been deactivated. Please contact support.');
+                return redirect()->route('login');
+            }
+
             if (!$user->is_verified) {
                 Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
                 Toastr::error('Please verify your email before logging in.');
                 return redirect()->route('login');
             }

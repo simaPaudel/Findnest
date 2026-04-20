@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
 
                 $view->with([
                     'notificationCount' => NotificationService::countUnreadNotifications($userId),
-                    'recentNotifications' => NotificationService::fetchNotifications($userId, 5),
+                    'recentNotifications' => NotificationService::fetchNotifications($userId, null),
                 ]);
             } catch (\Throwable $e) {
                 $view->with([

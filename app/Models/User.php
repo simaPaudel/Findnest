@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -26,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile_photo',
         'trust_points',
         'is_verified',
+        'is_blocked',
         'email_verified_at',
         'verification_token'
     ];
@@ -39,12 +41,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'trust_points' => 'integer',
         'is_verified' => 'boolean',
+        'is_blocked' => 'boolean',
     ];
 
     protected $attributes = [
         'role' => self::ROLE_USER,
         'trust_points' => 0,
         'is_verified' => false,
+        'is_blocked' => false,
     ];
 
     public function isUser(): bool
@@ -60,6 +64,47 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isBlocked(): bool
+    {
+        return (bool) $this->is_blocked;
+    }
+
+    public function profilePhotoUrl(): ?string
+    {
+        if (! $this->profile_photo) {
+            return null;
+        }
+
+        if (Str::startsWith($this->profile_photo, ['http://', 'https://', '//'])) {
+            return $this->profile_photo;
+        }
+
+        $path = ltrim($this->profile_photo, '/');
+
+        if (file_exists(public_path($path))) {
+            return asset($path);
+        }
+
+        if (Str::startsWith($path, 'storage/')) {
+            return asset($path);
+        }
+
+        if (file_exists(storage_path('app/public/' . $path))) {
+            return asset('storage/' . $path);
+        }
+
+        if (Str::startsWith($path, 'profiles/')) {
+            return asset('storage/' . $path);
+        }
+
+        return asset($path);
+    }
+
+    public function avatarInitial(): string
+    {
+        return strtoupper(Str::substr(trim((string) ($this->name ?: 'U')), 0, 1));
     }
 
     // Relationships

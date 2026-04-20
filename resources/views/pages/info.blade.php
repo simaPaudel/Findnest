@@ -3,6 +3,8 @@
     $isContact = ($pageTitle ?? '') === 'Contact Us';
     $isHelp = ($pageTitle ?? '') === 'Help Center';
     $isFaq = ($pageTitle ?? '') === 'FAQ';
+    $isTerms = ($pageTitle ?? '') === 'Terms & Conditions';
+    $isPrivacy = ($pageTitle ?? '') === 'Privacy Policy';
 
     $aboutValues = [
         [
@@ -75,6 +77,8 @@
     $faqSource = !empty($faqItems ?? []) ? $faqItems : $helpFaqs;
 
     $contactCards = $contactCards ?? [];
+    $policyCards = $policyCards ?? [];
+    $closingText = $closingText ?? '';
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -630,6 +634,32 @@
                     <div class="contact-actions">
                         <a class="primary-link" href="{{ route('pages.contact') }}">Contact Us</a>
                     </div>
+                </section>
+            </div>
+        @elseif($isTerms || $isPrivacy)
+            <section class="page-hero hero-center">
+                <span class="page-eyebrow">{{ $eyebrow }}</span>
+                <div>
+                    <h1 class="page-title">{{ $heading }}</h1>
+                    <p class="page-intro">
+                        {{ $intro }}
+                    </p>
+                </div>
+            </section>
+
+            <div class="content-stack">
+                <section class="values-grid">
+                    @foreach($policyCards as $card)
+                        <article class="value-card">
+                            <span class="card-icon" aria-hidden="true">{!! $card['icon'] !!}</span>
+                            <h2 class="card-title">{{ $card['title'] }}</h2>
+                            <p class="card-copy">{{ $card['description'] }}</p>
+                        </article>
+                    @endforeach
+                </section>
+
+                <section class="closing-card">
+                    <p>{{ $closingText }}</p>
                 </section>
             </div>
         @else

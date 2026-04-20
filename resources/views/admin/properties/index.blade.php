@@ -1,27 +1,28 @@
 @extends('admin.layout')
 
 @section('title', 'Properties')
-@section('page_title', 'Property Moderation')
+@section('page_title', 'Properties')
+@section('hide_pagebar', 'true')
 
 @section('content')
-<div class="admin-dashboard">
-    <section class="content-card">
+<div class="admin-dashboard admin-properties-page">
+    <section class="content-card admin-properties-filters-card">
         <div class="content-card-header">
             <div>
-                <h2>Filter Properties</h2>
-                <p>Review listings by status and city before moderation.</p>
+                <h2>Filters</h2>
+                <p>Narrow listings by status or city.</p>
             </div>
         </div>
 
-        <div style="padding: 20px 22px;">
-            <form method="GET" action="{{ route('admin.properties.index') }}" class="admin-filters">
+        <div class="admin-properties-card-body">
+            <form method="GET" action="{{ route('admin.properties.index') }}" class="admin-filters admin-properties-filter-form">
                 <div class="admin-filter-group">
                     <label for="status">Status</label>
                     <select id="status" name="status" class="admin-input">
                         <option value="">All Statuses</option>
-                        <option value="pending" @selected(request('status')==='pending' )>Pending</option>
-                        <option value="approved" @selected(request('status')==='approved' )>Approved</option>
-                        <option value="rejected" @selected(request('status')==='rejected' )>Rejected</option>
+                        <option value="pending" @selected(request('status') === 'pending')>Pending</option>
+                        <option value="approved" @selected(request('status') === 'approved')>Approved</option>
+                        <option value="rejected" @selected(request('status') === 'rejected')>Rejected</option>
                     </select>
                 </div>
 
@@ -37,102 +38,124 @@
                 </div>
 
                 <div class="admin-filter-actions">
-                    <button type="submit" class="admin-btn admin-btn-primary">Apply Filters</button>
+                    <button type="submit" class="admin-btn admin-btn-primary">Apply</button>
                     <a href="{{ route('admin.properties.index') }}" class="admin-btn admin-btn-secondary">Reset</a>
                 </div>
             </form>
         </div>
     </section>
 
-    <section class="content-card">
-        <div class="content-card-header">
+    <section class="content-card admin-properties-card admin-properties-results-card">
+        <div class="content-card-header admin-properties-results-header">
             <div>
-                <h2>All Properties</h2>
-                <p>{{ $properties->total() }} listing{{ $properties->total() === 1 ? '' : 's' }} found.</p>
+                <h2>Listings</h2>
+                <p>{{ $properties->total() }} total.</p>
             </div>
         </div>
 
-        <div class="table-wrap">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Owner</th>
-                        <th>City</th>
-                        <th>Rent</th>
-                        <th>Room Type</th>
-                        <th>Status</th>
-                        <th>Verified</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($properties as $property)
-                    <tr>
-                        <td>
-                            <div class="primary-text">{{ $property->title }}</div>
-                            @if ($property->status === 'approved')
-                            <div class="muted-text">
-                                <a href="{{ route('listings.show', $property) }}" class="admin-inline-link" target="_blank" rel="noopener">
-                                    View public listing
-                                </a>
+        <div class="admin-properties-grid">
+            @forelse ($properties as $property)
+                @php
+                    $propertyImage = $property->getFirstImageUrl();
+                    $roomCount = $property->rooms->count();
+                    $summary = $property->getOwnerListingSummary();
+                @endphp
+
+                <article class="admin-property-card">
+                    <a href="{{ route('listings.show', $property) }}" class="admin-property-media">
+                        <img src="{{ $propertyImage }}" alt="{{ $property->title }}">
+                        <div class="admin-property-media-overlay">
+                            <span class="admin-property-city">{{ $property->city ?? 'N/A' }}</span>
+                            <span class="admin-property-view-link">View details</span>
+                        </div>
+                    </a>
+
+                    <div class="admin-property-body">
+                        <div class="admin-property-head">
+                            <div class="admin-property-head-copy">
+                                <h3 class="admin-property-title">{{ $property->title }}</h3>
+                                <p class="admin-property-owner">
+                                    {{ $property->owner->name ?? 'N/A' }}
+                                </p>
                             </div>
-                            @endif
-                        </td>
-                        <td>{{ $property->owner->name ?? 'N/A' }}</td>
-                        <td>{{ $property->city ?? 'N/A' }}</td>
-                        <td>Rs {{ number_format((float) $property->rent_price, 2) }}</td>
-                        <td>{{ $property->getPropertyTypeLabel() ?? 'N/A' }}</td>
-                        <td>
-                            <span class="status-pill status-{{ $property->status }}">
-                                {{ $property->status }}
-                            </span>
-                        </td>
-                        <td>
+
+                            <a href="{{ route('listings.show', $property) }}" class="admin-property-open-link">
+                                Open
+                            </a>
+                        </div>
+
+                        <div class="admin-property-meta">
+                            <div class="admin-property-meta-item">
+                                <span>City</span>
+                                <strong>{{ $property->city ?? 'N/A' }}</strong>
+                            </div>
+                            <div class="admin-property-meta-item">
+                                <span>Rent</span>
+                                <strong>Rs {{ number_format((float) $property->rent_price, 2) }}</strong>
+                            </div>
+                            <div class="admin-property-meta-item">
+                                <span>Type</span>
+                                <strong>{{ $property->getPropertyTypeLabel() ?? 'N/A' }}</strong>
+                            </div>
+                            <div class="admin-property-meta-item">
+                                <span>Rooms</span>
+                                <strong>{{ $roomCount > 0 ? $roomCount : '0' }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="admin-property-badges">
+                            <span class="status-pill status-{{ $property->status }}">{{ $property->status }}</span>
                             <span class="status-pill {{ $property->is_verified ? 'status-approved' : 'status-neutral' }}">
                                 {{ $property->is_verified ? 'Verified' : 'Unverified' }}
                             </span>
-                        </td>
-                        <td>{{ optional($property->created_at)->format('M d, Y') ?? 'N/A' }}</td>
-                        <td>
-                            <div class="admin-action-stack">
-                                @if ($property->status !== 'approved')
+                        </div>
+
+                        <div class="admin-property-summary">
+                            <span>{{ $summary }}</span>
+                            <span>Created {{ optional($property->created_at)->format('M d, Y') ?? 'N/A' }}</span>
+                        </div>
+
+                        <div class="admin-property-actions">
+                            @if ($property->status !== 'approved')
                                 <form method="POST" action="{{ route('admin.properties.approve', $property) }}">
                                     @csrf
                                     <button type="submit" class="admin-btn admin-btn-success">Approve</button>
                                 </form>
-                                @endif
+                            @endif
 
-                                @if ($property->status !== 'rejected')
+                            @if ($property->status !== 'rejected')
                                 <form method="POST" action="{{ route('admin.properties.reject', $property) }}">
                                     @csrf
                                     <button type="submit" class="admin-btn admin-btn-danger">Reject</button>
                                 </form>
-                                @endif
+                            @endif
 
-                                <form method="POST" action="{{ route('admin.properties.verify', $property) }}">
-                                    @csrf
-                                    <button type="submit" class="admin-btn admin-btn-secondary">
-                                        {{ $property->is_verified ? 'Unverify' : 'Verify' }}
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="9" class="empty-cell">No properties matched your filters.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                            <form method="POST" action="{{ route('admin.properties.verify', $property) }}">
+                                @csrf
+                                <button type="submit" class="admin-btn admin-btn-secondary">
+                                    {{ $property->is_verified ? 'Unverify' : 'Verify' }}
+                                </button>
+                            </form>
+
+                            <form method="POST" action="{{ route('admin.properties.destroy', $property) }}" onsubmit="return confirm('Remove this property? This cannot be undone.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="admin-btn admin-btn-danger admin-btn-danger-soft">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+            @empty
+                <div class="empty-cell admin-properties-empty">
+                    No listings match these filters.
+                </div>
+            @endforelse
         </div>
 
         @if ($properties->hasPages())
-        <div style="padding: 18px 22px; border-top: 1px solid var(--fn-line);">
-            {{ $properties->links() }}
-        </div>
+            <div class="admin-properties-pagination">
+                {{ $properties->links() }}
+            </div>
         @endif
     </section>
 </div>

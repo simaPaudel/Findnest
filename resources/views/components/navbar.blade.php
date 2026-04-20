@@ -2,6 +2,13 @@
 @php
     $navbarUser = null;
     $navbarHomeRoute = route('home');
+    $navbarRole = 'guest';
+    $navbarCenterLinks = [];
+    $navbarSecondaryLink = null;
+    $navbarProfileRoute = route('login');
+    $navbarAvatarUrl = null;
+    $navbarProfileFallbackInitial = 'A';
+    $navbarShowNotifications = false;
 
     try {
         if (auth()->check()) {
@@ -11,14 +18,93 @@
         $navbarUser = null;
     }
 
-    if ($navbarUser) {
-        if ($navbarUser->isUser()) {
-            $navbarHomeRoute = route('user.dashboard');
-        } elseif ($navbarUser->isOwner()) {
-            $navbarHomeRoute = route('owner.dashboard');
-        } elseif ($navbarUser->isAdmin()) {
-            $navbarHomeRoute = route('admin.dashboard');
+    $resolveAvatarUrl = function (?string $path): ?string {
+        if (! $path) {
+            return null;
         }
+
+        if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//'])) {
+            return $path;
+        }
+
+        if (\Illuminate\Support\Str::startsWith($path, 'storage/')) {
+            return asset($path);
+        }
+
+        if (\Illuminate\Support\Str::startsWith($path, 'profiles/')) {
+            return asset('storage/' . ltrim($path, '/'));
+        }
+
+        return asset('storage/' . ltrim($path, '/'));
+    };
+
+    if ($navbarUser) {
+        $navbarAvatarUrl = method_exists($navbarUser, 'profilePhotoUrl')
+            ? $navbarUser->profilePhotoUrl()
+            : $resolveAvatarUrl(data_get($navbarUser, 'profile_photo'));
+        $navbarShowNotifications = true;
+        $navbarProfileFallbackInitial = method_exists($navbarUser, 'avatarInitial')
+            ? $navbarUser->avatarInitial()
+            : strtoupper(substr(data_get($navbarUser, 'name', 'A'), 0, 1));
+
+        if ($navbarUser->isUser()) {
+            $navbarRole = 'user';
+            $navbarHomeRoute = route('user.dashboard');
+            $navbarProfileRoute = route('user.profile.edit');
+            $navbarCenterLinks = [
+                ['label' => 'Find Listings', 'url' => route('listings.index'), 'active' => request()->routeIs('listings.index')],
+                ['label' => 'Find Roommates', 'url' => route('roommates.index'), 'active' => request()->routeIs('roommates.*', 'user.roommate*')],
+                ['label' => 'Saved', 'url' => route('user.saved-listings.index'), 'active' => request()->routeIs('user.saved*')],
+                ['label' => 'My Bookings', 'url' => route('user.bookings.index'), 'active' => request()->routeIs('user.bookings*')],
+            ];
+            $navbarSecondaryLink = [
+                'title' => 'Messages',
+                'url' => route('user.messages.index'),
+                'active' => request()->routeIs('user.messages.*'),
+                'icon' => 'message',
+            ];
+        } elseif ($navbarUser->isOwner()) {
+            $navbarRole = 'owner';
+            $navbarHomeRoute = route('owner.dashboard');
+            $navbarProfileRoute = route('owner.profile.edit');
+            $navbarCenterLinks = [
+                ['label' => 'Dashboard', 'url' => route('owner.dashboard'), 'active' => request()->routeIs('owner.dashboard')],
+                ['label' => 'Properties', 'url' => route('owner.listings.index'), 'active' => request()->routeIs('owner.listings.index')],
+                ['label' => 'Add Property', 'url' => route('owner.listings.create'), 'active' => request()->routeIs('owner.listings.create')],
+                ['label' => 'Booking Requests', 'url' => route('owner.bookings.index'), 'active' => request()->routeIs('owner.bookings.*')],
+                ['label' => 'Reviews', 'url' => route('owner.reviews.index'), 'active' => request()->routeIs('owner.reviews.*')],
+            ];
+            $navbarSecondaryLink = [
+                'title' => 'Messages',
+                'url' => route('owner.messages.index'),
+                'active' => request()->routeIs('owner.messages.*', 'owner.conversations.*'),
+                'icon' => 'message',
+            ];
+        } elseif ($navbarUser->isAdmin()) {
+            $navbarRole = 'admin';
+            $navbarHomeRoute = route('admin.dashboard');
+            $navbarProfileRoute = route('admin.profile.edit');
+            $navbarCenterLinks = [
+                ['label' => 'Dashboard', 'url' => route('admin.dashboard'), 'active' => request()->routeIs('admin.dashboard')],
+                ['label' => 'Properties', 'url' => route('admin.properties.index'), 'active' => request()->routeIs('admin.properties.*')],
+                ['label' => 'Users', 'url' => route('admin.users.index'), 'active' => request()->routeIs('admin.users.*')],
+                ['label' => 'Host Applications', 'url' => route('admin.owner-applications.index'), 'active' => request()->routeIs('admin.owner-applications.*')],
+                ['label' => 'Reviews', 'url' => route('admin.reviews.index'), 'active' => request()->routeIs('admin.reviews.*')],
+                ['label' => 'Bookings', 'url' => route('admin.bookings.index'), 'active' => request()->routeIs('admin.bookings.*')],
+            ];
+            $navbarSecondaryLink = [
+                'title' => 'Reports',
+                'url' => route('admin.reports.index'),
+                'active' => request()->routeIs('admin.reports.*'),
+                'icon' => 'reports',
+            ];
+        }
+    } else {
+        $navbarCenterLinks = [
+            ['label' => 'Browse Listings', 'url' => route('home') . '#featured', 'active' => false],
+            ['label' => 'How It Works', 'url' => route('home') . '#how-it-works', 'active' => false],
+            ['label' => 'Find Roommates', 'url' => route('home') . '#roommates', 'active' => false],
+        ];
     }
 @endphp
 <nav class="fn-navbar">
@@ -30,45 +116,53 @@
 
         <!-- Center Navigation -->
         <div class="fn-navbar-center">
-            @if($navbarUser)
-                <a href="{{ route('listings.index') }}" class="fn-nav-link {{ request()->routeIs('listings.index') ? 'active' : '' }}">Find Listings</a>
-                <a href="{{ route('roommates.index') }}" class="fn-nav-link {{ request()->routeIs('roommates.*', 'user.roommate*') ? 'active' : '' }}">Find Roommates</a>
-                <a href="{{ route('user.saved-listings.index') }}" class="fn-nav-link {{ request()->routeIs('user.saved*') ? 'active' : '' }}">Saved</a>
-                <a href="{{ route('user.bookings.index') }}" class="fn-nav-link {{ request()->routeIs('user.bookings*') ? 'active' : '' }}">My Bookings</a>
-            @else
-                <a href="{{ route('home') }}#featured" class="fn-nav-link">Browse Listings</a>
-                <a href="{{ route('home') }}#how-it-works" class="fn-nav-link">How It Works</a>
-                <a href="{{ route('home') }}#roommates" class="fn-nav-link">Find Roommates</a>
-            @endif
+            @foreach($navbarCenterLinks as $navLink)
+                <a href="{{ $navLink['url'] }}" class="fn-nav-link {{ $navLink['active'] ? 'active' : '' }}">
+                    {{ $navLink['label'] }}
+                </a>
+            @endforeach
         </div>
 
         <!-- Right Section - RIGHT CORNER -->
         <div class="fn-navbar-end">
             @if($navbarUser)
-                @include('components.notification-dropdown')
+                @if($navbarShowNotifications)
+                    @include('components.notification-dropdown')
+                @endif
 
-                @if($navbarUser && $navbarUser->isUser())
-                    <a href="{{ route('user.messages.index') }}" class="fn-message-link {{ request()->routeIs('user.messages.*') ? 'active' : '' }}" title="Messages" aria-label="Messages">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m7 6l-3.5-2H7a4 4 0 01-4-4V8a4 4 0 014-4h10a4 4 0 014 4v6a4 4 0 01-4 4h-1.5L12 20z"></path>
-                        </svg>
-                        <span class="fn-message-badge" id="fn-user-unread-badge" hidden>0</span>
+                @if($navbarSecondaryLink)
+                    <a href="{{ $navbarSecondaryLink['url'] }}" class="fn-message-link {{ $navbarSecondaryLink['active'] ? 'active' : '' }}" title="{{ $navbarSecondaryLink['title'] }}" aria-label="{{ $navbarSecondaryLink['title'] }}">
+                        @if($navbarSecondaryLink['icon'] === 'reports')
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m7 6l-3.5-2H7a4 4 0 01-4-4V8a4 4 0 014-4h10a4 4 0 014 4v6a4 4 0 01-4 4h-1.5L12 20z"></path>
+                            </svg>
+                        @else
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m7 6l-3.5-2H7a4 4 0 01-4-4V8a4 4 0 014-4h10a4 4 0 014 4v6a4 4 0 01-4 4h-1.5L12 20z"></path>
+                            </svg>
+                        @endif
+                        @if($navbarRole === 'user')
+                            <span class="fn-message-badge" id="fn-user-unread-badge" hidden>0</span>
+                        @endif
                     </a>
                 @endif
 
                 <details class="fn-profile-menu">
                     <summary class="fn-profile-avatar" title="Profile" aria-label="Profile menu">
-                        @if($navbarUser && $navbarUser->profile_photo)
-                            <img src="{{ asset($navbarUser->profile_photo) }}" alt="{{ $navbarUser->name }}" />
+                        @if($navbarAvatarUrl)
+                            <img
+                                src="{{ $navbarAvatarUrl }}"
+                                alt="{{ $navbarUser->name }}"
+                                onerror="this.style.display='none'; this.nextElementSibling.removeAttribute('hidden');"
+                            />
+                            <span class="fn-profile-avatar-fallback" hidden>{{ $navbarProfileFallbackInitial }}</span>
                         @else
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
+                            <span class="fn-profile-avatar-fallback">{{ $navbarProfileFallbackInitial }}</span>
                         @endif
                     </summary>
 
                     <div class="fn-profile-panel" role="menu" aria-label="Profile menu">
-                        <a href="{{ route('user.profile.edit') }}" class="fn-profile-item">Profile</a>
+                        <a href="{{ $navbarProfileRoute }}" class="fn-profile-item">Profile</a>
 
                         <form method="POST" action="{{ route('logout') }}" class="fn-profile-logout-form">
                             @csrf
@@ -99,8 +193,9 @@
         display: flex;
         align-items: center;
         width: 100%;
-        padding: 1rem 1.5rem;
-        max-width: 100%;
+        max-width: 1520px;
+        margin: 0 auto;
+        padding: 0.95rem 1.9rem;
         gap: 1rem;
         flex-wrap: wrap;
     }
@@ -114,7 +209,7 @@
         color: var(--fn-red, #ff385c);
         text-decoration: none;
         flex-shrink: 0;
-        margin-left: 0.85rem;
+        margin-left: 0;
         transition: all 0.2s ease;
     }
 
@@ -130,7 +225,7 @@
     .fn-navbar-center {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.4rem;
         flex: 1;
         justify-content: center;
         min-width: 0;
@@ -158,7 +253,7 @@
     .fn-navbar-end {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.4rem;
         flex-shrink: 0;
         margin-left: auto;
         flex-wrap: wrap;
@@ -167,8 +262,8 @@
 
     .fn-message-link {
         position: relative;
-        width: 36px;
-        height: 36px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         border: 1px solid var(--fn-gray-border, #e5e7eb);
         background: #fff;
@@ -181,8 +276,8 @@
     }
 
     .fn-message-link svg {
-        width: 1.15rem;
-        height: 1.15rem;
+        width: 1.05rem;
+        height: 1.05rem;
     }
 
     .fn-message-link:hover,
@@ -210,8 +305,8 @@
     }
 
         .fn-profile-avatar {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             background: var(--fn-gray-light, #f3f4f6);
             border: 1px solid var(--fn-gray-border, #e5e7eb);
@@ -220,6 +315,8 @@
             align-items: center;
             justify-content: center;
             color: var(--fn-charcoal, #1f2937);
+            font-size: 0.82rem;
+            font-weight: 700;
             text-decoration: none;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -231,14 +328,27 @@
     }
 
     .fn-profile-avatar svg {
-        width: 1.25rem;
-        height: 1.25rem;
+        width: 1.05rem;
+        height: 1.05rem;
     }
 
         .fn-profile-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .fn-profile-avatar-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #fff5f7 0%, #ffe9ee 100%);
+            color: var(--fn-red, #ff385c);
+            font-size: 0.82rem;
+            font-weight: 700;
+            line-height: 1;
         }
 
         .fn-profile-menu {

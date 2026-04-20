@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ResolveReportRequest;
 use App\Models\Report;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +34,19 @@ class AdminReportController extends Controller
             $query->for($request->reportable_type);
         }
 
+        // Filter by user relevance
+        if ($request->filled('user')) {
+            $userId = (int) $request->integer('user');
+            $query->where(function ($userQuery) use ($userId) {
+                $userQuery->where('reporter_id', $userId)
+                    ->orWhere('reviewed_by', $userId)
+                    ->orWhere(function ($reportableQuery) use ($userId) {
+                        $reportableQuery->where('reportable_type', User::class)
+                            ->where('reportable_id', $userId);
+                    });
+            });
+        }
+
         // Search by reason or reporter name
         if ($request->has('search') && $request->search !== '') {
             $searchTerm = '%' . $request->search . '%';
@@ -49,7 +63,7 @@ class AdminReportController extends Controller
         // Sort by creation date (newest first)
         $query->recent();
 
-        $reports = $query->paginate(20);
+        $reports = $query->paginate(20)->withQueryString();
 
         // Get statistics for dashboard
         $stats = [

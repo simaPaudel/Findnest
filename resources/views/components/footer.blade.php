@@ -3,38 +3,38 @@
     .fn-footer {
         background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
         border-top: 1px solid rgba(148, 163, 184, 0.18);
-        padding: 72px 0 28px;
+        padding: 36px 0 16px;
         color: #f8fafc;
     }
 
     .fn-footer-container {
-        max-width: 1280px;
+        max-width: 1160px;
         margin: 0 auto;
-        padding: 0 24px;
+        padding: 0 18px;
     }
 
     .fn-footer-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
-        gap: 36px;
+        grid-template-columns: minmax(0, 1fr) repeat(3, minmax(0, 0.86fr));
+        gap: 22px;
         align-items: start;
     }
 
     .fn-footer-brand {
         display: inline-flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
+        gap: 8px;
+        margin-bottom: 10px;
         color: #ffffff;
-        font-size: 1.2rem;
-        font-weight: 800;
+        font-size: 0.92rem;
+        font-weight: 700;
         letter-spacing: -0.02em;
     }
 
     .fn-footer-brand-mark {
-        width: 40px;
-        height: 40px;
-        border-radius: 14px;
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
         border: 1px solid rgba(255, 56, 92, 0.28);
         background: rgba(255, 56, 92, 0.14);
         color: #ff385c;
@@ -45,15 +45,15 @@
     }
 
     .fn-footer-brand-mark svg {
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
     }
 
     .fn-footer-description {
-        max-width: 360px;
+        max-width: 240px;
         color: rgba(226, 232, 240, 0.72);
-        font-size: 0.95rem;
-        line-height: 1.8;
+        font-size: 0.76rem;
+        line-height: 1.45;
     }
 
     .fn-footer-section {
@@ -61,12 +61,12 @@
     }
 
     .fn-footer-heading {
-        margin-bottom: 18px;
+        margin-bottom: 10px;
         color: #ffffff;
-        font-size: 0.76rem;
+        font-size: 0.64rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.18em;
+        letter-spacing: 0.14em;
     }
 
     .fn-footer-links {
@@ -74,14 +74,15 @@
         padding: 0;
         margin: 0;
         display: grid;
-        gap: 12px;
+        gap: 8px;
     }
 
     .fn-footer-links a,
     .fn-footer-contact-link {
         color: rgba(226, 232, 240, 0.72);
         text-decoration: none;
-        font-size: 0.95rem;
+        font-size: 0.78rem;
+        line-height: 1.4;
         transition: color 0.2s ease, padding-left 0.2s ease;
     }
 
@@ -93,22 +94,22 @@
 
     .fn-footer-contact {
         display: grid;
-        gap: 14px;
+        gap: 10px;
     }
 
     .fn-footer-contact-item {
         display: flex;
         align-items: flex-start;
-        gap: 12px;
+        gap: 8px;
         color: rgba(226, 232, 240, 0.72);
-        font-size: 0.95rem;
-        line-height: 1.7;
+        font-size: 0.78rem;
+        line-height: 1.4;
     }
 
     .fn-footer-contact-icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 12px;
+        width: 28px;
+        height: 28px;
+        border-radius: 9px;
         border: 1px solid rgba(148, 163, 184, 0.16);
         background: rgba(255, 255, 255, 0.05);
         color: #ff9fb0;
@@ -119,37 +120,44 @@
     }
 
     .fn-footer-contact-icon svg {
-        width: 16px;
-        height: 16px;
+        width: 13px;
+        height: 13px;
     }
 
     .fn-footer-contact-label {
         display: block;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
         color: #ffffff;
-        font-size: 0.82rem;
+        font-size: 0.62rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.12em;
     }
 
     .fn-footer-bottom {
-        margin-top: 28px;
-        padding-top: 22px;
+        margin-top: 16px;
+        padding-top: 14px;
         border-top: 1px solid rgba(148, 163, 184, 0.16);
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
     .fn-footer-copyright {
         color: rgba(226, 232, 240, 0.78);
-        font-size: 0.88rem;
-        line-height: 1.7;
+        font-size: 0.76rem;
+        line-height: 1.4;
+        text-align: left;
     }
 
     .fn-footer-note {
-        margin-top: 6px;
+        margin-top: 4px;
         color: rgba(148, 163, 184, 0.8);
-        font-size: 0.84rem;
+        font-size: 0.7rem;
+        line-height: 1.35;
+        text-align: left;
     }
 
     @media (max-width: 1024px) {
@@ -165,16 +173,20 @@
 
     @media (max-width: 640px) {
         .fn-footer {
-            padding: 56px 0 24px;
+            padding: 30px 0 14px;
         }
 
         .fn-footer-container {
-            padding: 0 18px;
+            padding: 0 16px;
         }
 
         .fn-footer-grid {
             grid-template-columns: 1fr;
-            gap: 28px;
+            gap: 18px;
+        }
+
+        .fn-footer-bottom {
+            align-items: flex-start;
         }
 
     }
@@ -185,10 +197,10 @@
         <div class="fn-footer-grid">
             <div>
                 <div class="fn-footer-brand">
-                    <x-findnest-logo variant="stacked" size="md" />
+                    <x-findnest-logo variant="inline" size="sm" />
                 </div>
                 <p class="fn-footer-description">
-                    A trusted platform for secure accommodation booking and roommate matching.
+                    Verified stays and roommate matching.
                 </p>
             </div>
 
@@ -209,6 +221,8 @@
                     <li><a href="{{ route('pages.help-center') }}">Help Center</a></li>
                     <li><a href="{{ route('pages.faq') }}">FAQ</a></li>
                     <li><a href="{{ route('pages.contact') }}">Contact Us</a></li>
+                    <li><a href="{{ route('pages.terms') }}">Terms &amp; Conditions</a></li>
+                    <li><a href="{{ route('pages.privacy') }}">Privacy Policy</a></li>
                 </ul>
             </nav>
 
@@ -249,7 +263,7 @@
                 &copy; 2026 FindNest. All rights reserved.
             </p>
             <p class="fn-footer-note">
-                Designed for smarter housing and roommate discovery.
+                Built for clearer housing search and roommate discovery.
             </p>
         </div>
     </div>

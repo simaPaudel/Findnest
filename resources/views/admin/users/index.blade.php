@@ -1,19 +1,22 @@
 @extends('admin.layout')
 
 @section('title', 'Users')
-@section('page_title', 'User Management')
+@section('page_title', 'Users')
+@section('hide_pagebar', 'true')
 
 @section('content')
-    <div class="admin-dashboard">
+    <div class="admin-dashboard admin-users-page">
         <section class="content-card">
-            <div class="content-card-header">
+            <div class="content-card-header admin-panel-header">
                 <div>
-                    <h2>Filter Users</h2>
-                    <p>Review platform accounts by role.</p>
+                    <h2>Filters</h2>
+                    <p>Browse every account, open profile details, and manage access.</p>
                 </div>
+
+                <span class="admin-card-chip">View all users</span>
             </div>
 
-            <div style="padding: 20px 22px;">
+            <div class="admin-users-filter-body">
                 <form method="GET" action="{{ route('admin.users.index') }}" class="admin-filters">
                     <div class="admin-filter-group">
                         <label for="role">Role</label>
@@ -33,73 +36,93 @@
             </div>
         </section>
 
-        <section class="content-card">
-            <div class="content-card-header">
+        <section class="content-card admin-users-results-card">
+            <div class="content-card-header admin-panel-header">
                 <div>
                     <h2>All Users</h2>
                     <p>{{ $users->total() }} account{{ $users->total() === 1 ? '' : 's' }} found.</p>
                 </div>
+
+                <span class="admin-card-chip">View user details</span>
             </div>
 
-            <div class="table-wrap">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Role</th>
-                            <th>Verified</th>
-                            <th>Trust Points</th>
-                            <th>Joined</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($users as $user)
-                            <tr>
-                                <td>
-                                    <div class="admin-user-cell">
-                                        @if ($user->profile_photo)
-                                            <img
-                                                src="{{ asset('storage/' . $user->profile_photo) }}"
-                                                alt="{{ $user->name }}"
-                                                class="admin-user-avatar"
-                                            >
-                                        @else
-                                            <div class="admin-user-avatar admin-user-avatar-fallback">
-                                                {{ strtoupper(substr($user->name, 0, 1)) }}
-                                            </div>
-                                        @endif
+            <div class="admin-users-grid">
+                @forelse ($users as $user)
+                    @php($userAvatarUrl = $user->profilePhotoUrl())
 
-                                        <div>
-                                            <div class="primary-text">{{ $user->name }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>{{ $user->email }}</td>
-                                <td>{{ $user->phone ?: 'N/A' }}</td>
-                                <td>
-                                    <span class="status-pill status-neutral">{{ $user->role }}</span>
-                                </td>
-                                <td>
-                                    <span class="status-pill {{ $user->is_verified ? 'status-approved' : 'status-neutral' }}">
-                                        {{ $user->is_verified ? 'Verified' : 'Unverified' }}
-                                    </span>
-                                </td>
-                                <td>{{ $user->trust_points }}</td>
-                                <td>{{ optional($user->created_at)->format('M d, Y') ?? 'N/A' }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="empty-cell">No users matched the current filter.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                    <article class="admin-user-card">
+                        <div class="admin-user-card-top">
+                            <div class="admin-user-card-avatar">
+                                @if ($userAvatarUrl)
+                                    <img
+                                        src="{{ $userAvatarUrl }}"
+                                        alt="{{ $user->name }}"
+                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                    >
+                                    <span class="admin-user-card-avatar-fallback" style="display:none;">{{ $user->avatarInitial() }}</span>
+                                @else
+                                    <span class="admin-user-card-avatar-fallback">{{ $user->avatarInitial() }}</span>
+                                @endif
+                            </div>
+
+                            <div class="admin-user-card-copy">
+                                <h3>{{ $user->name }}</h3>
+                                <p>{{ $user->email }}</p>
+                                <span>{{ $user->phone ?: 'No phone number' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-user-card-badges">
+                            <span class="status-pill status-neutral">{{ ucfirst($user->role) }}</span>
+                            <span class="status-pill {{ $user->is_verified ? 'status-approved' : 'status-neutral' }}">
+                                {{ $user->is_verified ? 'Verified' : 'Unverified' }}
+                            </span>
+                            <span class="status-pill {{ $user->is_blocked ? 'status-rejected' : 'status-approved' }}">
+                                {{ $user->is_blocked ? 'Blocked' : 'Active' }}
+                            </span>
+                        </div>
+
+                        <div class="admin-user-card-body">
+                            <div class="admin-user-summary-grid admin-user-summary-grid-index">
+                                <div class="admin-user-mini-stat">
+                                    <span>Bookings</span>
+                                    <strong>{{ $user->bookings_count }}</strong>
+                                </div>
+
+                                <div class="admin-user-mini-stat">
+                                    <span>Joined</span>
+                                    <strong>{{ optional($user->created_at)->format('M d, Y') ?? 'N/A' }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="admin-user-card-actions">
+                                <a href="{{ route('admin.users.show', $user) }}" class="admin-btn admin-btn-secondary">
+                                    View user details
+                                </a>
+
+                                @if (! $user->isAdmin())
+                                    <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}">
+                                        @csrf
+                                        <button
+                                            type="submit"
+                                            class="admin-btn {{ $user->is_blocked ? 'admin-btn-success' : 'admin-btn-danger' }}"
+                                        >
+                                            {{ $user->is_blocked ? 'Reactivate user' : 'Block user' }}
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="admin-meta-note">Admin accounts are protected.</span>
+                                @endif
+                            </div>
+                        </div>
+                    </article>
+                @empty
+                    <div class="admin-users-empty">No users matched the current filter.</div>
+                @endforelse
             </div>
 
             @if ($users->hasPages())
-                <div style="padding: 18px 22px; border-top: 1px solid var(--fn-line);">
+                <div class="admin-properties-pagination">
                     {{ $users->links() }}
                 </div>
             @endif

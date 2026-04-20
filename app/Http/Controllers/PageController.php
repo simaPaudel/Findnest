@@ -117,6 +117,62 @@ class PageController extends Controller
         ]);
     }
 
+    public function terms(): View
+    {
+        return view('pages.info', [
+            'pageTitle' => 'Terms & Conditions',
+            'eyebrow' => 'Terms & Conditions',
+            'heading' => 'Simple rules for using FindNest',
+            'intro' => 'These terms keep the platform clear for renters, owners, and visitors using the project.',
+            'policyCards' => [
+                [
+                    'title' => 'Account Use',
+                    'description' => 'Keep your profile accurate, use your own account, and follow the rules shown on the platform.',
+                    'icon' => '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke-width="2"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 20a8 8 0 0 1 16 0"></path></svg>',
+                ],
+                [
+                    'title' => 'Bookings & Payments',
+                    'description' => 'Review listing details before booking and follow the payment flow shown in your account.',
+                    'icon' => '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="5" y="6" width="14" height="12" rx="2" stroke-width="2"></rect><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6V4m8 2V4M5 10h14"></path></svg>',
+                ],
+                [
+                    'title' => 'Content Standards',
+                    'description' => 'Share honest listings, photos, and reviews. Misleading content may be reviewed or removed.',
+                    'icon' => '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h10M4 17h16"></path></svg>',
+                ],
+            ],
+            'closingText' => 'FindNest is a final year project built to demonstrate a realistic housing workflow.',
+        ]);
+    }
+
+    public function privacy(): View
+    {
+        return view('pages.info', [
+            'pageTitle' => 'Privacy Policy',
+            'eyebrow' => 'Privacy Policy',
+            'heading' => 'How FindNest handles your data',
+            'intro' => 'We collect only what is needed to run listings, bookings, payments, and support.',
+            'policyCards' => [
+                [
+                    'title' => 'What We Collect',
+                    'description' => 'Basic profile details, booking activity, and content you submit on the platform.',
+                    'icon' => '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4h12v16H6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6M9 12h6M9 16h4"></path></svg>',
+                ],
+                [
+                    'title' => 'How We Use It',
+                    'description' => 'To manage your account, show listings, confirm bookings, and respond to support requests.',
+                    'icon' => '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22s7-4 7-11V6l-7-3-7 3v5c0 7 7 11 7 11Z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 12 2 2 4-4"></path></svg>',
+                ],
+                [
+                    'title' => 'Your Choices',
+                    'description' => 'You can update your profile, manage saved items, and contact support with privacy questions.',
+                    'icon' => '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 2"></path></svg>',
+                ],
+            ],
+            'closingText' => 'If you have a privacy question, email support@findnest.com.',
+        ]);
+    }
+
     public function helpCenter(): View
     {
         return view('pages.info', [

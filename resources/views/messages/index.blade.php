@@ -7,24 +7,27 @@
     <style>
         .mn-shell {
             display: grid;
-            grid-template-columns: 320px minmax(0, 1fr);
-            gap: 16px;
-            min-height: 620px;
+            grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+            gap: 18px;
+            min-height: 640px;
+            max-width: 1440px;
+            margin: 0 auto;
         }
 
         .mn-panel,
         .mn-chat {
-            border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            background: #ffffff;
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 14px 40px rgba(15, 23, 42, 0.06);
             overflow: hidden;
         }
 
         .mn-panel-header,
         .mn-chat-header {
-            padding: 14px 16px;
-            border-bottom: 1px solid #f1f5f9;
-            background: #fcfcfd;
+            padding: 16px 18px;
+            border-bottom: 1px solid #eef2f7;
+            background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
         }
 
         .mn-panel-title {
@@ -35,21 +38,23 @@
         }
 
         .mn-panel-title h2 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #0f172a;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #475569;
         }
 
         .mn-panel-count {
             min-width: 24px;
+            height: 24px;
             padding: 0 8px;
-            height: 22px;
             border-radius: 999px;
-            border: 1px solid #e2e8f0;
-            background: #fff;
+            border: 1px solid rgba(255, 56, 92, 0.16);
+            background: #fff7f9;
             font-size: 0.72rem;
-            font-weight: 600;
-            color: #475569;
+            font-weight: 700;
+            color: #ff385c;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -58,31 +63,43 @@
         .mn-thread-list {
             max-height: 560px;
             overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .mn-thread {
             display: flex;
-            gap: 10px;
-            padding: 12px 14px;
-            border-bottom: 1px solid #f8fafc;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 16px;
             text-decoration: none;
             color: inherit;
-            transition: background 0.15s ease;
+            border: 1px solid transparent;
+            background: #ffffff;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease, border-color 0.16s ease;
         }
 
         .mn-thread:hover {
-            background: #f8fafc;
+            background: #ffffff;
+            border-color: #eef2f7;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+            transform: translateY(-1px);
         }
 
         .mn-thread.active {
-            background: #fff3f5;
+            background: linear-gradient(180deg, rgba(255, 56, 92, 0.08) 0%, rgba(255, 56, 92, 0.04) 100%);
+            border-color: rgba(255, 56, 92, 0.18);
+            box-shadow: 0 10px 22px rgba(255, 56, 92, 0.08);
         }
 
         .mn-thread-avatar {
-            width: 36px;
-            height: 36px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            background: #f1f5f9;
+            background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+            border: 1px solid #e2e8f0;
             color: #475569;
             display: inline-flex;
             align-items: center;
@@ -112,23 +129,24 @@
         }
 
         .mn-thread-title {
-            font-size: 0.86rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: #111827;
+            color: #0f172a;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .mn-thread-time {
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             color: #94a3b8;
             flex-shrink: 0;
         }
 
         .mn-thread-preview {
             margin-top: 4px;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
+            line-height: 1.35;
             color: #64748b;
             white-space: nowrap;
             overflow: hidden;
@@ -136,7 +154,7 @@
         }
 
         .mn-thread-meta {
-            margin-top: 7px;
+            margin-top: 8px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -145,7 +163,7 @@
 
         .mn-thread-type {
             font-size: 0.68rem;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             color: #94a3b8;
@@ -166,8 +184,8 @@
         }
 
         .mn-chat-header h3 {
-            font-size: 0.95rem;
-            font-weight: 600;
+            font-size: 0.98rem;
+            font-weight: 700;
             color: #0f172a;
         }
 
@@ -178,10 +196,11 @@
         }
 
         .mn-chat-header-avatar {
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: #f1f5f9;
+            background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+            border: 1px solid #e2e8f0;
             color: #475569;
             display: inline-flex;
             align-items: center;
@@ -204,22 +223,22 @@
 
         .mn-chat-subtitle {
             margin-top: 3px;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             color: #64748b;
         }
 
         .mn-chat-body {
             height: 460px;
             overflow-y: auto;
-            padding: 16px;
-            background: #f8fafc;
+            padding: 20px;
+            background: linear-gradient(180deg, #f8fafc 0%, #fcfdff 100%);
         }
 
         .mn-message {
             display: flex;
             flex-direction: column;
-            margin-bottom: 10px;
-            max-width: 75%;
+            margin-bottom: 12px;
+            max-width: 72%;
         }
 
         .mn-message.mine {
@@ -233,84 +252,94 @@
         }
 
         .mn-bubble {
-            border-radius: 14px;
-            padding: 10px 12px;
-            font-size: 0.84rem;
-            line-height: 1.5;
+            border-radius: 18px;
+            padding: 11px 14px;
+            font-size: 0.88rem;
+            line-height: 1.55;
             white-space: pre-wrap;
             word-break: break-word;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
         }
 
         .mn-message.mine .mn-bubble {
-            background: #ff385c;
+            background: linear-gradient(135deg, #ff385c 0%, #ff5577 100%);
             color: #fff;
-            border-bottom-right-radius: 4px;
+            border-bottom-right-radius: 6px;
+            box-shadow: 0 10px 24px rgba(255, 56, 92, 0.18);
         }
 
         .mn-message.other .mn-bubble {
             background: #fff;
             border: 1px solid #e2e8f0;
             color: #0f172a;
-            border-bottom-left-radius: 4px;
+            border-bottom-left-radius: 6px;
         }
 
         .mn-message-time {
-            margin-top: 3px;
+            margin-top: 4px;
             font-size: 0.68rem;
             color: #94a3b8;
         }
 
         .mn-chat-footer {
-            border-top: 1px solid #f1f5f9;
-            padding: 12px;
+            border-top: 1px solid #eef2f7;
+            padding: 14px 16px 16px;
             background: #fff;
         }
 
         .mn-form {
             display: grid;
             grid-template-columns: minmax(0, 1fr) auto;
-            gap: 8px;
+            gap: 10px;
             align-items: end;
         }
 
         .mn-input {
             width: 100%;
-            min-height: 42px;
+            min-height: 48px;
             max-height: 120px;
             border: 1px solid #dbe4ee;
-            border-radius: 12px;
-            padding: 10px 12px;
-            font-size: 0.84rem;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 0.9rem;
             font-family: inherit;
             resize: vertical;
             outline: none;
+            background: #fff;
+            color: #0f172a;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
         }
 
         .mn-input:focus {
-            border-color: rgba(255, 56, 92, 0.4);
+            border-color: rgba(255, 56, 92, 0.42);
             box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.08);
         }
 
         .mn-send {
-            min-height: 42px;
-            padding: 0 14px;
+            min-height: 48px;
+            padding: 0 18px;
             border: 1px solid transparent;
-            border-radius: 12px;
+            border-radius: 14px;
             background: #ff385c;
             color: #fff;
-            font-size: 0.82rem;
-            font-weight: 600;
+            font-size: 0.84rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: background 0.15s ease;
+            box-shadow: 0 10px 20px rgba(255, 56, 92, 0.16);
+            transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
         }
 
         .mn-send:hover {
             background: #e11d48;
+            box-shadow: 0 12px 24px rgba(255, 56, 92, 0.2);
+            transform: translateY(-1px);
         }
 
         .mn-send:disabled {
-            opacity: 0.6;
+            opacity: 0.65;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .mn-empty {
@@ -324,11 +353,36 @@
             text-align: center;
             color: #64748b;
             padding: 24px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
         }
 
         .mn-empty h4 {
             font-size: 0.95rem;
-            color: #111827;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .mn-empty p {
+            max-width: 280px;
+            font-size: 0.84rem;
+            line-height: 1.5;
+            color: #64748b;
+        }
+
+        .mn-thread-list::-webkit-scrollbar,
+        .mn-chat-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .mn-thread-list::-webkit-scrollbar-thumb,
+        .mn-chat-body::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.35);
+            border-radius: 999px;
+        }
+
+        .mn-thread-list::-webkit-scrollbar-thumb:hover,
+        .mn-chat-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 56, 92, 0.35);
         }
 
         @media (max-width: 1024px) {
@@ -348,9 +402,60 @@
                 height: 360px;
             }
         }
+
+        @media (max-width: 640px) {
+            .mn-panel-header,
+            .mn-chat-header,
+            .mn-chat-footer {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .mn-thread {
+                padding: 11px;
+            }
+
+            .mn-message {
+                max-width: 88%;
+            }
+
+            .mn-form {
+                grid-template-columns: 1fr;
+            }
+
+            .mn-send {
+                width: 100%;
+            }
+        }
     </style>
 
     <div class="mn-shell">
+        @php
+            $resolveProfilePhotoUrl = function ($path) {
+                if (empty($path)) {
+                    return null;
+                }
+
+                if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://'])) {
+                    return $path;
+                }
+
+                if (\Illuminate\Support\Str::startsWith($path, 'storage/')) {
+                    return asset($path);
+                }
+
+                if (file_exists(public_path($path))) {
+                    return asset($path);
+                }
+
+                if (file_exists(storage_path('app/public/' . ltrim($path, '/')))) {
+                    return asset('storage/' . ltrim($path, '/'));
+                }
+
+                return asset($path);
+            };
+        @endphp
+
         <aside class="mn-panel">
             <div class="mn-panel-header">
                 <div class="mn-panel-title">
@@ -380,18 +485,7 @@
 
                             $latestMessage = $conversation->latestMessage;
                             $previewText = $latestMessage ? $latestMessage->message : 'No messages yet';
-                            $avatarPath = $otherParticipant?->profile_photo;
-                            $avatarUrl = null;
-
-                            if ($avatarPath) {
-                                if (\Illuminate\Support\Str::startsWith($avatarPath, ['http://', 'https://'])) {
-                                    $avatarUrl = $avatarPath;
-                                } elseif (\Illuminate\Support\Str::startsWith($avatarPath, 'storage/')) {
-                                    $avatarUrl = asset($avatarPath);
-                                } else {
-                                    $avatarUrl = asset('storage/' . $avatarPath);
-                                }
-                            }
+                            $avatarUrl = $resolveProfilePhotoUrl($otherParticipant?->profile_photo);
                         @endphp
 
                         <a href="{{ route($routePrefix . '.messages.index', ['conversation' => $conversation->id]) }}" class="mn-thread {{ (int) $conversation->id === (int) $selectedConversationId ? 'active' : '' }}">
@@ -434,18 +528,7 @@
                         ? ($selectedConversation->property->title ?? 'Property chat')
                         : 'Roommate chat';
 
-                    $chatAvatarPath = $selectedOtherParticipant?->profile_photo;
-                    $chatAvatarUrl = null;
-
-                    if ($chatAvatarPath) {
-                        if (\Illuminate\Support\Str::startsWith($chatAvatarPath, ['http://', 'https://'])) {
-                            $chatAvatarUrl = $chatAvatarPath;
-                        } elseif (\Illuminate\Support\Str::startsWith($chatAvatarPath, 'storage/')) {
-                            $chatAvatarUrl = asset($chatAvatarPath);
-                        } else {
-                            $chatAvatarUrl = asset('storage/' . $chatAvatarPath);
-                        }
-                    }
+                    $chatAvatarUrl = $resolveProfilePhotoUrl($selectedOtherParticipant?->profile_photo);
 
                     $lastMessageTimestamp = optional($selectedConversation->messages->last()?->created_at)->toIso8601String();
                 @endphp

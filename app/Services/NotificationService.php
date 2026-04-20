@@ -97,7 +97,7 @@ class NotificationService
     /**
      * Get recent notifications for a user
      */
-    public static function getRecent(User $user, int $limit = 5): EloquentCollection
+    public static function getRecent(User $user, int $limit = 100): EloquentCollection
     {
         return self::fetchNotifications($user->id, $limit);
     }
@@ -105,13 +105,17 @@ class NotificationService
     /**
      * Fetch notifications for a user by ID, latest first.
      */
-    public static function fetchNotifications(int $userId, int $limit = 10): EloquentCollection
+    public static function fetchNotifications(int $userId, ?int $limit = 100): EloquentCollection
     {
-        return AppNotification::query()
+        $query = AppNotification::query()
             ->where('user_id', $userId)
-            ->orderByDesc('created_at')
-            ->limit($limit)
-            ->get();
+            ->orderByDesc('created_at');
+
+        if ($limit !== null && $limit > 0) {
+            $query->limit($limit);
+        }
+
+        return $query->get();
     }
 
     /**

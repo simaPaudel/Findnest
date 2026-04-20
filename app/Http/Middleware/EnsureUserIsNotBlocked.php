@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class UserMiddleware
+class EnsureUserIsNotBlocked
 {
     /**
      * Handle an incoming request.
@@ -17,9 +17,8 @@ class UserMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if user is authenticated
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return $next($request);
         }
 
         $user = Auth::user();
@@ -28,14 +27,10 @@ class UserMiddleware
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+
             Toastr::error('Your account has been deactivated. Please contact support.');
 
             return redirect()->route('login');
-        }
-
-        // Check if user has user role
-        if ($user->role !== 'user') {
-            abort(403, 'Unauthorized. User access only.');
         }
 
         return $next($request);

@@ -9,7 +9,7 @@
         <div class="owner-dashboard-copy-block">
             <p class="owner-dashboard-kicker">Overview</p>
             <h2 class="owner-dashboard-title">Dashboard</h2>
-            <p class="owner-dashboard-copy">A quick overview of your properties, booking requests, and recent activity.</p>
+            <p class="owner-dashboard-copy">Manage listings, bookings, and activity.</p>
         </div>
 
         <a href="{{ route('owner.listings.create') }}" class="owner-dashboard-cta">Add Property</a>
@@ -41,7 +41,7 @@
         </article>
     </section>
 
-    <section class="owner-section-card">
+    <section class="owner-section-card owner-booking-section">
         <div class="owner-section-header">
             <div>
                 <h3 class="owner-section-title">Management Actions</h3>
@@ -128,7 +128,7 @@
                             </div>
                         </div>
 
-                        <div>
+                        <div class="owner-property-cell">
                             <div class="owner-property-title" title="{{ $booking->property->title }}">{{ $booking->property->title }}</div>
                             <div class="owner-property-subtitle">{{ $booking->property->city ?? 'Property' }}</div>
                         </div>
@@ -156,7 +156,15 @@
                                     <button type="submit" class="btn-danger-outline">Reject</button>
                                 </form>
                             @else
-                                <span class="table-empty-action">No actions</span>
+                                <span class="table-empty-action">
+                                    @if($booking->confirmed_at)
+                                        Confirmed on {{ \Carbon\Carbon::parse($booking->confirmed_at)->format('M d, Y') }}
+                                    @elseif($booking->cancelled_at)
+                                        Cancelled on {{ \Carbon\Carbon::parse($booking->cancelled_at)->format('M d, Y') }}
+                                    @else
+                                        No further actions
+                                    @endif
+                                </span>
                             @endif
                         </div>
                     </div>

@@ -580,7 +580,7 @@
 
     <!-- Explore Stays Section -->
     <section id="featured" class="py-8 lg:py-10">
-        <div class="w-full px-4 lg:px-6">
+        <div class="mx-auto max-w-[1650px] px-4 lg:px-6">
             <div class="mb-8">
                 <h2 class="text-3xl font-bold text-slate-950">Explore stays</h2>
                 <p class="mt-2 text-sm text-slate-500">
@@ -589,7 +589,7 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-x-6 gap-y-10 items-start">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 items-start">
                 @forelse($featuredListings->take(4) as $property)
                     @php
                         $imageUrl = $property->getFirstImageUrl();

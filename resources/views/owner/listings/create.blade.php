@@ -22,43 +22,43 @@
         <div class="step-flow">
             <div class="step-flow-header">
                 <div>
-                    <h2 class="step-flow-title">Create a New Property</h2>
-                    <p class="step-flow-copy">Complete each step to publish a clear, well-structured listing.</p>
+                    <h2 class="step-flow-title">Add Property</h2>
+                    <p class="step-flow-copy">Add the details needed to publish your listing.</p>
                 </div>
                 <div class="step-counter">Step <span id="current-step-number">1</span> of 5</div>
             </div>
             <div class="step-progress-track"><div class="step-progress-fill" id="step-progress-fill"></div></div>
             <div class="step-list">
-                <div class="step-item is-active" data-step-indicator="1"><span class="step-item-index">1</span><span class="step-item-title">Basic Info</span><span class="step-item-copy">Title, type, mode</span></div>
-                <div class="step-item" data-step-indicator="2"><span class="step-item-index">2</span><span class="step-item-title">Location</span><span class="step-item-copy">Address details</span></div>
-                <div class="step-item" data-step-indicator="3"><span class="step-item-index">3</span><span class="step-item-title">Property Details</span><span class="step-item-copy">Rooms and rules</span></div>
-                <div class="step-item" data-step-indicator="4"><span class="step-item-index">4</span><span class="step-item-title">Amenities</span><span class="step-item-copy">Select features</span></div>
-                <div class="step-item" data-step-indicator="5"><span class="step-item-index">5</span><span class="step-item-title">Images</span><span class="step-item-copy">Upload photos</span></div>
+                <div class="step-item is-active" data-step-indicator="1"><span class="step-item-index">1</span><span class="step-item-title">Basic</span><span class="step-item-copy">Title, type, mode</span></div>
+                <div class="step-item" data-step-indicator="2"><span class="step-item-index">2</span><span class="step-item-title">Location</span><span class="step-item-copy">Address</span></div>
+                <div class="step-item" data-step-indicator="3"><span class="step-item-index">3</span><span class="step-item-title">Details</span><span class="step-item-copy">Rooms and rules</span></div>
+                <div class="step-item" data-step-indicator="4"><span class="step-item-index">4</span><span class="step-item-title">Amenities</span><span class="step-item-copy">Features</span></div>
+                <div class="step-item" data-step-indicator="5"><span class="step-item-index">5</span><span class="step-item-title">Images</span><span class="step-item-copy">Photos</span></div>
             </div>
         </div>
 
         <div class="form-step is-active" data-step="1">
             <div class="step-card">
                 <div class="step-card-header">
-                    <h3 class="step-card-title">Basic Information</h3>
-                    <p class="step-card-copy">Start with the core listing details renters will see first.</p>
+                    <h3 class="step-card-title">Basic Info</h3>
+                    <p class="step-card-copy">Start with the essentials.</p>
                 </div>
                 <div class="step-card-body">
                     <div class="form-group">
-                        <label for="title" class="form-label">Property Title *</label>
-                        <input type="text" name="title" id="title" class="form-input @error('title') error @enderror" value="{{ old('title') }}" placeholder="e.g., Spacious 2BHK Apartment near Lakeside" required>
+                        <label for="title" class="form-label">Title *</label>
+                        <input type="text" name="title" id="title" class="form-input @error('title') error @enderror" value="{{ old('title') }}" placeholder="e.g., Spacious 2BHK near Lakeside" required>
                         @error('title')<span class="form-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-group">
                         <label for="description" class="form-label">Description</label>
-                        <textarea name="description" id="description" rows="5" class="form-input @error('description') error @enderror" placeholder="Write a short overview of the property, room setup, and nearby area.">{{ old('description') }}</textarea>
+                        <textarea name="description" id="description" rows="5" class="form-input @error('description') error @enderror" placeholder="Short overview of the property.">{{ old('description') }}</textarea>
                         @error('description')<span class="form-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="property_type" class="form-label">Property Type *</label>
+                            <label for="property_type" class="form-label">Type *</label>
                             <select name="property_type" id="property_type" class="form-input @error('property_type') error @enderror" required>
-                                <option value="">Select Type</option>
+                                <option value="">Select type</option>
                                 <option value="house" {{ old('property_type') === 'house' ? 'selected' : '' }}>House</option>
                                 <option value="flat" {{ old('property_type') === 'flat' ? 'selected' : '' }}>Flat/Apartment</option>
                                 <option value="apartment" {{ old('property_type') === 'apartment' ? 'selected' : '' }}>Multi-room Apartment</option>
@@ -67,17 +67,17 @@
                             @error('property_type')<span class="form-error">{{ $message }}</span>@enderror
                         </div>
                         <div class="form-group">
-                            <label for="rental_mode" class="form-label">Rental Mode *</label>
+                            <label for="rental_mode" class="form-label">Mode *</label>
                             <select name="rental_mode" id="rental_mode" class="form-input @error('rental_mode') error @enderror" required onchange="toggleRentalSections()">
-                                <option value="">Select rental mode</option>
-                                <option value="full_property" {{ old('rental_mode') === 'full_property' ? 'selected' : '' }}>Full Property Only</option>
+                                <option value="">Select mode</option>
+                                <option value="full_property" {{ old('rental_mode') === 'full_property' ? 'selected' : '' }}>Full Property</option>
                                 <option value="per_room" {{ old('rental_mode') === 'per_room' ? 'selected' : '' }}>Per Room</option>
                             </select>
                             @error('rental_mode')<span class="form-error">{{ $message }}</span>@enderror
                         </div>
                     </div>
                     <div class="form-group" id="rent-price-group">
-                        <label for="rent_price" class="form-label">Rent Price/Month (NPR) *</label>
+                        <label for="rent_price" class="form-label">Rent / Month (NPR) *</label>
                         <input type="number" name="rent_price" id="rent_price" class="form-input @error('rent_price') error @enderror" value="{{ old('rent_price') }}" min="0" step="0.01" placeholder="e.g., 25000">
                         @error('rent_price')<span class="form-error">{{ $message }}</span>@enderror
                     </div>
@@ -93,12 +93,12 @@
             <div class="step-card">
                 <div class="step-card-header">
                     <h3 class="step-card-title">Location</h3>
-                    <p class="step-card-copy">Add the address information as you want it displayed on the listing page.</p>
+                    <p class="step-card-copy">Add the address details.</p>
                 </div>
                 <div class="step-card-body">
                     <div class="form-group">
                         <label for="address" class="form-label">Address *</label>
-                        <input type="text" name="address" id="address" class="form-input @error('address') error @enderror" value="{{ old('address') }}" placeholder="Street address, ward, or area" required>
+                        <input type="text" name="address" id="address" class="form-input @error('address') error @enderror" value="{{ old('address') }}" placeholder="Street, ward, or area" required>
                         @error('address')<span class="form-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-row">
@@ -108,14 +108,14 @@
                             @error('city')<span class="form-error">{{ $message }}</span>@enderror
                         </div>
                         <div class="form-group">
-                            <label for="location" class="form-label">Location/Area</label>
+                            <label for="location" class="form-label">Area</label>
                             <input type="text" name="location" id="location" class="form-input @error('location') error @enderror" value="{{ old('location') }}" placeholder="e.g., Lakeside">
                             @error('location')<span class="form-error">{{ $message }}</span>@enderror
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="landmark" class="form-label">Landmark</label>
-                        <input type="text" name="landmark" id="landmark" class="form-input @error('landmark') error @enderror" value="{{ old('landmark') }}" placeholder="Nearby landmark or chowk">
+                        <input type="text" name="landmark" id="landmark" class="form-input @error('landmark') error @enderror" value="{{ old('landmark') }}" placeholder="Nearby landmark">
                         @error('landmark')<span class="form-error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form-row">
@@ -141,8 +141,8 @@
                         'defaultLongitude' => 85.3240,
                         'defaultZoom' => 12,
                         'height' => '320px',
-                        'title' => 'Pick Location on Map',
-                        'helpText' => 'Click anywhere on the map to place the pin and fill latitude and longitude automatically.',
+                        'title' => 'Map Location',
+                        'helpText' => 'Tap the map to set the pin.',
                     ])
                     <div class="step-actions">
                         <div class="step-actions-group"><button type="button" class="btn-secondary" onclick="goToStep(1)">Back</button></div>
@@ -155,8 +155,8 @@
         <div class="form-step" data-step="3">
             <div class="step-card">
                 <div class="step-card-header">
-                    <h3 class="step-card-title">Property Details</h3>
-                    <p class="step-card-copy">Configure rooms, rules, furnishing, and preferences for this listing.</p>
+                    <h3 class="step-card-title">Details</h3>
+                    <p class="step-card-copy">Set rooms, rules, and preferences.</p>
                 </div>
                 <div class="step-card-body">
                     <div class="form-row">
@@ -183,7 +183,7 @@
                     </div>
                     <div class="form-group">
                         <label for="rules" class="form-label">House Rules</label>
-                        <textarea name="rules" id="rules" rows="4" class="form-input @error('rules') error @enderror" placeholder="Mention important house rules or move-in notes.">{{ old('rules') }}</textarea>
+                        <textarea name="rules" id="rules" rows="4" class="form-input @error('rules') error @enderror" placeholder="Important rules or move-in notes.">{{ old('rules') }}</textarea>
                         @error('rules')<span class="form-error">{{ $message }}</span>@enderror
                     </div>
 
@@ -191,13 +191,13 @@
                         <div class="form-panel">
                             <div class="form-panel-header">
                                 <div>
-                                    <h3 class="form-panel-title">Individual Rooms</h3>
-                                    <p class="form-panel-copy">Add at least one room for per-room listings. Each room can have its own monthly price and images.</p>
+                                    <h3 class="form-panel-title">Rooms</h3>
+                                    <p class="form-panel-copy">Add rooms for per-room listings.</p>
                                 </div>
                                 <button type="button" class="btn-primary" onclick="addRoom(); return false;">Add Room</button>
                             </div>
                             <div id="rooms-error-message" class="form-error-panel" style="display: none; margin: 0 0 14px 0;">
-                                <h3>You must add at least one room for Per Room rental mode.</h3>
+                                <h3>Add at least one room for per-room mode.</h3>
                             </div>
                             <div id="rooms-container" class="room-stack"></div>
                             <div id="rooms-empty-state" class="form-panel-empty">No rooms added yet.</div>
@@ -216,11 +216,11 @@
             <div class="step-card">
                 <div class="step-card-header">
                     <h3 class="step-card-title">Amenities</h3>
-                    <p class="step-card-copy">Choose the amenities available in this property. Select all that apply.</p>
+                    <p class="step-card-copy">Choose the available features.</p>
                 </div>
                 <div class="step-card-body">
                     <div class="form-group">
-                        <label class="form-label">Available Amenities</label>
+                        <label class="form-label">Features</label>
                         @error('amenity_ids')<span class="form-error">{{ $message }}</span>@enderror
                         <div class="amenity-pill-grid">
                             @foreach($amenities as $amenity)
@@ -243,22 +243,22 @@
             <div class="step-card">
                 <div class="step-card-header">
                     <h3 class="step-card-title">Images</h3>
-                    <p class="step-card-copy">Upload clear property photos. For per-room listings, room images can also be added inside each room card.</p>
+                    <p class="step-card-copy">Upload clear listing photos.</p>
                 </div>
                 <div class="step-card-body">
                     <div class="form-group" id="images-section">
-                        <label for="images" class="form-label">Property Images <span id="images-required"></span></label>
+                        <label for="images" class="form-label">Photos <span id="images-required"></span></label>
                         <div class="dropzone" id="property-dropzone">
                             <div class="dropzone-copy">
-                                <span class="dropzone-title">Drag and drop images here</span>
-                                <span class="dropzone-text">Or browse from your device. JPG, PNG, WEBP. Max 5MB per file, up to 20 files.</span>
+                                <span class="dropzone-title">Drop images here</span>
+                                <span class="dropzone-text">JPG, PNG, WEBP. Up to 20 files, 5MB each.</span>
                             </div>
                             <div class="upload-frame">
                                 <input type="file" name="images[]" id="images" class="form-input @error('images.*') error @enderror" multiple accept="image/jpeg,image/png,image/webp">
                             </div>
                         </div>
                         <div id="file-preview" class="mt-4">
-                            <p class="form-panel-copy">Selected files: <span id="file-count">0</span></p>
+                            <p class="form-panel-copy">Selected: <span id="file-count">0</span></p>
                             <div id="preview-container" class="preview-grid"></div>
                         </div>
                         @error('images')<span class="form-error">{{ $message }}</span>@enderror
@@ -268,7 +268,7 @@
                         <div class="step-actions-group"><button type="button" class="btn-secondary" onclick="goToStep(4)">Back</button></div>
                         <div class="step-actions-group">
                             <a href="{{ route('owner.listings.index') }}" class="btn-secondary">Cancel</a>
-                            <button type="submit" class="btn-primary">Create Property</button>
+                            <button type="submit" class="btn-primary">Create Listing</button>
                         </div>
                     </div>
                 </div>
@@ -372,17 +372,17 @@ function addRoom() {
                 <button type="button" class="room-card-action danger" onclick="removeRoom(${roomIndex})">Remove</button>
             </div>
             <div class="form-row">
-                <div class="form-group"><label class="form-label">Room Name *</label><input type="text" name="rooms[${roomIndex}][room_name]" class="form-input" placeholder="e.g., Master Bedroom" required></div>
-                <div class="form-group"><label class="form-label">Room Number</label><input type="text" name="rooms[${roomIndex}][room_number]" class="form-input" placeholder="e.g., 101"></div>
-                <div class="form-group"><label class="form-label">Capacity (Persons) *</label><input type="number" name="rooms[${roomIndex}][capacity]" class="form-input" min="1" value="1" required></div>
-                <div class="form-group"><label class="form-label">Price/Month (NPR) *</label><input type="number" name="rooms[${roomIndex}][price]" class="form-input" min="0" step="0.01" placeholder="e.g., 12000" required></div>
+                <div class="form-group"><label class="form-label">Name *</label><input type="text" name="rooms[${roomIndex}][room_name]" class="form-input" placeholder="e.g., Master Bedroom" required></div>
+                <div class="form-group"><label class="form-label">Number</label><input type="text" name="rooms[${roomIndex}][room_number]" class="form-input" placeholder="e.g., 101"></div>
+                <div class="form-group"><label class="form-label">Capacity *</label><input type="number" name="rooms[${roomIndex}][capacity]" class="form-input" min="1" value="1" required></div>
+                <div class="form-group"><label class="form-label">Price / Month *</label><input type="number" name="rooms[${roomIndex}][price]" class="form-input" min="0" step="0.01" placeholder="e.g., 12000" required></div>
             </div>
-            <div class="form-group"><label class="form-label">Room Features</label><textarea name="rooms[${roomIndex}][room_features]" class="form-input" rows="2" placeholder="e.g., Attached bathroom, balcony, wardrobe"></textarea></div>
+            <div class="form-group"><label class="form-label">Features</label><textarea name="rooms[${roomIndex}][room_features]" class="form-input" rows="2" placeholder="e.g., Attached bath, balcony, wardrobe"></textarea></div>
             <div class="form-group">
-                <label class="form-label">Room Images</label>
+                <label class="form-label">Images</label>
                 <div class="upload-stack">
                     <div class="upload-frame"><input type="file" name="rooms[${roomIndex}][images][]" class="form-input room-image-input" multiple accept="image/jpeg,image/png,image/webp" data-room-index="${roomIndex}"></div>
-                    <small class="form-hint">Optional room-specific photos. JPG, PNG, WEBP. Max 5MB per file.</small>
+                    <small class="form-hint">Optional room photos. JPG, PNG, WEBP. Max 5MB each.</small>
                     <div class="room-image-preview preview-grid" id="preview-room-${roomIndex}"></div>
                 </div>
             </div>

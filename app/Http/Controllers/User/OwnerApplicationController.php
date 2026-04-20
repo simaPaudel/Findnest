@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\OwnerApplication;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -62,7 +63,7 @@ class OwnerApplicationController extends Controller
         $frontPath = $request->file('citizenship_front')->store('owner-applications', 'public');
         $backPath = $request->file('citizenship_back')->store('owner-applications', 'public');
 
-        $user->ownerApplications()->create([
+        $application = $user->ownerApplications()->create([
             'full_name' => $validated['full_name'],
             'phone' => $validated['phone'],
             'citizenship_number' => $validated['citizenship_number'],
@@ -72,6 +73,24 @@ class OwnerApplicationController extends Controller
             'status' => OwnerApplication::STATUS_PENDING,
             'submitted_at' => now(),
         ]);
+
+        $adminIds = User::query()
+            ->where('role', User::ROLE_ADMIN)
+            ->pluck('id');
+
+        foreach ($adminIds as $adminId) {
+            try {
+                NotificationService::sendNotification(
+                    (int) $adminId,
+                    'host_application',
+                    'New host application submitted',
+                    $validated['full_name'] . ' submitted a host application for review.',
+                    route('admin.owner-applications.show', $application)
+                );
+            } catch (\Throwable $notificationError) {
+                // Notification failures must not block host application submission.
+            }
+        }
 
         return redirect()->route('user.host-application.show')
             ->with('success', 'Your host application has been submitted for review.');

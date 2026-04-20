@@ -39,12 +39,14 @@ Route::get('/about-us', [PageController::class, 'about'])->name('pages.about');
 Route::get('/contact-us', [PageController::class, 'contact'])->name('pages.contact');
 Route::get('/faq', [PageController::class, 'faq'])->name('pages.faq');
 Route::get('/help-center', [PageController::class, 'helpCenter'])->name('pages.help-center');
+Route::get('/terms-and-conditions', [PageController::class, 'terms'])->name('pages.terms');
+Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('pages.privacy');
 
 // Auth Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-Route::middleware('auth')->get('/notifications/{notification}/open', [NotificationController::class, 'open'])
+Route::middleware(['auth', 'blocked'])->get('/notifications/{notification}/open', [NotificationController::class, 'open'])
     ->whereNumber('notification')
     ->name('notifications.open');
 
@@ -136,7 +138,7 @@ Route::get('/debug/test-update/{token}', function ($token) {
 });
 
 // User Dashboard 
-Route::prefix('user')->middleware(['auth', 'user'])->group(function () {
+Route::prefix('user')->middleware(['auth', 'blocked', 'user'])->group(function () {
     // Redirect old dashboard to listings (new main flow)
     Route::get('/dashboard', function () {
         return redirect()->route('listings.index');
@@ -195,7 +197,7 @@ Route::prefix('user')->middleware(['auth', 'user'])->group(function () {
 });
 
 // Owner Dashboard 
-Route::prefix('owner')->middleware(['auth', 'owner'])->group(function () {
+Route::prefix('owner')->middleware(['auth', 'blocked', 'owner'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [OwnerDashboardController::class, 'index'])->name('owner.dashboard');
 
@@ -266,15 +268,19 @@ Route::prefix('owner')->middleware(['auth', 'owner'])->group(function () {
 
 
 // Admin Dashboard
-Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('admin')->middleware(['auth', 'blocked', 'admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::get('/properties', [AdminPropertyController::class, 'index'])->name('admin.properties.index');
     Route::post('/properties/{property}/approve', [AdminPropertyController::class, 'approve'])->name('admin.properties.approve');
     Route::post('/properties/{property}/reject', [AdminPropertyController::class, 'reject'])->name('admin.properties.reject');
     Route::post('/properties/{property}/verify', [AdminPropertyController::class, 'verify'])->name('admin.properties.verify');
+    Route::delete('/properties/{property}', [AdminPropertyController::class, 'destroy'])->name('admin.properties.destroy');
 
     Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::get('/users/{user}', [AdminUserController::class, 'show'])->whereNumber('user')->name('admin.users.show');
+    Route::post('/users/{user}/toggle-status', [AdminUserController::class, 'toggleStatus'])->whereNumber('user')->name('admin.users.toggle-status');
+    Route::put('/users/{user}/role', [AdminUserController::class, 'updateRole'])->whereNumber('user')->name('admin.users.update-role');
 
     Route::get('/owner-applications', [AdminOwnerApplicationController::class, 'index'])->name('admin.owner-applications.index');
     Route::get('/owner-applications/{ownerApplication}', [AdminOwnerApplicationController::class, 'show'])->name('admin.owner-applications.show');
@@ -286,6 +292,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::post('/reviews/{review}/hide', [AdminReviewController::class, 'hide'])->name('admin.reviews.hide');
 
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('admin.bookings.index');
+    Route::get('/bookings/{booking}', [AdminBookingController::class, 'show'])->whereNumber('booking')->name('admin.bookings.show');
     Route::post('/bookings/{booking}/release', [AdminBookingController::class, 'release'])->name('admin.bookings.release');
 
     // Profile Management
@@ -316,7 +323,7 @@ Route::post('/bookings/create', [UserBookingController::class, 'create'])
     ->name('user.bookings.create');
 
 // Report Routes (Auth Required)
-Route::middleware('auth')->prefix('reports')->group(function () {
+Route::middleware(['auth', 'blocked'])->prefix('reports')->group(function () {
     Route::get('/my-reports', [ReportController::class, 'myReports'])->name('report.my-reports');
     Route::get('/{report}', [ReportController::class, 'show'])->name('report.show');
     Route::get('/create/{reportableType}/{reportableId}', [ReportController::class, 'create'])->name('report.create');
@@ -325,8 +332,8 @@ Route::middleware('auth')->prefix('reports')->group(function () {
 
 // Roommates Routes
 Route::get('/roommates', [RoommatesController::class, 'index'])->name('roommates.index');
-Route::get('/roommates/profile', [RoommatesController::class, 'profile'])->middleware('auth')->name('roommates.profile');
-Route::get('/roommates/matches', [RoommatesController::class, 'matches'])->middleware('auth')->name('roommates.matches');
+Route::get('/roommates/profile', [RoommatesController::class, 'profile'])->middleware(['auth', 'blocked'])->name('roommates.profile');
+Route::get('/roommates/matches', [RoommatesController::class, 'matches'])->middleware(['auth', 'blocked'])->name('roommates.matches');
 
 // Khalti Payment Routes
 Route::middleware(['auth', 'user'])->prefix('payment/khalti')->group(function () {

@@ -4,6 +4,7 @@
 @section('page-title', 'Booking Requests')
 
 @section('content')
+<div class="owner-bookings-page">
 <div class="content-card bookings-card">
     <div class="card-header bookings-card-header">
         <div>
@@ -200,5 +201,6 @@
             </div>
         @endif
     </div>
+</div>
 </div>
 @endsection

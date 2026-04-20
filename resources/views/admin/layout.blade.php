@@ -23,18 +23,15 @@
     @endphp
     @php
         $adminAvatarUrl = null;
-        $adminAvatarPath = data_get($adminNavUser, 'profile_photo');
+        $adminAvatarInitial = 'A';
 
-        if ($adminAvatarPath) {
-            if (\Illuminate\Support\Str::startsWith($adminAvatarPath, ['http://', 'https://', '//'])) {
-                $adminAvatarUrl = $adminAvatarPath;
-            } elseif (\Illuminate\Support\Str::startsWith($adminAvatarPath, 'storage/')) {
-                $adminAvatarUrl = asset($adminAvatarPath);
-            } elseif (\Illuminate\Support\Str::startsWith($adminAvatarPath, 'profiles/')) {
-                $adminAvatarUrl = asset('storage/' . ltrim($adminAvatarPath, '/'));
-            } else {
-                $adminAvatarUrl = asset('storage/' . ltrim($adminAvatarPath, '/'));
-            }
+        if ($adminNavUser) {
+            $adminAvatarUrl = method_exists($adminNavUser, 'profilePhotoUrl')
+                ? $adminNavUser->profilePhotoUrl()
+                : null;
+            $adminAvatarInitial = method_exists($adminNavUser, 'avatarInitial')
+                ? $adminNavUser->avatarInitial()
+                : strtoupper(substr(data_get($adminNavUser, 'name', 'A'), 0, 1));
         }
     @endphp
     <div class="admin-page">
@@ -67,14 +64,16 @@
                         <summary class="admin-profile-trigger {{ request()->routeIs('admin.profile.*') ? 'is-active' : '' }}" aria-label="Profile menu">
                             <div class="admin-avatar">
                                 @if($adminAvatarUrl)
-                                    <img src="{{ $adminAvatarUrl }}" alt="{{ data_get($adminNavUser, 'name', 'Admin') }}">
+                                    <img
+                                        src="{{ $adminAvatarUrl }}"
+                                        alt="{{ data_get($adminNavUser, 'name', 'Admin') }}"
+                                        onerror="this.style.display='none'; this.nextElementSibling.removeAttribute('hidden');"
+                                    >
+                                    <span class="admin-avatar-fallback" hidden>{{ $adminAvatarInitial }}</span>
                                 @else
-                                    {{ strtoupper(substr(data_get($adminNavUser, 'name', 'A'), 0, 1)) }}
+                                    <span class="admin-avatar-fallback">{{ $adminAvatarInitial }}</span>
                                 @endif
                             </div>
-                            <svg class="admin-profile-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
                         </summary>
 
                         <div class="admin-profile-panel" role="menu" aria-label="Profile menu">
@@ -89,22 +88,34 @@
             </div>
         </nav>
 
-        <header class="admin-pagebar">
-            <div>
-                <p class="page-kicker">@yield('page_kicker', 'Control Center')</p>
-                <h1 class="page-title">@yield('page_title', 'Admin Dashboard')</h1>
-            </div>
+        @php($adminPagebarHidden = trim($__env->yieldContent('hide_pagebar')))
+        @if($adminPagebarHidden !== 'true')
+            <header class="admin-pagebar">
+                <div>
+                    @php($adminPageKicker = trim($__env->yieldContent('page_kicker')))
+                    @if($adminPageKicker !== '')
+                        <p class="page-kicker">{{ $adminPageKicker }}</p>
+                    @endif
+                    <h1 class="page-title">@yield('page_title', 'Admin Dashboard')</h1>
+                </div>
 
-            <div class="admin-pagebar-meta">
-                @yield('page_meta', now()->format('l, F j, Y'))
-            </div>
-        </header>
+                <div class="admin-pagebar-meta">
+                    @yield('page_meta', now()->format('l, F j, Y'))
+                </div>
+            </header>
+        @endif
 
         <main class="admin-main">
             <section class="admin-content">
                 @if (session('success'))
                     <div class="admin-alert admin-alert-success">
                         {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="admin-alert admin-alert-error">
+                        {{ session('error') }}
                     </div>
                 @endif
 

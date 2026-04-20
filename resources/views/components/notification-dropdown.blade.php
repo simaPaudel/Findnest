@@ -75,8 +75,8 @@
 
     .fn-notification-trigger {
         position: relative;
-        width: 36px;
-        height: 36px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         border: 1px solid var(--fn-gray-border, #e5e7eb);
         background: #fff;
@@ -89,8 +89,8 @@
     }
 
     .fn-notification-trigger svg {
-        width: 1.15rem;
-        height: 1.15rem;
+        width: 1.05rem;
+        height: 1.05rem;
     }
 
     .fn-notification-trigger:hover,
@@ -102,16 +102,16 @@
 
     .fn-notification-badge {
         position: absolute;
-        top: -5px;
+        top: -4px;
         right: -4px;
-        min-width: 17px;
-        height: 17px;
+        min-width: 16px;
+        height: 16px;
         border-radius: 999px;
         background: var(--fn-red, #ff385c);
         color: #fff;
-        font-size: 0.66rem;
+        font-size: 0.64rem;
         font-weight: 700;
-        line-height: 17px;
+        line-height: 16px;
         text-align: center;
         padding: 0 4px;
         border: 2px solid #fff;

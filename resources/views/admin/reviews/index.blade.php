@@ -2,6 +2,7 @@
 
 @section('title', 'Reviews')
 @section('page_title', 'Review Moderation')
+@section('hide_pagebar', 'true')
 
 @section('content')
     <div class="admin-dashboard">

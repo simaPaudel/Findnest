@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'blocked' => \App\Http\Middleware\EnsureUserIsNotBlocked::class,
             'owner' => \App\Http\Middleware\OwnerMiddleware::class,
             'user' => \App\Http\Middleware\UserMiddleware::class,
         ]);

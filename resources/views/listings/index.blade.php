@@ -254,7 +254,7 @@
         </section>
 
         <section class="px-4 sm:px-6 lg:px-8 py-10">
-            <div class="w-full">
+            <div class="mx-auto max-w-[1650px]">
                 <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                     <div>
                         <h1 class="text-3xl font-bold text-slate-950">
@@ -278,7 +278,7 @@
                 </div>
 
                 @if($properties->count() > 0)
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-10 mb-12 items-start">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 mb-12 items-start">
                         @foreach($properties as $property)
                             @php
                                 $primaryImage = $property->images->firstWhere('is_primary', true) ?? $property->images->sortBy('order')->first();

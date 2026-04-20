@@ -6,138 +6,126 @@
 @section('content')
 <div class="py-8">
     <div class="mb-8">
-        <div class="flex items-center justify-between mb-2">
-            <div class="fn-text-gray text-sm px-4 py-2 fn-glass-card">
-                {{ $savedListings->total() }} property(ies) saved
-            </div>
+        <div class="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
+            {{ $savedListings->total() }} saved listing{{ $savedListings->total() === 1 ? '' : 's' }}
         </div>
-        <p class="fn-text-gray">Your collection of favorite properties</p>
+        <p class="mt-3 text-slate-500">Your collection of favorite properties</p>
     </div>
 
     @if($savedListings->count() > 0)
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-10 mb-12 items-start">
         @foreach($savedListings as $saved)
-        @php
-        $property = $saved->property;
-        if (!$property) continue;
+            @php
+                $property = $saved->property;
+            @endphp
 
-        $imageUrl = $property->getFirstImageUrl();
-        if ($property->canRentPerRoom()) {
-            $minRoomPrice = $property->min_room_price !== null ? (float) $property->min_room_price : null;
-            $maxRoomPrice = $property->max_room_price !== null ? (float) $property->max_room_price : null;
+            @continue(!$property)
 
-            if ($minRoomPrice === null || $maxRoomPrice === null) {
-                $priceLabel = 'Price on request';
-                $priceSubLabel = 'per month';
-            } elseif ($minRoomPrice === $maxRoomPrice) {
-                $priceLabel = 'Rs ' . number_format($minRoomPrice, 0);
-                $priceSubLabel = 'per room / month';
-            } else {
-                $priceLabel = 'Rs ' . number_format($minRoomPrice, 0) . ' - Rs ' . number_format($maxRoomPrice, 0);
-                $priceSubLabel = 'per room / month';
-            }
-        } else {
-            $priceLabel = 'Rs ' . number_format((float) $property->rent_price, 0);
-            $priceSubLabel = 'per month';
-        }
-        @endphp
+            @php
+                $primaryImage = $property->images->firstWhere('is_primary', true) ?? $property->images->sortBy('order')->first();
+                $imageUrl = $primaryImage ? $primaryImage->getUrl() : asset('images/property-placeholder.jpg');
 
-        <div class="group fn-glass-card overflow-hidden hover:shadow-lg transition-all duration-300">
-            <div class="relative h-56 overflow-hidden bg-gray-200">
-                @if($imageUrl)
-                <img src="{{ $imageUrl }}"
-                    alt="{{ $property->title }}"
-                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onerror="this.src='https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&h=400&fit=crop'">
-                @else
-                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-300 to-gray-400">
-                    <svg class="w-16 h-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-                @endif
+                $minRoomPrice = $property->min_room_price !== null ? (float) $property->min_room_price : ($property->rooms->min('price') !== null ? (float) $property->rooms->min('price') : null);
+                $maxRoomPrice = $property->max_room_price !== null ? (float) $property->max_room_price : ($property->rooms->max('price') !== null ? (float) $property->rooms->max('price') : null);
+                $availableRooms = (int) ($property->available_rooms_count ?? 0);
 
-                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                if ($property->rental_mode === 'per_room') {
+                    if ($minRoomPrice === null || $maxRoomPrice === null) {
+                        $priceAmount = 'Price on request';
+                        $priceSuffix = null;
+                    } elseif ($minRoomPrice === $maxRoomPrice) {
+                        $priceAmount = 'Rs ' . number_format($minRoomPrice);
+                        $priceSuffix = '/month';
+                    } else {
+                        $priceAmount = 'Rs ' . number_format($minRoomPrice) . ' - Rs ' . number_format($maxRoomPrice);
+                        $priceSuffix = '/month';
+                    }
 
-                <button class="save-btn absolute top-3 right-3 bg-transparent border-none w-10 h-10 cursor-pointer flex items-center justify-center"
-                    onclick="handleUnsave(this, {{ $property->id }}, {{ $saved->id }})">
-                    <svg class="w-6 h-6 text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3))">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                    </svg>
-                </button>
+                    $subtitle = $property->property_availability_label
+                        ?? ($availableRooms === 1
+                            ? '1 room available'
+                            : ($availableRooms > 1 ? $availableRooms . ' rooms available' : 'No rooms available right now'));
+                } else {
+                    $priceAmount = 'Rs ' . number_format((float) $property->rent_price);
+                    $priceSuffix = '/month';
+                    $subtitle = $property->property_availability_label ?? 'Available for booking';
+                }
 
-                <div class="absolute top-3 left-3 flex flex-wrap gap-2">
-                    @if($property->is_verified)
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold fn-bg-white text-green-700">
-                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                        </svg>
-                        Verified
-                    </span>
-                    @endif
-                </div>
-            </div>
+                $availabilityLabel = $property->is_property_bookable ? 'Available' : 'Unavailable';
+                $availabilityClass = $property->is_property_bookable ? 'available' : 'unavailable';
+                $priceToneClass = $priceAmount === 'Price on request' ? 'is-muted' : 'is-red';
+            @endphp
 
-            <div class="p-5">
-                <h3 class="font-semibold fn-text-charcoal text-base line-clamp-1 mb-1">
-                    {{ $property->title }}
-                </h3>
+            <a href="{{ route('listings.show', $property) }}" class="listing-card">
+                <div class="listing-image-wrap aspect-[4/3] mb-3">
+                    <img
+                        src="{{ $imageUrl }}"
+                        alt="{{ $property->title }}"
+                        class="listing-image"
+                        loading="lazy"
+                        onerror="this.src='{{ asset('images/property-placeholder.jpg') }}'"
+                    >
 
-                <div class="flex items-center text-sm fn-text-gray mb-3">
-                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                    </svg>
-                    <span class="truncate">{{ $property->city ?? $property->location }}</span>
-                </div>
+                    <div class="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-3">
+                        <span class="listing-chip bg-white/92 text-slate-800 shadow-sm">
+                            {{ $property->rental_mode === 'per_room' ? 'Room choice' : 'Whole place' }}
+                        </span>
 
-                <div class="flex items-center justify-between mb-4 text-xs">
-                    <span class="inline-block px-2.5 py-1 rounded-full fn-bg-gray fn-text-gray">
-                        {{ $property->getPropertyTypeLabel() ?? 'Property' }}
-                    </span>
-                    <span class="inline-block px-2.5 py-1 rounded-full fn-bg-gray fn-text-gray">
-                        @if($property->canRentPerRoom())
-                        {{ $property->property_availability_label ?? 'All rooms booked' }}
-                        @elseif($property->total_rooms)
-                        {{ $property->total_rooms }} room{{ $property->total_rooms > 1 ? 's' : '' }}
-                        @else
-                        Shared
-                        @endif
-                    </span>
-                </div>
-
-                <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                    <div class="flex flex-col">
-                        <span class="text-2xl font-bold fn-text-charcoal">{{ $priceLabel }}</span>
-                        <span class="text-xs fn-text-gray">{{ $priceSubLabel }}</span>
+                        <button
+                            class="save-btn saved"
+                            title="Remove from saved listings"
+                            onclick="handleUnsave(event, this, {{ $property->id }}, {{ $saved->id }})"
+                        >
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
                     </div>
-                    <a href="{{ route('listings.show', $property->id) }}"
-                        class="inline-flex items-center justify-center px-4 py-2 rounded-lg fn-text-red font-semibold hover:fn-bg-red hover:text-white transition-all duration-300 border border-red-300 hover:border-transparent">
-                        View Details
-                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
                 </div>
-            </div>
-        </div>
+
+                <div class="listing-details">
+                    <div class="flex items-start justify-between gap-3">
+                        <h2 class="text-[15px] font-semibold text-slate-950 leading-6 line-clamp-1">{{ $property->title }}</h2>
+                        <span class="shrink-0 text-sm font-semibold text-slate-900">{{ $property->city ?: 'Nepal' }}</span>
+                    </div>
+
+                    <p class="text-sm text-slate-500 line-clamp-1">{{ $property->address ?: ($property->location ?: 'Location not specified') }}</p>
+
+                    <div class="flex items-center gap-2">
+                        <span class="listing-status-pill {{ $availabilityClass }}">{{ $availabilityLabel }}</span>
+                        <p class="text-sm text-slate-500 line-clamp-1">{{ $subtitle }}</p>
+                    </div>
+
+                    <p class="text-sm text-slate-500 line-clamp-1">{{ $property->getPropertyTypeLabel() }}</p>
+
+                    <div class="listing-price-row">
+                        <p class="listing-price">
+                            <span class="listing-price-value {{ $priceToneClass }}">{{ $priceAmount }}</span>
+                            @if($priceSuffix)
+                                <span class="listing-price-suffix">{{ $priceSuffix }}</span>
+                            @endif
+                        </p>
+
+                        <span class="listing-view-btn">View</span>
+                    </div>
+                </div>
+            </a>
         @endforeach
     </div>
 
     @if($savedListings->hasPages())
-    <div class="flex justify-center">
-        {{ $savedListings->links() }}
-    </div>
+        <div class="flex justify-center">
+            {{ $savedListings->links() }}
+        </div>
     @endif
     @else
-    <div class="fn-glass-card p-16 text-center">
-        <div class="flex justify-center mb-6">
-            <svg class="w-24 h-24 fn-text-gray opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-            </svg>
-        </div>
-        <h3 class="text-2xl font-bold fn-text-charcoal mb-2">No Saved Listings Yet</h3>
-        <p class="fn-text-gray mb-8 text-lg">Start exploring and save your favorite properties to your collection</p>
-        <a href="{{ route('listings.index') }}" class="inline-block px-6 py-3 rounded-lg fn-bg-red text-white font-semibold hover:opacity-90 transition">
+    <div class="rounded-3xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
+        <svg class="w-20 h-20 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+        </svg>
+        <h3 class="text-2xl font-bold text-slate-900 mb-2">No Saved Listings Yet</h3>
+        <p class="text-slate-500 mb-8 text-lg">Start exploring and save your favorite properties to your collection</p>
+        <a href="{{ route('listings.index') }}" class="inline-flex items-center justify-center rounded-xl bg-rose-500 px-6 py-3 font-semibold text-white hover:bg-rose-600 transition">
             Browse Listings
         </a>
     </div>
@@ -145,46 +133,176 @@
 </div>
 
 <style>
-    .fn-bg-gray {
-        background-color: #f7f7f7;
+    .listing-card {
+        display: block;
+        color: inherit;
+        text-decoration: none;
     }
 
-    .fn-text-gray {
-        color: #595959;
+    .listing-card:hover .listing-image {
+        transform: scale(1.04);
     }
 
-    .fn-bg-red {
-        background-color: #FF385C;
+    .listing-image-wrap {
+        position: relative;
+        overflow: hidden;
+        border-radius: 22px;
+        background: #f1f5f9;
     }
 
-    .fn-text-red {
-        color: #FF385C;
+    .listing-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.35s ease;
     }
 
-    .fn-glass-card {
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    .listing-chip {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.45rem 0.85rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .listing-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .listing-status-pill {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.3rem 0.65rem;
+        font-size: 0.68rem;
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    .listing-status-pill.available {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .listing-status-pill.unavailable {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
+    .listing-price-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: 0.15rem;
+    }
+
+    .listing-price {
+        display: flex;
+        align-items: baseline;
+        gap: 0.2rem;
+        min-width: 0;
+    }
+
+    .listing-price-value {
+        font-size: 0.95rem;
+        font-weight: 700;
+    }
+
+    .listing-price-value.is-red {
+        color: #e11d48;
+    }
+
+    .listing-price-value.is-muted {
+        color: #64748b;
+    }
+
+    .listing-price-suffix {
+        color: #94a3b8;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .listing-view-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        background: #ff385c;
+        color: #ffffff;
+        padding: 0.42rem 0.85rem;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+        transition: background 0.2s ease, transform 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .listing-view-btn:hover {
+        background: #e11d48;
+        transform: translateY(-1px);
+    }
+
+    .save-btn {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.32);
+        backdrop-filter: blur(8px);
+        color: white;
+        cursor: pointer;
+        z-index: 10;
     }
 
     .save-btn svg {
-        color: white;
-        transition: all 0.3s ease;
+        width: 19px;
+        height: 19px;
+        stroke-width: 2;
+        transition: transform 0.2s ease;
     }
 
-    .save-btn.saved svg {
-        color: #FF385C;
-        fill: #FF385C;
+    .save-btn:hover svg {
+        transform: scale(1.08);
     }
 
-    .group:hover .save-btn svg {
-        transform: scale(1.1);
+    .save-btn.saved {
+        background: #ff385c;
+    }
+
+    .line-clamp-1,
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .line-clamp-1 {
+        -webkit-line-clamp: 1;
+    }
+
+    .line-clamp-2 {
+        -webkit-line-clamp: 2;
     }
 </style>
 
 <script>
-    function handleUnsave(button, propertyId, savedListingId) {
+    function handleUnsave(event, button, propertyId, savedListingId) {
+        event.preventDefault();
+        event.stopPropagation();
+
         if (confirm('Remove from saved listings?')) {
             fetch(`/user/saved-listings/${savedListingId}`, {
                     method: 'DELETE',
@@ -206,11 +324,5 @@
                 });
         }
     }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.save-btn').forEach(btn => {
-            btn.classList.add('saved');
-        });
-    });
 </script>
 @endsection
