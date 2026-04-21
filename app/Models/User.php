@@ -92,6 +92,10 @@ class User extends Authenticatable implements MustVerifyEmail
             return asset($path);
         }
 
+        if (file_exists(public_path('storage/' . $path))) {
+            return asset('storage/' . $path);
+        }
+
         if (Str::startsWith($path, 'storage/')) {
             return asset($path);
         }
@@ -126,6 +130,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
         if (file_exists(public_path($path))) {
             return asset($path);
+        }
+
+        if (file_exists(public_path('storage/' . $path))) {
+            return asset('storage/' . $path);
         }
 
         if (Str::startsWith($path, 'storage/')) {

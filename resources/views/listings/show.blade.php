@@ -254,6 +254,8 @@
         $propertyAvailabilityClasses = $property->is_property_bookable
             ? 'bg-emerald-50 text-emerald-700'
             : 'bg-amber-50 text-amber-700';
+        $isOwnerView = auth()->check() && auth()->user()->isOwner();
+        $canBookProperty = auth()->check() && auth()->user()->isUser() && (int) auth()->id() !== (int) $property->owner_id;
     @endphp
 
     <main class="py-10 lg:py-12">
@@ -336,58 +338,73 @@
                     </div>
 
                     <aside class="space-y-4 xl:pt-24">
-                        <div class="surface p-6 xl:sticky xl:top-24">
-                            <div class="border-b border-slate-200 pb-5">
-                                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Booking Summary</p>
-                                <p class="mt-3 text-2xl font-semibold leading-tight text-slate-950">{{ $headlinePrice }}</p>
-                                <p class="mt-2 text-sm leading-6 text-slate-500">
+                        @if($isOwnerView)
+                            <div class="surface p-6 xl:sticky xl:top-24">
+                                <div class="border-b border-slate-200 pb-5">
+                                    <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Owner View</p>
+                                    <p class="mt-3 text-2xl font-semibold leading-tight text-slate-950">{{ $property->title }}</p>
+                                    <p class="mt-2 text-sm leading-6 text-slate-500">
+                                        Booking actions are hidden here because you manage this property from your owner dashboard.
+                                    </p>
+                                </div>
+
+                                <div class="mt-6 space-y-3">
+                                    <a href="{{ route('owner.listings.edit', $property) }}" class="btn-primary">Edit Property</a>
+                                    <a href="{{ route('owner.bookings.index') }}" class="btn-secondary">View Booking Requests</a>
+                                </div>
+                            </div>
+                        @else
+                            <div class="surface p-6 xl:sticky xl:top-24">
+                                <div class="border-b border-slate-200 pb-5">
+                                    <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Booking Summary</p>
+                                    <p class="mt-3 text-2xl font-semibold leading-tight text-slate-950">{{ $headlinePrice }}</p>
+                                    <p class="mt-2 text-sm leading-6 text-slate-500">
+                                        @if($property->canRentRooms())
+                                            Pick a room from the section below and continue to booking.
+                                        @else
+                                            Book the complete property as one monthly rental.
+                                        @endif
+                                    </p>
+                                </div>
+
+                                <div class="mt-5 flex items-center gap-3">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-base font-bold text-rose-500">
+                                        {{ strtoupper(substr($property->owner->name ?? 'O', 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-slate-900">{{ $property->owner->name ?? 'Owner' }}</p>
+                                        <p class="text-sm text-slate-500">Property owner</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 space-y-3">
                                     @if($property->canRentRooms())
-                                        Pick a room from the section below and continue to booking.
+                                        <a href="#available-rooms" class="btn-primary">Choose a Room</a>
+                                    @elseif(auth()->check())
+                                        <a href="{{ route('listings.request-booking', $property->id) }}" class="btn-primary">Request Booking</a>
                                     @else
-                                        Book the complete property as one monthly rental.
+                                        <a href="{{ route('login') }}" class="btn-primary">Sign In to Book</a>
                                     @endif
-                                </p>
-                            </div>
-
-                            <div class="mt-5 flex items-center gap-3">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-base font-bold text-rose-500">
-                                    {{ strtoupper(substr($property->owner->name ?? 'O', 0, 1)) }}
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-slate-900">{{ $property->owner->name ?? 'Owner' }}</p>
-                                    <p class="text-sm text-slate-500">Property owner</p>
-                                </div>
-                            </div>
-
-                            <div class="mt-6 space-y-3">
-                                @if($property->canRentRooms())
-                                    <a href="#available-rooms" class="btn-primary">Choose a Room</a>
-                                @elseif(auth()->check())
-                                    <a href="{{ route('listings.request-booking', $property->id) }}" class="btn-primary">Request Booking</a>
-                                @else
-                                    <a href="{{ route('login') }}" class="btn-primary">Sign In to Book</a>
-                                @endif
-                                @auth
-                                    <form action="{{ route('user.saved-listings.save', $property) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="btn-secondary">Save Listing</button>
-                                    </form>
-                                    @if(auth()->user()->isUser() && auth()->id() !== (int) $property->owner_id)
+                                    @if($canBookProperty)
+                                        <form action="{{ route('user.saved-listings.save', $property) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="btn-secondary">Save Listing</button>
+                                        </form>
                                         <button type="button" class="btn-secondary js-contact-owner" data-property-id="{{ $property->id }}">Contact Owner</button>
+                                    @else
+                                        <a href="{{ route('login') }}" class="btn-secondary">Sign In to Save</a>
+                                        <a href="{{ route('login') }}" class="btn-secondary">Sign In to Message</a>
                                     @endif
-                                @else
-                                    <a href="{{ route('login') }}" class="btn-secondary">Sign In to Save</a>
-                                    <a href="{{ route('login') }}" class="btn-secondary">Sign In to Message</a>
-                                @endauth
-                            </div>
-
-                            @if($property->owner->email)
-                                <div class="mt-6 border-t border-slate-200 pt-5">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Contact Email</p>
-                                    <p class="mt-2 break-all text-sm font-medium text-slate-700">{{ $property->owner->email }}</p>
                                 </div>
-                            @endif
-                        </div>
+
+                                @if($property->owner->email)
+                                    <div class="mt-6 border-t border-slate-200 pt-5">
+                                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Contact Email</p>
+                                        <p class="mt-2 break-all text-sm font-medium text-slate-700">{{ $property->owner->email }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
                     </aside>
                 </section>
 
@@ -455,11 +472,15 @@
 
                                                     <div class="mt-5">
                                                         @if($room->is_bookable)
-                                                            @auth
+                                                            @if($isOwnerView)
+                                                                <span class="inline-flex w-full items-center justify-center rounded-[14px] border border-slate-200 bg-slate-100 px-4 py-[0.95rem] text-sm font-semibold text-slate-500">
+                                                                    Owner view only
+                                                                </span>
+                                                            @elseif($canBookProperty)
                                                                 <a href="{{ route('listings.request-booking', ['property' => $property->id, 'room' => $room->id]) }}" class="btn-primary">Book This Room</a>
                                                             @else
                                                                 <a href="{{ route('login') }}" class="btn-primary">Sign In to Book</a>
-                                                            @endauth
+                                                            @endif
                                                         @else
                                                             <span class="inline-flex w-full items-center justify-center rounded-[14px] border border-slate-200 bg-slate-100 px-4 py-[0.95rem] text-sm font-semibold text-slate-400">
                                                                 Unavailable

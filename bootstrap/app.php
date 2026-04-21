@@ -14,8 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'blocked' => \App\Http\Middleware\EnsureUserIsNotBlocked::class,
+            'fresh.session' => \App\Http\Middleware\EnsureSessionIsFresh::class,
             'owner' => \App\Http\Middleware\OwnerMiddleware::class,
             'user' => \App\Http\Middleware\UserMiddleware::class,
+        ]);
+
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\EnsureSessionIsFresh::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

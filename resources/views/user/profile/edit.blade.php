@@ -5,7 +5,7 @@
 
 @section('content')
     @php
-        $photoUrl = $user->profile_photo ? asset($user->profile_photo) : null;
+        $photoUrl = method_exists($user, 'profilePhotoUrl') ? $user->profilePhotoUrl() : null;
     @endphp
 
     <style>

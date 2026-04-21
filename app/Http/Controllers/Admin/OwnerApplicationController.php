@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\OwnerApplication;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -59,6 +60,9 @@ class OwnerApplicationController extends Controller
             'admin_notes' => 'nullable|string|max:2000',
         ]);
 
+        $applicationUser = $ownerApplication->user;
+        $wasAlreadyApproved = $ownerApplication->isApproved();
+
         DB::transaction(function () use ($ownerApplication, $data): void {
             $ownerApplication->update([
                 'status' => OwnerApplication::STATUS_APPROVED,
@@ -70,6 +74,20 @@ class OwnerApplicationController extends Controller
                 'role' => User::ROLE_OWNER,
             ]);
         });
+
+        if ($applicationUser && ! $wasAlreadyApproved) {
+            try {
+                NotificationService::sendNotification(
+                    $applicationUser->id,
+                    'host_application',
+                    'Host application approved',
+                    'Your host application has been approved. You can now access owner features.',
+                    route('owner.dashboard')
+                );
+            } catch (\Throwable $notificationError) {
+                // Notification failures must not block the approval flow.
+            }
+        }
 
         return redirect()
             ->route('admin.owner-applications.show', $ownerApplication)
@@ -87,11 +105,28 @@ class OwnerApplicationController extends Controller
             'admin_notes' => 'nullable|string|max:2000',
         ]);
 
+        $applicationUser = $ownerApplication->user;
+        $wasAlreadyRejected = $ownerApplication->isRejected();
+
         $ownerApplication->update([
             'status' => OwnerApplication::STATUS_REJECTED,
             'admin_notes' => filled($data['admin_notes'] ?? null) ? trim($data['admin_notes']) : null,
             'reviewed_at' => now(),
         ]);
+
+        if ($applicationUser && ! $wasAlreadyRejected) {
+            try {
+                NotificationService::sendNotification(
+                    $applicationUser->id,
+                    'host_application',
+                    'Host application rejected',
+                    'Your host application was not approved. Please review the admin notes and submit again if needed.',
+                    route('user.host-application.show')
+                );
+            } catch (\Throwable $notificationError) {
+                // Notification failures must not block the rejection flow.
+            }
+        }
 
         return redirect()
             ->route('admin.owner-applications.show', $ownerApplication)

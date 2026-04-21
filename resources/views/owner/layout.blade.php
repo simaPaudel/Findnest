@@ -22,6 +22,11 @@
             $ownerLayoutUser = null;
         }
     @endphp
+    @php
+        $ownerAvatarUrl = $ownerLayoutUser && method_exists($ownerLayoutUser, 'profilePhotoUrl')
+            ? $ownerLayoutUser->profilePhotoUrl()
+            : null;
+    @endphp
     <nav class="owner-navbar">
         <div class="owner-navbar-container">
             <a href="{{ route('owner.dashboard') }}" class="owner-brand">
@@ -49,8 +54,8 @@
 
                 <details class="owner-profile-menu">
                     <summary class="owner-profile-trigger" aria-label="Profile menu">
-                        @if($ownerLayoutUser && $ownerLayoutUser->profile_photo)
-                            <img src="{{ asset('storage/' . $ownerLayoutUser->profile_photo) }}" alt="Profile" class="profile-photo">
+                        @if($ownerAvatarUrl)
+                            <img src="{{ $ownerAvatarUrl }}" alt="Profile" class="profile-photo">
                         @else
                             <svg class="owner-profile-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>

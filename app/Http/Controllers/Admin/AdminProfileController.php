@@ -78,6 +78,18 @@ class AdminProfileController extends Controller
             return asset($path);
         }
 
+        if (file_exists(public_path($path))) {
+            return asset($path);
+        }
+
+        if (file_exists(public_path('storage/' . ltrim($path, '/')))) {
+            return asset('storage/' . ltrim($path, '/'));
+        }
+
+        if (file_exists(storage_path('app/public/' . ltrim($path, '/')))) {
+            return asset('storage/' . ltrim($path, '/'));
+        }
+
         if (Str::startsWith($path, 'profiles/')) {
             return asset('storage/' . ltrim($path, '/'));
         }

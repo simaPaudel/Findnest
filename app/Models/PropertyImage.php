@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class PropertyImage extends Model
 {
@@ -35,7 +36,33 @@ class PropertyImage extends Model
      */
     public function getUrl()
     {
-        return asset('storage/' . $this->path);
+        $path = ltrim(str_replace('\\', '/', (string) $this->path), '/');
+
+        if ($path === '') {
+            return asset('images/property-placeholder.jpg');
+        }
+
+        if (Str::startsWith($path, ['http://', 'https://', '//'])) {
+            return $path;
+        }
+
+        if (file_exists(public_path($path))) {
+            return asset($path);
+        }
+
+        if (file_exists(public_path('storage/' . $path))) {
+            return asset('storage/' . $path);
+        }
+
+        if (file_exists(storage_path('app/public/' . $path))) {
+            return asset('storage/' . $path);
+        }
+
+        if (Str::startsWith($path, 'storage/')) {
+            return asset($path);
+        }
+
+        return asset('images/property-placeholder.jpg');
     }
 
     /**

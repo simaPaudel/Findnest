@@ -7,6 +7,36 @@
 @php
     $matches = collect($matches ?? []);
     $roommateProfiles = [];
+
+    $resolveProfilePhotoUrl = function ($path) {
+        if (empty($path)) {
+            return null;
+        }
+
+        if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//'])) {
+            return $path;
+        }
+
+        $path = ltrim(str_replace('\\', '/', (string) $path), '/');
+
+        if (file_exists(public_path($path))) {
+            return asset($path);
+        }
+
+        if (file_exists(public_path('storage/' . $path))) {
+            return asset('storage/' . $path);
+        }
+
+        if (\Illuminate\Support\Str::startsWith($path, 'storage/')) {
+            return asset($path);
+        }
+
+        if (file_exists(storage_path('app/public/' . $path))) {
+            return asset('storage/' . $path);
+        }
+
+        return asset('images/user-placeholder.jpg');
+    };
 @endphp
 
 <div class="space-y-6">
@@ -82,7 +112,7 @@
                     ];
                     $score = (int) ($match['compatibility_score'] ?? 0);
                     $scoreClass = $score >= 80 ? 'fn-badge-green' : ($score >= 60 ? 'fn-badge-yellow' : 'fn-badge-red');
-                    $photoUrl = !empty($match['profile_photo']) ? asset($match['profile_photo']) : null;
+                    $photoUrl = $resolveProfilePhotoUrl($match['profile_photo'] ?? null);
                     $roommateProfile = [
                         'user_id' => $match['user_id'],
                         'name' => $match['name'],

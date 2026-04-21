@@ -4,7 +4,7 @@
 
 @section('content')
     @php
-        $photoUrl = $owner->profile_photo ? asset('storage/' . $owner->profile_photo) : null;
+        $photoUrl = method_exists($owner, 'profilePhotoUrl') ? $owner->profilePhotoUrl() : null;
         $payoutQrUrl = method_exists($owner, 'payoutQrUrl') ? $owner->payoutQrUrl() : null;
     @endphp
 
