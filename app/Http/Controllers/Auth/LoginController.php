@@ -67,11 +67,17 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        $isSessionExpired = $request->string('logout_reason')->toString() === 'session_expired';
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-       Toastr::success('Logged out successfully.');
+        if ($isSessionExpired) {
+            return redirect()->route('login')->with('error', 'Your session expired. Please log in again.');
+        }
+
+        Toastr::success('Logged out successfully.');
         return redirect()->route('login');
     }
 }

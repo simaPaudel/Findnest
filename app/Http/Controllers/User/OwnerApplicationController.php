@@ -9,6 +9,7 @@ use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class OwnerApplicationController extends Controller
 {
@@ -41,11 +42,6 @@ class OwnerApplicationController extends Controller
                 ->with('success', 'Your host request has already been approved.');
         }
 
-        if ($latestApplication && $latestApplication->isPending()) {
-            return redirect()->route('user.host-application.show')
-                ->with('error', 'You already have a pending host application.');
-        }
-
         if ($latestApplication && $latestApplication->isApproved()) {
             return redirect()->route('owner.dashboard')
                 ->with('success', 'Your host application is already approved.');
@@ -63,16 +59,38 @@ class OwnerApplicationController extends Controller
         $frontPath = $request->file('citizenship_front')->store('owner-applications', 'public');
         $backPath = $request->file('citizenship_back')->store('owner-applications', 'public');
 
-        $application = $user->ownerApplications()->create([
-            'full_name' => $validated['full_name'],
-            'phone' => $validated['phone'],
-            'citizenship_number' => $validated['citizenship_number'],
-            'citizenship_front' => $frontPath,
-            'citizenship_back' => $backPath,
-            'address' => $validated['address'],
-            'status' => OwnerApplication::STATUS_PENDING,
-            'submitted_at' => now(),
-        ]);
+        $isUpdatingPendingApplication = $latestApplication && $latestApplication->isPending();
+
+        if ($isUpdatingPendingApplication) {
+            Storage::disk('public')->delete(array_values(array_filter([
+                $latestApplication->citizenship_front,
+                $latestApplication->citizenship_back,
+            ])));
+
+            $latestApplication->update([
+                'full_name' => $validated['full_name'],
+                'phone' => $validated['phone'],
+                'citizenship_number' => $validated['citizenship_number'],
+                'citizenship_front' => $frontPath,
+                'citizenship_back' => $backPath,
+                'address' => $validated['address'],
+                'status' => OwnerApplication::STATUS_PENDING,
+                'submitted_at' => now(),
+            ]);
+
+            $application = $latestApplication;
+        } else {
+            $application = $user->ownerApplications()->create([
+                'full_name' => $validated['full_name'],
+                'phone' => $validated['phone'],
+                'citizenship_number' => $validated['citizenship_number'],
+                'citizenship_front' => $frontPath,
+                'citizenship_back' => $backPath,
+                'address' => $validated['address'],
+                'status' => OwnerApplication::STATUS_PENDING,
+                'submitted_at' => now(),
+            ]);
+        }
 
         $adminIds = User::query()
             ->where('role', User::ROLE_ADMIN)
@@ -83,8 +101,10 @@ class OwnerApplicationController extends Controller
                 NotificationService::sendNotification(
                     (int) $adminId,
                     'host_application',
-                    'New host application submitted',
-                    $validated['full_name'] . ' submitted a host application for review.',
+                    $isUpdatingPendingApplication ? 'Host application updated' : 'New host application submitted',
+                    $validated['full_name'] . ($isUpdatingPendingApplication
+                        ? ' updated their host application for review.'
+                        : ' submitted a host application for review.'),
                     route('admin.owner-applications.show', $application)
                 );
             } catch (\Throwable $notificationError) {

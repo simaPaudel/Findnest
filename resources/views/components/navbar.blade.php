@@ -493,6 +493,76 @@
 </style>
 
 @if($navbarUser)
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const idleTimeoutMs = {{ max(1, (int) config('session.lifetime', 120)) * 60 * 1000 }};
+            const activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+            let timeoutId = null;
+            let hasTimedOut = false;
+
+            const logoutForms = [
+                '.fn-profile-logout-form',
+                '.owner-profile-logout-form',
+                '.admin-profile-logout-form',
+            ];
+
+            const findLogoutForm = () => {
+                for (const selector of logoutForms) {
+                    const form = document.querySelector(selector);
+                    if (form) {
+                        return form;
+                    }
+                }
+
+                return null;
+            };
+
+            const triggerLogout = () => {
+                if (hasTimedOut) {
+                    return;
+                }
+
+                hasTimedOut = true;
+
+                const form = findLogoutForm();
+
+                if (form) {
+                    let reasonInput = form.querySelector('input[name="logout_reason"]');
+
+                    if (!reasonInput) {
+                        reasonInput = document.createElement('input');
+                        reasonInput.type = 'hidden';
+                        reasonInput.name = 'logout_reason';
+                        form.appendChild(reasonInput);
+                    }
+
+                    reasonInput.value = 'session_expired';
+                    form.submit();
+                    return;
+                }
+
+                window.location.href = '{{ route('login') }}';
+            };
+
+            const resetTimer = () => {
+                if (hasTimedOut) {
+                    return;
+                }
+
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+
+                timeoutId = window.setTimeout(triggerLogout, idleTimeoutMs);
+            };
+
+            activityEvents.forEach((eventName) => {
+                window.addEventListener(eventName, resetTimer, { passive: true });
+            });
+
+            resetTimer();
+        });
+    </script>
     @if($navbarUser && $navbarUser->isUser())
         <script>
             document.addEventListener('DOMContentLoaded', function () {
