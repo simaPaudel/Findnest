@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class OwnerBookingController extends Controller
 {
     /**
-     * Display a listing of bookings for owner's properties.
+     
      *
      * @return \Illuminate\View\View
      */

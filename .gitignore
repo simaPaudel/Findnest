@@ -1,34 +1,36 @@
 *.log
 .DS_Store
+Thumbs.db
+
 .env
 .env.backup
 .env.production
+*.env
+
 .phpactor.json
 .phpunit.result.cache
+
 /.fleet
 /.idea
 /.nova
 /.phpunit.cache
 /.vscode
 /.zed
+
 /auth.json
+
 /node_modules
+
 /public/build
 /public/hot
-/public/storage
-/storage/*.key
+
 /storage/pail
+/storage/logs
+/storage/framework
+
+/bootstrap/cache
+
 /vendor
+
 Homestead.json
 Homestead.yaml
-Thumbs.db
-# Laravel storage (important)
- /storage/logs
- /storage/framework
- /bootstrap/cache
-
-# User uploads (VERY important for your project)
- /public/profiles
-
-# Optional (extra safety)
- *.env
