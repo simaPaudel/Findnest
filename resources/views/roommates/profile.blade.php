@@ -23,6 +23,12 @@
             box-sizing: border-box;
         }
 
+        html {
+            width: 100%;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #FFF5F7 0%, var(--fn-white) 100%);
@@ -32,6 +38,28 @@
             align-items: center;
             justify-content: center;
             padding: 32px 16px;
+            overflow-x: hidden;
+        }
+
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+        }
+
+        img,
+        video {
+            height: auto;
+        }
+
+        input,
+        select,
+        textarea,
+        a,
+        button {
+            max-width: 100%;
+            font: inherit;
         }
 
         .fn-text-red { color: var(--fn-red); }
@@ -63,6 +91,7 @@
             border: 1px solid rgba(229, 231, 235, 0.8);
             border-radius: 20px;
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            max-width: 100%;
         }
 
         @keyframes pulse {
@@ -94,6 +123,11 @@
                 padding: 1.5rem;
             }
 
+            h1 {
+                font-size: 2rem !important;
+                line-height: 1.2;
+            }
+
             .relative.z-10.text-center.px-6.max-w-2xl.mx-auto {
                 max-width: 100%;
                 padding-left: 0;
@@ -103,6 +137,24 @@
             .pulse-bg::before {
                 width: 320px;
                 height: 320px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            body {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .fn-glass-card {
+                padding: 1.15rem;
+            }
+
+            .fn-btn-primary {
+                width: 100%;
+                justify-content: center;
+                padding-left: 1rem;
+                padding-right: 1rem;
             }
         }
     </style>

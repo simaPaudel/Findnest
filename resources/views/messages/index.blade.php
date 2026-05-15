@@ -12,15 +12,39 @@
             min-height: 640px;
             max-width: 1440px;
             margin: 0 auto;
+            min-width: 0;
         }
 
         .mn-panel,
         .mn-chat {
+            min-width: 0;
             border: 1px solid rgba(226, 232, 240, 0.95);
             border-radius: 20px;
             background: rgba(255, 255, 255, 0.97);
             box-shadow: 0 14px 40px rgba(15, 23, 42, 0.06);
             overflow: hidden;
+        }
+
+        .mn-chat {
+            display: flex;
+            min-height: 0;
+            flex-direction: column;
+        }
+
+        .mn-chat-header,
+        .mn-chat-footer {
+            flex: 0 0 auto;
+        }
+
+        .mn-chat-body {
+            flex: 1 1 auto;
+        }
+
+        .mn-thread,
+        .mn-message,
+        .mn-bubble,
+        .mn-message-image-link {
+            min-width: 0;
         }
 
         .mn-panel-header,
@@ -275,6 +299,35 @@
             border-bottom-left-radius: 6px;
         }
 
+        .mn-message-image-link {
+            display: block;
+            max-width: min(280px, 100%);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .mn-message.mine .mn-message-image-link {
+            border-bottom-right-radius: 6px;
+        }
+
+        .mn-message.other .mn-message-image-link {
+            border-bottom-left-radius: 6px;
+        }
+
+        .mn-message-image {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 320px;
+            object-fit: cover;
+            background: #f8fafc;
+        }
+
+        .mn-message-image-link + .mn-bubble {
+            margin-top: 8px;
+        }
+
         .mn-message-time {
             margin-top: 4px;
             font-size: 0.68rem;
@@ -289,9 +342,75 @@
 
         .mn-form {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-columns: auto minmax(0, 1fr) auto;
             gap: 10px;
             align-items: end;
+        }
+
+        .mn-attach {
+            min-width: 48px;
+            min-height: 48px;
+            border: 1px solid #dbe4ee;
+            border-radius: 14px;
+            background: #fff;
+            color: #475569;
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .mn-attach:hover,
+        .mn-attach:focus-within {
+            border-color: rgba(255, 56, 92, 0.42);
+            color: #ff385c;
+            box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.08);
+        }
+
+        .mn-attach-input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .mn-attachment-preview {
+            grid-column: 1 / -1;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 9px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: #475569;
+            font-size: 0.78rem;
+        }
+
+        .mn-attachment-preview.is-visible {
+            display: flex;
+        }
+
+        .mn-attachment-name {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .mn-attachment-remove {
+            border: 0;
+            background: transparent;
+            color: #ff385c;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
         }
 
         .mn-input {
@@ -388,6 +507,7 @@
         @media (max-width: 1024px) {
             .mn-shell {
                 grid-template-columns: 1fr;
+                min-height: 0;
             }
 
             .mn-panel {
@@ -404,27 +524,233 @@
         }
 
         @media (max-width: 640px) {
+            .mn-shell {
+                gap: 14px;
+                width: 100%;
+            }
+
+            .mn-panel,
+            .mn-chat {
+                border-radius: 18px;
+                box-shadow: 0 10px 28px rgba(15, 23, 42, 0.055);
+            }
+
             .mn-panel-header,
             .mn-chat-header,
             .mn-chat-footer {
-                padding-left: 14px;
-                padding-right: 14px;
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .mn-panel-header,
+            .mn-chat-header {
+                padding-top: 13px;
+                padding-bottom: 13px;
+            }
+
+            .mn-panel-title h2 {
+                font-size: 0.72rem;
+                letter-spacing: 0.11em;
+            }
+
+            .mn-thread-list {
+                max-height: 34vh;
+                padding: 8px;
+                gap: 7px;
             }
 
             .mn-thread {
-                padding: 11px;
+                gap: 10px;
+                padding: 11px 10px;
+                border-radius: 15px;
+            }
+
+            .mn-thread-avatar {
+                width: 38px;
+                height: 38px;
+                font-size: 0.78rem;
+            }
+
+            .mn-thread-top {
+                gap: 8px;
+            }
+
+            .mn-thread-title {
+                font-size: 0.86rem;
+            }
+
+            .mn-thread-time {
+                font-size: 0.66rem;
+            }
+
+            .mn-thread-preview {
+                font-size: 0.76rem;
+            }
+
+            .mn-thread-meta {
+                margin-top: 7px;
+            }
+
+            .mn-thread-type {
+                font-size: 0.62rem;
+                letter-spacing: 0.06em;
+            }
+
+            .mn-chat-header-row {
+                gap: 10px;
+            }
+
+            .mn-chat-header-avatar {
+                width: 38px;
+                height: 38px;
+                font-size: 0.78rem;
+            }
+
+            .mn-chat-header h3 {
+                font-size: 0.92rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .mn-chat-subtitle {
+                font-size: 0.74rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .mn-chat-body {
+                height: clamp(340px, 54dvh, 520px);
+                padding: 14px 12px;
             }
 
             .mn-message {
-                max-width: 88%;
+                max-width: 92%;
+                margin-bottom: 10px;
+            }
+
+            .mn-bubble {
+                border-radius: 16px;
+                padding: 10px 12px;
+                font-size: 0.84rem;
+                line-height: 1.5;
+            }
+
+            .mn-message-image-link {
+                max-width: min(230px, 86vw);
+                border-radius: 14px;
+            }
+
+            .mn-message-image {
+                max-height: 260px;
+            }
+
+            .mn-message-time {
+                max-width: 100%;
+                font-size: 0.64rem;
+                line-height: 1.4;
+                word-break: break-word;
+            }
+
+            .mn-chat-footer {
+                padding-top: 12px;
+                padding-bottom: 12px;
             }
 
             .mn-form {
-                grid-template-columns: 1fr;
+                grid-template-columns: 44px minmax(0, 1fr) auto;
+                gap: 8px;
+                align-items: end;
+            }
+
+            .mn-attach {
+                min-width: 44px;
+                min-height: 44px;
+                width: 44px;
+                height: 44px;
+                border-radius: 13px;
             }
 
             .mn-send {
-                width: 100%;
+                min-height: 44px;
+                padding: 0 14px;
+                border-radius: 13px;
+                font-size: 0.8rem;
+            }
+
+            .mn-input {
+                min-height: 44px;
+                max-height: 96px;
+                border-radius: 13px;
+                padding: 11px 12px;
+                font-size: 0.84rem;
+                resize: none;
+            }
+
+            .mn-attachment-preview {
+                padding: 8px 9px;
+                font-size: 0.74rem;
+            }
+
+            .mn-empty {
+                min-height: 320px;
+                padding: 22px 16px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .mn-panel-header,
+            .mn-chat-header,
+            .mn-chat-footer {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .mn-thread-list {
+                max-height: 30vh;
+                padding: 7px;
+            }
+
+            .mn-thread-avatar,
+            .mn-chat-header-avatar {
+                width: 34px;
+                height: 34px;
+            }
+
+            .mn-chat-body {
+                height: clamp(310px, 52dvh, 460px);
+                padding: 12px 10px;
+            }
+
+            .mn-form {
+                grid-template-columns: 40px minmax(0, 1fr) auto;
+                gap: 7px;
+            }
+
+            .mn-attach {
+                min-width: 40px;
+                min-height: 40px;
+                width: 40px;
+                height: 40px;
+            }
+
+            .mn-send {
+                min-height: 40px;
+                padding: 0 11px;
+            }
+
+            .mn-input {
+                min-height: 40px;
+                padding: 10px 11px;
+            }
+
+            .mn-message {
+                max-width: 94%;
+            }
+
+            .mn-message-image-link {
+                max-width: min(210px, 84vw);
             }
         }
     </style>
@@ -484,7 +810,9 @@
                             }
 
                             $latestMessage = $conversation->latestMessage;
-                            $previewText = $latestMessage ? $latestMessage->message : 'No messages yet';
+                            $previewText = $latestMessage
+                                ? ($latestMessage->message ?: ($latestMessage->image_path ? 'Photo attachment' : 'No messages yet'))
+                                : 'No messages yet';
                             $avatarUrl = $resolveProfilePhotoUrl($otherParticipant?->profile_photo);
                         @endphp
 
@@ -556,17 +884,33 @@
                             $isMine = (int) $message->sender_id === (int) $currentUserId;
                         @endphp
                         <div class="mn-message {{ $isMine ? 'mine' : 'other' }}" data-message-id="{{ $message->id }}" data-message-time="{{ optional($message->created_at)->toIso8601String() }}">
-                            <div class="mn-bubble">{{ $message->message }}</div>
+                            @if($message->image_url)
+                                <a class="mn-message-image-link" href="{{ $message->image_url }}" target="_blank" rel="noopener noreferrer">
+                                    <img class="mn-message-image" src="{{ $message->image_url }}" alt="{{ $message->image_original_name ?: 'Shared image' }}" loading="lazy">
+                                </a>
+                            @endif
+
+                            @if(!empty($message->message))
+                                <div class="mn-bubble">{{ $message->message }}</div>
+                            @endif
                             <span class="mn-message-time">{{ $message->created_at->format('M d, h:i A') }}</span>
                         </div>
                     @endforeach
                 </div>
 
                 <div class="mn-chat-footer">
-                    <form id="mn-send-form" class="mn-form" autocomplete="off">
+                    <form id="mn-send-form" class="mn-form" autocomplete="off" enctype="multipart/form-data">
                         @csrf
-                        <textarea class="mn-input" name="message" id="mn-message-input" rows="1" maxlength="5000" placeholder="Type a message..." required></textarea>
+                        <label class="mn-attach" for="mn-image-input" aria-label="Attach image" title="Attach image">
+                            +
+                            <input class="mn-attach-input" type="file" name="image" id="mn-image-input" accept="image/jpeg,image/png,image/webp,image/gif">
+                        </label>
+                        <textarea class="mn-input" name="message" id="mn-message-input" rows="1" maxlength="5000" placeholder="Type a message..."></textarea>
                         <button class="mn-send" id="mn-send-button" type="submit">Send</button>
+                        <div class="mn-attachment-preview" id="mn-attachment-preview" aria-live="polite">
+                            <span class="mn-attachment-name" id="mn-attachment-name"></span>
+                            <button class="mn-attachment-remove" id="mn-attachment-remove" type="button">Remove</button>
+                        </div>
                     </form>
                 </div>
 
@@ -578,8 +922,14 @@
                         const chatBody = document.getElementById('mn-chat-body');
                         const sendForm = document.getElementById('mn-send-form');
                         const messageInput = document.getElementById('mn-message-input');
+                        const imageInput = document.getElementById('mn-image-input');
+                        const attachmentPreview = document.getElementById('mn-attachment-preview');
+                        const attachmentName = document.getElementById('mn-attachment-name');
+                        const attachmentRemove = document.getElementById('mn-attachment-remove');
                         const sendButton = document.getElementById('mn-send-button');
                         const csrfToken = sendForm.querySelector('input[name="_token"]').value;
+                        const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+                        const maxImageBytes = 4 * 1024 * 1024;
                         let lastMessageTime = @json($lastMessageTimestamp);
 
                         const escapeHtml = (value) => {
@@ -610,10 +960,17 @@
                             const mineClass = Number(message.sender_id) === Number(currentUserId) ? 'mine' : 'other';
                             const messageTime = message.created_at || '';
                             const safeMessage = escapeHtml(message.message || '');
+                            const safeImageUrl = escapeHtml(message.image_url || '');
+                            const safeImageName = escapeHtml(message.image_original_name || 'Shared image');
+                            const imageMarkup = safeImageUrl
+                                ? `<a class="mn-message-image-link" href="${safeImageUrl}" target="_blank" rel="noopener noreferrer"><img class="mn-message-image" src="${safeImageUrl}" alt="${safeImageName}" loading="lazy"></a>`
+                                : '';
+                            const textMarkup = safeMessage ? `<div class="mn-bubble">${safeMessage}</div>` : '';
 
                             return `
                                 <div class="mn-message ${mineClass}" data-message-id="${message.id}" data-message-time="${messageTime}">
-                                    <div class="mn-bubble">${safeMessage}</div>
+                                    ${imageMarkup}
+                                    ${textMarkup}
                                     <span class="mn-message-time">${formatTime(messageTime)}</span>
                                 </div>
                             `;
@@ -654,12 +1011,53 @@
 
                         scrollToBottom();
 
+                        const clearAttachment = () => {
+                            imageInput.value = '';
+                            attachmentName.textContent = '';
+                            attachmentPreview.classList.remove('is-visible');
+                        };
+
+                        imageInput.addEventListener('change', function () {
+                            const file = imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
+
+                            if (!file) {
+                                clearAttachment();
+                                return;
+                            }
+
+                            if (!allowedImageTypes.includes(file.type)) {
+                                clearAttachment();
+                                alert('Please attach a JPG, PNG, WEBP, or GIF image.');
+                                return;
+                            }
+
+                            if (file.size > maxImageBytes) {
+                                clearAttachment();
+                                alert('Please attach an image smaller than 4 MB.');
+                                return;
+                            }
+
+                            attachmentName.textContent = file.name;
+                            attachmentPreview.classList.add('is-visible');
+                        });
+
+                        attachmentRemove.addEventListener('click', clearAttachment);
+
                         sendForm.addEventListener('submit', async function (event) {
                             event.preventDefault();
 
                             const message = messageInput.value.trim();
-                            if (!message) {
+                            const image = imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
+
+                            if (!message && !image) {
                                 return;
+                            }
+
+                            const formData = new FormData();
+                            formData.append('message', message);
+
+                            if (image) {
+                                formData.append('image', image);
                             }
 
                             sendButton.disabled = true;
@@ -668,12 +1066,11 @@
                                 const response = await fetch(`${window.location.origin}/${routePrefix}/conversations/${conversationId}/messages`, {
                                     method: 'POST',
                                     headers: {
-                                        'Content-Type': 'application/json',
                                         'Accept': 'application/json',
                                         'X-Requested-With': 'XMLHttpRequest',
                                         'X-CSRF-TOKEN': csrfToken
                                     },
-                                    body: JSON.stringify({ message })
+                                    body: formData
                                 });
 
                                 const data = await response.json();
@@ -684,6 +1081,7 @@
 
                                 setMessages(data.messages || []);
                                 messageInput.value = '';
+                                clearAttachment();
                                 messageInput.focus();
                             } catch (error) {
                                 alert(error.message || 'Unable to send message.');

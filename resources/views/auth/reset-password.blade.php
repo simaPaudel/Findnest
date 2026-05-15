@@ -26,6 +26,12 @@
             box-sizing: border-box;
         }
 
+        html {
+            width: 100%;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #FFF5F7 0%, #FFFFFF 50%, #FFF1F3 100%);
@@ -35,6 +41,17 @@
             justify-content: center;
             position: relative;
             overflow-x: hidden;
+        }
+
+        img,
+        svg {
+            max-width: 100%;
+        }
+
+        input,
+        button,
+        a {
+            max-width: 100%;
         }
 
         /* Background Pattern */
@@ -235,6 +252,68 @@
             margin-top: 8px;
             transition: all 0.3s ease;
         }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-field .fn-input {
+            padding-right: 48px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--fn-gray-dark);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: color 0.18s ease, background 0.18s ease;
+        }
+
+        .password-toggle:hover,
+        .password-toggle:focus-visible {
+            color: var(--fn-red);
+            background: rgba(255, 56, 92, 0.06);
+            outline: none;
+        }
+
+        .password-toggle svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                align-items: flex-start;
+                padding: 20px 0;
+            }
+
+            .relative.z-10.w-full.max-w-md.px-6 {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .fn-glass-card {
+                border-radius: 18px;
+                padding: 1.25rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .relative.z-10.w-full.max-w-md.px-6 {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+        }
     </style>
 </head>
 
@@ -294,26 +373,42 @@
                 <!-- Password Field -->
                 <div class="mb-5">
                     <label for="password" class="fn-label">New Password</label>
-                    <input type="password"
-                        class="fn-input"
-                        id="password"
-                        name="password"
-                        placeholder="Enter new password (min. 8 characters)"
-                        required>
+                    <div class="password-field">
+                        <input type="password"
+                            class="fn-input"
+                            id="password"
+                            name="password"
+                            placeholder="8+ chars, upper/lowercase, number, symbol"
+                            required>
+                        <button type="button" class="password-toggle" data-password-toggle="password" aria-label="Show password" aria-pressed="false">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <p class="mt-2 text-xs" style="color: var(--fn-gray-dark);">
-                        Password must be at least 8 characters long
+                        Password must be at least 8 characters and include uppercase letters, lowercase letters, a number, and a special character.
                     </p>
                 </div>
 
                 <!-- Confirm Password Field -->
                 <div class="mb-6">
                     <label for="password_confirmation" class="fn-label">Confirm Password</label>
-                    <input type="password"
-                        class="fn-input"
-                        id="password_confirmation"
-                        name="password_confirmation"
-                        placeholder="Confirm your new password"
-                        required>
+                    <div class="password-field">
+                        <input type="password"
+                            class="fn-input"
+                            id="password_confirmation"
+                            name="password_confirmation"
+                            placeholder="Confirm your new password"
+                            required>
+                        <button type="button" class="password-toggle" data-password-toggle="password_confirmation" aria-label="Show password confirmation" aria-pressed="false">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Submit Button -->
@@ -347,6 +442,21 @@
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const input = document.getElementById(button.dataset.passwordToggle);
+                if (!input) {
+                    return;
+                }
+
+                const shouldShow = input.type === 'password';
+                input.type = shouldShow ? 'text' : 'password';
+                button.setAttribute('aria-pressed', shouldShow ? 'true' : 'false');
+                button.setAttribute('aria-label', shouldShow ? 'Hide password' : 'Show password');
+            });
+        });
+    </script>
     {!! Toastr::message() !!}
 </body>
 

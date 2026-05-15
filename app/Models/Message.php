@@ -9,6 +9,19 @@ class Message extends Model
 {
     use HasFactory;
 
+    protected $appends = [
+        'image_url',
+    ];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (empty($this->image_path)) {
+            return null;
+        }
+
+        return '/storage/' . ltrim($this->image_path, '/');
+    }
+
     public function conversation()
     {
         return $this->belongsTo(Conversation::class, 'conversation_id');

@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ContactFormSubmitted;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class PageController extends Controller
@@ -79,6 +84,53 @@ class PageController extends Controller
                 ],
             ],
         ]);
+    }
+
+    public function sendContact(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email:rfc', 'max:160'],
+            'subject' => ['required', 'string', 'max:180'],
+            'message' => ['required', 'string', 'min:10', 'max:3000'],
+        ], [
+            'name.required' => 'Please enter your name.',
+            'email.required' => 'Please enter your email address.',
+            'email.email' => 'Please enter a valid email address.',
+            'subject.required' => 'Please enter a subject.',
+            'message.required' => 'Please enter your message.',
+            'message.min' => 'Message must be at least 10 characters.',
+            'message.max' => 'Message must not exceed 3000 characters.',
+        ]);
+
+        $recipient = config('mail.contact_to');
+
+        if (blank($recipient)) {
+            Log::warning('Contact form submission blocked because CONTACT_MAIL_TO is not configured.', [
+                'email' => $validated['email'],
+                'subject' => $validated['subject'],
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('contact_error', 'Support email is not configured yet. Please try again later.');
+        }
+
+        try {
+            Mail::to($recipient)->send(new ContactFormSubmitted($validated));
+        } catch (\Throwable $exception) {
+            Log::error('Contact form email could not be sent.', [
+                'message' => $exception->getMessage(),
+                'email' => $validated['email'],
+                'subject' => $validated['subject'],
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('contact_error', 'Your message could not be sent right now. Please try again later.');
+        }
+
+        return back()->with('contact_success', 'Your message has been sent. The FindNest team will review it soon.');
     }
 
     public function faq(): View

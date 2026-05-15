@@ -184,7 +184,7 @@
                                 Cancel
                             </a>
                             <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-rose-500 px-6 py-3 font-semibold text-white hover:bg-rose-600 {{ $property->canRentRooms() && $rooms->isEmpty() ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $property->canRentRooms() && $rooms->isEmpty() ? 'disabled' : '' }}>
-                                Continue to Bill
+                                Book This Property
                             </button>
                         </div>
                     </div>

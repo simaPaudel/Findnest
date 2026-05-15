@@ -43,6 +43,15 @@
                     </thead>
                     <tbody>
                         @foreach($bookings as $booking)
+                            @php
+                                $trustPointGiven = $booking->trustPoints
+                                    ->where('giver_id', auth()->id())
+                                    ->where('receiver_id', $booking->user_id)
+                                    ->isNotEmpty();
+                                $canGiveTrustPoint = $booking->isStayCompletedForFeedback()
+                                    && (int) $booking->user_id !== (int) auth()->id()
+                                    && ! $trustPointGiven;
+                            @endphp
                             <tr>
                                 <td>
                                     <span class="booking-id">#{{ $booking->id }}</span>
@@ -53,6 +62,7 @@
                                         <div class="user-meta">
                                             <div class="user-name">{{ $booking->user->name }}</div>
                                             <div class="user-email">{{ $booking->user->email }}</div>
+                                            <div class="booking-meta-note">Trust Points: {{ (int) ($booking->user->trust_points ?? 0) }}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -103,7 +113,14 @@
                                         </div>
                                     @else
                                         <div class="booking-meta-note">
-                                            @if($booking->confirmed_at)
+                                            @if($canGiveTrustPoint)
+                                                <form method="POST" action="{{ route('owner.bookings.trust-point', $booking) }}" class="booking-action-form">
+                                                    @csrf
+                                                    <button type="submit" class="btn-success-outline">Give Trust Point</button>
+                                                </form>
+                                            @elseif($trustPointGiven)
+                                                Trust point already given
+                                            @elseif($booking->confirmed_at)
                                                 Confirmed on {{ \Carbon\Carbon::parse($booking->confirmed_at)->format('M d, Y') }}
                                             @elseif($booking->cancelled_at)
                                                 Cancelled on {{ \Carbon\Carbon::parse($booking->cancelled_at)->format('M d, Y') }}
@@ -121,6 +138,15 @@
 
             <div class="bookings-mobile-list">
                 @foreach($bookings as $booking)
+                    @php
+                        $trustPointGiven = $booking->trustPoints
+                            ->where('giver_id', auth()->id())
+                            ->where('receiver_id', $booking->user_id)
+                            ->isNotEmpty();
+                        $canGiveTrustPoint = $booking->isStayCompletedForFeedback()
+                            && (int) $booking->user_id !== (int) auth()->id()
+                            && ! $trustPointGiven;
+                    @endphp
                     <article class="booking-mobile-card">
                         <div class="booking-mobile-top">
                             <div>
@@ -140,6 +166,7 @@
                             <div class="user-meta">
                                 <div class="user-name">{{ $booking->user->name }}</div>
                                 <div class="user-email">{{ $booking->user->email }}</div>
+                                <div class="booking-meta-note">Trust Points: {{ (int) ($booking->user->trust_points ?? 0) }}</div>
                             </div>
                         </div>
 
@@ -175,7 +202,14 @@
                             </div>
                         @else
                             <div class="booking-meta-note">
-                                @if($booking->confirmed_at)
+                                @if($canGiveTrustPoint)
+                                    <form method="POST" action="{{ route('owner.bookings.trust-point', $booking) }}" class="booking-action-form">
+                                        @csrf
+                                        <button type="submit" class="btn-success-outline">Give Trust Point</button>
+                                    </form>
+                                @elseif($trustPointGiven)
+                                    Trust point already given
+                                @elseif($booking->confirmed_at)
                                     Confirmed on {{ \Carbon\Carbon::parse($booking->confirmed_at)->format('M d, Y') }}
                                 @elseif($booking->cancelled_at)
                                     Cancelled on {{ \Carbon\Carbon::parse($booking->cancelled_at)->format('M d, Y') }}

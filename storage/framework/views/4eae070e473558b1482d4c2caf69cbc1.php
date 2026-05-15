@@ -201,6 +201,78 @@
         .line-clamp-2 {
             -webkit-line-clamp: 2;
         }
+
+        @media (max-width: 767px) {
+            .listing-search-section {
+                padding: 0.85rem 0.75rem !important;
+            }
+
+            .listing-search-form {
+                max-width: none !important;
+            }
+
+            .search-shell {
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 0.45rem !important;
+                border-radius: 14px !important;
+                box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+                padding: 0.55rem !important;
+                overflow: visible;
+            }
+
+            .search-shell > div {
+                width: 100%;
+                min-width: 0;
+                padding: 0.5rem 0.6rem !important;
+                border: 1px solid #eef2f7 !important;
+                border-radius: 10px;
+                background: #fff;
+            }
+
+            .search-shell > div:first-child {
+                grid-column: 1 / -1;
+            }
+
+            .search-shell > div:last-of-type {
+                grid-column: 1 / 2;
+                border-right: 0 !important;
+            }
+
+            .search-shell label {
+                margin-bottom: 0.12rem;
+                font-size: 0.62rem;
+                line-height: 1.1;
+            }
+
+            .search-shell input,
+            .search-shell select {
+                min-height: 1.25rem;
+                font-size: 0.75rem;
+                line-height: 1.2;
+            }
+
+            .search-shell button[type="submit"] {
+                align-self: stretch;
+                justify-self: stretch;
+                width: 100% !important;
+                height: auto !important;
+                min-height: 2.55rem;
+                margin: 0 !important;
+                border-radius: 12px !important;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .search-shell > div {
+                padding: 0.45rem 0.5rem !important;
+            }
+
+            .search-shell input,
+            .search-shell select {
+                font-size: 0.72rem;
+            }
+        }
     </style>
 </head>
 
@@ -208,9 +280,9 @@
     <?php echo $__env->make('components.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <main>
-        <section class="border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8 py-6">
+        <section class="listing-search-section border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8 py-6">
             <div class="w-full">
-                <form action="<?php echo e(route('listings.index')); ?>" method="GET" class="max-w-5xl mx-auto">
+                <form action="<?php echo e(route('listings.index')); ?>" method="GET" class="listing-search-form max-w-5xl mx-auto">
                     <div class="search-shell p-2 flex flex-col gap-2 md:flex-row md:items-center md:gap-0">
                         <div class="flex-1 px-4 py-3 md:border-r md:border-slate-200">
                             <label class="block text-xs font-semibold text-slate-500 mb-1">Where</label>
@@ -313,6 +385,8 @@
                                 $availabilityLabel = $property->is_property_bookable ? 'Available' : 'Unavailable';
                                 $availabilityClass = $property->is_property_bookable ? 'available' : 'unavailable';
                                 $priceToneClass = $priceAmount === 'Price on request' ? 'is-muted' : 'is-red';
+                                $propertyReviewCount = (int) ($property->property_reviews_count ?? 0);
+                                $propertyAverageRating = (float) ($property->property_average_rating ?? 0);
                             ?>
 
                             <a href="<?php echo e(route('listings.show', $property)); ?>" class="listing-card">
@@ -345,6 +419,14 @@
                                     </div>
 
                                     <p class="text-sm text-slate-500 line-clamp-1"><?php echo e($property->address ?: ($property->location ?: 'Location not specified')); ?></p>
+                                    <p class="flex items-center gap-1.5 text-sm text-slate-600">
+                                        <span class="text-amber-400">★</span>
+                                        <?php if($propertyReviewCount > 0): ?>
+                                            <span><?php echo e(number_format($propertyAverageRating, 1)); ?> · <?php echo e($propertyReviewCount); ?> <?php echo e($propertyReviewCount === 1 ? 'review' : 'reviews'); ?></span>
+                                        <?php else: ?>
+                                            <span>No reviews yet</span>
+                                        <?php endif; ?>
+                                    </p>
                                     <div class="flex items-center gap-2">
                                         <span class="listing-status-pill <?php echo e($availabilityClass); ?>"><?php echo e($availabilityLabel); ?></span>
                                         <p class="text-sm text-slate-500 line-clamp-1"><?php echo e($subtitle); ?></p>

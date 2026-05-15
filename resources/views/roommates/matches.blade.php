@@ -35,9 +35,130 @@
             return asset('storage/' . $path);
         }
 
-        return asset('images/user-placeholder.jpg');
+        return null;
     };
 @endphp
+
+@push('styles')
+<style>
+    .roommate-profile-backdrop {
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .roommate-profile-dialog {
+        display: flex;
+        max-height: min(88vh, 760px);
+        min-height: 0;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .roommate-profile-header {
+        flex: 0 0 auto;
+    }
+
+    .roommate-profile-body {
+        min-height: 0;
+        overflow-y: auto;
+        padding-right: 0.25rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .roommate-profile-avatar {
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .roommate-profile-field {
+        min-width: 0;
+        transition: border-color 0.18s ease, background-color 0.18s ease;
+    }
+
+    .roommate-profile-field:hover {
+        border-color: rgba(255, 56, 92, 0.18);
+        background-color: #ffffff;
+    }
+
+    @media (max-width: 640px) {
+        .roommate-profile-backdrop {
+            align-items: flex-start !important;
+            padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem max(0.75rem, env(safe-area-inset-bottom)) !important;
+        }
+
+        .roommate-profile-dialog {
+            width: 100%;
+            max-height: calc(100dvh - 1.5rem);
+            border-radius: 20px;
+            padding: 1rem !important;
+        }
+
+        .roommate-profile-header {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            margin: -1rem -1rem 0;
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: rgba(255, 255, 255, 0.98);
+        }
+
+        .roommate-profile-header h3 {
+            font-size: 1.28rem;
+            line-height: 1.25;
+        }
+
+        .roommate-profile-header button {
+            flex: 0 0 auto;
+        }
+
+        .roommate-profile-body {
+            padding-top: 1rem;
+            padding-right: 0;
+        }
+
+        .roommate-profile-intro {
+            margin-top: 0 !important;
+            gap: 1rem;
+        }
+
+        .roommate-profile-avatar {
+            width: 4.75rem !important;
+            height: 4.75rem !important;
+            border-radius: 18px;
+        }
+
+        .roommate-profile-meta-grid,
+        .roommate-profile-choices-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .roommate-profile-section {
+            margin-top: 1.15rem !important;
+        }
+
+        .roommate-profile-section-title {
+            letter-spacing: 0.1em;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .roommate-profile-backdrop {
+            padding-left: 0.55rem !important;
+            padding-right: 0.55rem !important;
+        }
+
+        .roommate-profile-dialog {
+            padding: 0.85rem !important;
+        }
+
+        .roommate-profile-header {
+            margin: -0.85rem -0.85rem 0;
+            padding: 0.85rem;
+        }
+    }
+</style>
+@endpush
 
 <div class="space-y-6">
     <div class="fn-card p-6 md:p-8">
@@ -119,6 +240,7 @@
                         'email' => $match['email'],
                         'bio' => $match['bio'] ?: 'No bio shared yet.',
                         'photo_url' => $photoUrl,
+                        'trust_points' => (int) ($match['trust_points'] ?? 0),
                         'score' => $score,
                         'reasons' => array_values($match['reasons'] ?? []),
                         'choices' => array_values(array_filter($profileChoices, static fn ($choice) => !empty($choice['value']))),
@@ -132,8 +254,6 @@
                             <div class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 font-semibold text-slate-500">
                                 @if($photoUrl)
                                     <img src="{{ $photoUrl }}" alt="{{ $match['name'] }}" class="h-full w-full object-cover">
-                                @else
-                                    <span>{{ strtoupper(substr($match['name'] ?? 'U', 0, 1)) }}</span>
                                 @endif
                             </div>
 
@@ -190,47 +310,50 @@
     @endif
 </div>
 
-<div id="roommate-profile-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/50 px-4 py-6" style="display: none;" aria-hidden="true">
-    <div class="w-full max-w-2xl rounded-[18px] bg-white p-6 shadow-2xl">
-        <div class="flex items-start justify-between gap-4">
-            <div>
+<div id="roommate-profile-modal" class="roommate-profile-backdrop fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/50 px-4 py-6" style="display: none;" aria-hidden="true">
+    <div class="roommate-profile-dialog w-full max-w-2xl rounded-[22px] bg-white p-6 shadow-2xl">
+        <div class="roommate-profile-header flex items-start justify-between gap-4">
+            <div class="min-w-0">
                 <p class="text-xs font-semibold uppercase tracking-[0.2em] text-rose-500">View Profile</p>
                 <h3 id="roommate-profile-name" class="mt-2 text-2xl font-bold text-slate-950"></h3>
-                <p id="roommate-profile-email-top" class="mt-1 text-sm text-slate-500"></p>
+                <p id="roommate-profile-email-top" class="mt-1 break-words text-sm text-slate-500"></p>
             </div>
             <button type="button" class="rounded-full border border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-700" data-close-profile-modal>
                 Close
             </button>
         </div>
 
-        <div class="mt-6 flex flex-col gap-4 md:flex-row md:items-start">
-            <div id="roommate-profile-avatar" class="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-slate-100"></div>
-            <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-2">
-                    <span id="roommate-profile-score" class="fn-badge fn-badge-red">0% Match</span>
-                </div>
-                <p id="roommate-profile-bio" class="mt-3 text-sm leading-7 text-slate-600"></p>
-                <div class="mt-4 grid gap-2 sm:grid-cols-2">
-                    <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Email</p>
-                        <p id="roommate-profile-email" class="mt-1 break-words text-sm font-medium text-slate-900"></p>
+        <div class="roommate-profile-body">
+            <div class="roommate-profile-intro mt-6 flex flex-col gap-4 md:flex-row md:items-start">
+                <div id="roommate-profile-avatar" class="roommate-profile-avatar h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-slate-100"></div>
+                <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span id="roommate-profile-score" class="fn-badge fn-badge-red">0% Match</span>
+                        <span id="roommate-profile-trust" class="fn-badge fn-badge-gray">Trust Points: 0</span>
                     </div>
-                    <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Location</p>
-                        <p id="roommate-profile-location" class="mt-1 text-sm font-medium text-slate-900"></p>
+                    <p id="roommate-profile-bio" class="mt-3 text-sm leading-7 text-slate-600"></p>
+                    <div class="roommate-profile-meta-grid mt-4 grid gap-2 sm:grid-cols-2">
+                        <div class="roommate-profile-field rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Email</p>
+                            <p id="roommate-profile-email" class="mt-1 break-words text-sm font-medium text-slate-900"></p>
+                        </div>
+                        <div class="roommate-profile-field rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Location</p>
+                            <p id="roommate-profile-location" class="mt-1 break-words text-sm font-medium text-slate-900"></p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="mt-5">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Choices</p>
-            <div id="roommate-profile-choices" class="mt-3 grid gap-2 sm:grid-cols-2"></div>
-        </div>
+            <div class="roommate-profile-section mt-5">
+                <p class="roommate-profile-section-title text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Choices</p>
+                <div id="roommate-profile-choices" class="roommate-profile-choices-grid mt-3 grid gap-2 sm:grid-cols-2"></div>
+            </div>
 
-        <div class="mt-5">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Match Reasons</p>
-            <div id="roommate-profile-reasons" class="mt-3 flex flex-wrap gap-2"></div>
+            <div class="roommate-profile-section mt-5">
+                <p class="roommate-profile-section-title text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Match Reasons</p>
+                <div id="roommate-profile-reasons" class="mt-3 flex flex-wrap gap-2"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -291,6 +414,7 @@
         const profileEmailTop = document.getElementById('roommate-profile-email-top');
         const profileAvatar = document.getElementById('roommate-profile-avatar');
         const profileScore = document.getElementById('roommate-profile-score');
+        const profileTrust = document.getElementById('roommate-profile-trust');
         const profileBio = document.getElementById('roommate-profile-bio');
         const profileEmail = document.getElementById('roommate-profile-email');
         const profileLocation = document.getElementById('roommate-profile-location');
@@ -309,10 +433,9 @@
                 return;
             }
 
-            const initial = (name || 'U').trim().charAt(0).toUpperCase();
             container.innerHTML = photoUrl
                 ? `<img src="${photoUrl}" alt="${escapeHtml(name || 'Profile')}" class="h-full w-full object-cover">`
-                : `<div class="flex h-full w-full items-center justify-center text-lg font-bold text-slate-400">${escapeHtml(initial)}</div>`;
+                : '';
         };
 
         const escapeHtml = (value) => {
@@ -330,6 +453,7 @@
             modal.classList.add('flex');
             modal.style.display = 'flex';
             modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
         };
 
         const closeModal = (modal) => {
@@ -341,6 +465,11 @@
             modal.classList.remove('flex');
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
+
+            const hasOpenModal = [profileModal, contactModal].some((item) => item && item.getAttribute('aria-hidden') === 'false');
+            if (!hasOpenModal) {
+                document.body.style.overflow = '';
+            }
         };
 
         const renderChipList = (container, values) => {
@@ -376,6 +505,9 @@
             profileLocation.textContent = profile.choices?.find((choice) => choice.label === 'Location')?.value || 'Not set';
             profileScore.textContent = `${profile.score || 0}% Match`;
             profileScore.className = `fn-badge ${(profile.score || 0) >= 80 ? 'fn-badge-green' : ((profile.score || 0) >= 60 ? 'fn-badge-yellow' : 'fn-badge-red')}`;
+            if (profileTrust) {
+                profileTrust.textContent = `Trust Points: ${profile.trust_points || 0}`;
+            }
             renderAvatar(profileAvatar, profile.photo_url || '', profile.name || 'U');
 
             const choiceItems = (profile.choices || []).map((choice) => {
@@ -387,7 +519,7 @@
             }).filter((choice) => choice.value);
 
             profileChoices.innerHTML = choiceItems.map((choice) => `
-                <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <div class="roommate-profile-field rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                     <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">${escapeHtml(choice.label)}</p>
                     <p class="mt-1 text-sm font-medium text-slate-900">${escapeHtml(choice.value)}</p>
                 </div>

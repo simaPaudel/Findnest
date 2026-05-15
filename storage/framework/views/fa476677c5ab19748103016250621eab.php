@@ -21,12 +21,30 @@
             box-sizing: border-box;
         }
 
+        html {
+            width: 100%;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             margin: 0;
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
             background: var(--fn-bg);
             color: var(--fn-ink);
+            overflow-x: hidden;
+        }
+
+        img,
+        svg {
+            max-width: 100%;
+        }
+
+        input,
+        button,
+        a {
+            max-width: 100%;
         }
 
         a {
@@ -126,6 +144,83 @@
         .auth-form {
             display: grid;
             gap: 15px;
+        }
+
+        .oauth-stack {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 16px;
+        }
+
+        .oauth-button {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 16px;
+            border: 1px solid #d7dee8;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+            color: var(--fn-ink);
+            font: inherit;
+            font-weight: 700;
+            font-size: 0.94rem;
+            line-height: 1.2;
+            text-decoration: none;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 18px rgba(15, 23, 42, 0.04);
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
+        }
+
+        .oauth-button:hover {
+            border-color: rgba(255, 56, 92, 0.34);
+            background: #ffffff;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08), 0 0 0 3px rgba(255, 56, 92, 0.06);
+            transform: translateY(-1px);
+        }
+
+        .oauth-button:focus-visible {
+            outline: none;
+            border-color: var(--fn-red);
+            box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.12);
+        }
+
+        .oauth-icon {
+            width: 20px;
+            height: 20px;
+            flex: 0 0 20px;
+            display: block;
+        }
+
+        .oauth-icon-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid #edf1f6;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--fn-muted);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: var(--fn-border);
         }
 
         .fn-label {
@@ -241,6 +336,22 @@
                 gap: 8px;
             }
         }
+
+        @media (max-width: 380px) {
+            .auth-shell {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+
+            .auth-card {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .auth-title {
+                font-size: 1.35rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -294,6 +405,21 @@
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 <?php endif; ?>
+
+                <div class="oauth-stack">
+                    <a href="<?php echo e(route('auth.google.redirect')); ?>" class="oauth-button">
+                        <span class="oauth-icon-wrap" aria-hidden="true">
+                            <svg class="oauth-icon" viewBox="0 0 24 24" focusable="false">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06L5.84 9.9C6.71 7.31 9.14 5.38 12 5.38z"/>
+                            </svg>
+                        </span>
+                        <span>Continue with Google</span>
+                    </a>
+                    <div class="auth-divider">or sign in with email</div>
+                </div>
 
                 <form method="POST" action="<?php echo e(route('login')); ?>" class="auth-form">
                     <?php echo csrf_field(); ?>

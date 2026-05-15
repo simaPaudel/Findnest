@@ -18,6 +18,7 @@ class ListingsController extends Controller
     {
         // Base query for approved properties
         $query = Property::where('status', 'approved')
+            ->withApprovedReviewStats()
             ->with([
                 'images' => function ($query) {
                     $query->ordered();
@@ -192,6 +193,7 @@ class ListingsController extends Controller
 
         // Fetch similar properties
         $similar = Property::where('status', 'approved')
+            ->withApprovedReviewStats()
             ->where('id', '!=', $property->id)
             ->with([
                 'images' => function ($query) {

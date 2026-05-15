@@ -25,6 +25,11 @@
         .content-card-header {
             padding: 18px 20px;
             border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
         }
 
         .content-card-header h2 {
@@ -43,24 +48,25 @@
 
         .account-profile-overview {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
-            gap: 18px;
+            gap: 22px;
             flex-wrap: wrap;
-            padding: 20px;
+            padding: 24px;
         }
 
         .account-profile-overview-main {
             display: flex;
-            align-items: center;
-            gap: 16px;
+            align-items: flex-start;
+            gap: 20px;
             min-width: 0;
+            flex: 1 1 560px;
         }
 
         .account-profile-avatar {
-            width: 76px;
-            height: 76px;
-            border-radius: 18px;
+            width: 156px;
+            height: 156px;
+            border-radius: 999px;
             overflow: hidden;
             border: 1px solid var(--fn-gray-border, #e5e7eb);
             background: #fff;
@@ -68,6 +74,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
         }
 
         .account-profile-avatar img {
@@ -92,13 +99,42 @@
             min-width: 0;
         }
 
+        .account-profile-summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .account-profile-summary span {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 10px;
+            border: 1px solid #eef2f7;
+            border-radius: 999px;
+            background: #f9fafb;
+            color: #4b5563;
+            font-size: 12px;
+            font-weight: 650;
+            line-height: 1;
+        }
+
+        .account-profile-bio {
+            max-width: 680px;
+            margin: 12px 0 0;
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
         .account-profile-kicker {
             margin: 0 0 6px;
             color: var(--fn-red, #ff385c);
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
+            font-size: 13px;
+            font-weight: 650;
+            letter-spacing: 0.01em;
         }
 
         .account-profile-heading h2 {
@@ -149,11 +185,166 @@
             gap: 20px;
         }
 
+        .account-profile-editor {
+            display: none;
+        }
+
+        .account-profile-editor.is-editing {
+            display: block;
+        }
+
+        .account-profile-editor .account-profile-view {
+            display: none;
+        }
+
+        .account-profile-editor .account-profile-form {
+            display: none;
+        }
+
+        .account-profile-editor.is-editing .account-profile-form {
+            display: grid;
+        }
+
+        .account-profile-editor.is-editing .account-profile-view,
+        .account-profile-editor.is-editing [data-profile-edit] {
+            display: none;
+        }
+
+        .account-profile-page.is-editing [data-profile-edit] {
+            display: none;
+        }
+
+        .account-profile-editor .content-card-header {
+            display: none;
+        }
+
+        .account-profile-view {
+            padding: 20px;
+            display: grid;
+            gap: 16px;
+        }
+
+        .account-view-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .account-view-card {
+            border: 1px solid var(--fn-gray-border, #e5e7eb);
+            border-radius: 12px;
+            background: #fff;
+            padding: 16px;
+            min-width: 0;
+        }
+
+        .account-view-card.account-view-card-wide {
+            grid-column: 1 / -1;
+        }
+
+        .account-view-label {
+            display: block;
+            margin-bottom: 6px;
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .account-view-value {
+            margin: 0;
+            color: #111827;
+            font-size: 15px;
+            line-height: 1.55;
+            word-break: break-word;
+        }
+
+        .account-view-note {
+            margin: 6px 0 0;
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
         .account-profile-grid {
             display: grid;
             grid-template-columns: 260px minmax(0, 1fr);
             gap: 20px;
             align-items: start;
+        }
+
+        .account-security-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .account-password-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.42);
+        }
+
+        .account-password-modal.is-open {
+            display: flex;
+        }
+
+        .account-password-dialog {
+            width: min(100%, 460px);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            border-radius: 18px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+        }
+
+        .account-password-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 20px 20px 14px;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .account-password-header h3 {
+            margin: 0;
+            color: #111827;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .account-password-header p {
+            margin: 5px 0 0;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .account-password-close {
+            width: 34px;
+            height: 34px;
+            border: 1px solid #e5e7eb;
+            border-radius: 999px;
+            background: #fff;
+            color: #475569;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .account-password-form {
+            display: grid;
+            gap: 14px;
+            padding: 20px;
         }
 
         .account-profile-section {
@@ -443,11 +634,29 @@
 
         @media (max-width: 860px) {
             .account-profile-overview,
-            .account-profile-form {
+            .account-profile-form,
+            .account-profile-view {
                 padding: 18px;
             }
 
+            .account-profile-overview-main {
+                flex-direction: column;
+            }
+
+            .account-profile-avatar {
+                width: 122px;
+                height: 122px;
+            }
+
             .account-profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .account-view-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .account-security-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -470,7 +679,7 @@
         }
     </style>
 
-    <div class="account-profile-page">
+    <div class="account-profile-page {{ $errors->any() ? 'is-editing' : '' }}" data-profile-page>
         <section class="content-card account-profile-overview">
             <div class="account-profile-overview-main">
                 <div class="account-profile-avatar">
@@ -487,16 +696,23 @@
                     <p class="account-profile-kicker">User Account</p>
                     <h2>{{ $user->name }}</h2>
                     <p>{{ $user->email }}</p>
+                    <div class="account-profile-summary">
+                        <span>{{ $user->phone ?: 'Phone not set' }}</span>
+                        <span>{{ $user->gender ? ucfirst($user->gender) : 'Gender not set' }}</span>
+                        <span>User</span>
+                    </div>
+                    @if ($user->bio)
+                        <p class="account-profile-bio">{{ $user->bio }}</p>
+                    @endif
                 </div>
             </div>
 
             <div class="account-profile-meta">
-                <span class="account-status-pill">User</span>
-                <span class="account-meta-note">Update your account details and roommate preferences.</span>
+                <button type="button" class="account-btn account-btn-primary" data-profile-edit>Edit Profile</button>
             </div>
         </section>
 
-        <section class="content-card">
+        <section class="content-card account-profile-editor {{ $errors->any() ? 'is-editing' : '' }}" data-profile-editor>
             <div class="content-card-header">
                 <div>
                     <h2>Profile Details</h2>
@@ -504,7 +720,33 @@
                 </div>
             </div>
 
-            <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data" class="account-profile-form">
+            <div class="account-profile-view" data-profile-view>
+                <div class="account-view-grid">
+                    <div class="account-view-card">
+                        <span class="account-view-label">Full Name</span>
+                        <p class="account-view-value">{{ $user->name ?: 'Not set' }}</p>
+                    </div>
+                    <div class="account-view-card">
+                        <span class="account-view-label">Email Address</span>
+                        <p class="account-view-value">{{ $user->email }}</p>
+                        <p class="account-view-note">Email cannot be changed from the profile page.</p>
+                    </div>
+                    <div class="account-view-card">
+                        <span class="account-view-label">Phone Number</span>
+                        <p class="account-view-value">{{ $user->phone ?: 'Not set' }}</p>
+                    </div>
+                    <div class="account-view-card">
+                        <span class="account-view-label">Gender</span>
+                        <p class="account-view-value">{{ $user->gender ? ucfirst($user->gender) : 'Not set' }}</p>
+                    </div>
+                    <div class="account-view-card account-view-card-wide">
+                        <span class="account-view-label">Bio</span>
+                        <p class="account-view-value">{{ $user->bio ?: 'No bio added yet.' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data" class="account-profile-form" data-profile-form>
                 @csrf
                 @method('PUT')
 
@@ -597,11 +839,57 @@
                 </div>
 
                 <div class="account-profile-actions">
-                    <a href="{{ route('user.dashboard') }}" class="account-btn account-btn-secondary">Cancel</a>
+                    <button type="button" class="account-btn account-btn-secondary" data-password-open>Change Password</button>
+                    <button type="button" class="account-btn account-btn-secondary" data-profile-cancel>Cancel</button>
                     <button type="submit" class="account-btn account-btn-primary">Save Changes</button>
                 </div>
             </form>
         </section>
+
+        <div class="account-password-modal {{ session('password_modal_open') ? 'is-open' : '' }}" data-password-modal>
+            <div class="account-password-dialog" role="dialog" aria-modal="true" aria-labelledby="user-password-title">
+                <div class="account-password-header">
+                    <div>
+                        <h3 id="user-password-title">Change Password</h3>
+                        <p>Use a strong password with uppercase, lowercase, number, and symbol.</p>
+                    </div>
+                    <button type="button" class="account-password-close" aria-label="Close password modal" data-password-close>&times;</button>
+                </div>
+
+                <form action="{{ route('user.profile.update') }}" method="POST" class="account-password-form">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="profile_action" value="password">
+
+                    <div class="account-form-group">
+                        <label for="password_current" class="account-form-label">Current Password</label>
+                        <input type="password" id="password_current" name="current_password" class="account-form-input @error('current_password') error @enderror" autocomplete="current-password">
+                        @error('current_password')
+                            <div class="account-form-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="account-form-group">
+                        <label for="password_new" class="account-form-label">New Password</label>
+                        <input type="password" id="password_new" name="password" class="account-form-input @error('password') error @enderror" autocomplete="new-password">
+                        <div class="account-form-helper">Minimum 8 characters with uppercase, lowercase, number, and special character.</div>
+                        @error('password')
+                            <div class="account-form-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="account-form-group">
+                        <label for="password_new_confirmation" class="account-form-label">Confirm Password</label>
+                        <input type="password" id="password_new_confirmation" name="password_confirmation" class="account-form-input" autocomplete="new-password">
+                    </div>
+
+                    <div class="account-profile-actions">
+                        <button type="button" class="account-btn account-btn-secondary" data-password-close>Cancel</button>
+                        <button type="submit" class="account-btn account-btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <section class="content-card">
             <div class="content-card-header">
@@ -681,4 +969,42 @@
         </section>
 
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-profile-page]').forEach((page) => {
+                const editor = page.querySelector('[data-profile-editor]');
+                const editButtons = page.querySelectorAll('[data-profile-edit]');
+                const cancelButton = editor.querySelector('[data-profile-cancel]');
+                const form = editor.querySelector('[data-profile-form]');
+                const passwordModal = page.querySelector('[data-password-modal]');
+                const passwordOpenButtons = page.querySelectorAll('[data-password-open]');
+                const passwordCloseButtons = page.querySelectorAll('[data-password-close]');
+
+                editButtons.forEach((editButton) => editButton.addEventListener('click', () => {
+                    page.classList.add('is-editing');
+                    editor.classList.add('is-editing');
+                }));
+
+                cancelButton?.addEventListener('click', () => {
+                    form?.reset();
+                    page.classList.remove('is-editing');
+                    editor.classList.remove('is-editing');
+                });
+
+                passwordOpenButtons.forEach((button) => button.addEventListener('click', () => {
+                    passwordModal?.classList.add('is-open');
+                }));
+
+                passwordCloseButtons.forEach((button) => button.addEventListener('click', () => {
+                    passwordModal?.classList.remove('is-open');
+                }));
+
+                passwordModal?.addEventListener('click', (event) => {
+                    if (event.target === passwordModal) {
+                        passwordModal.classList.remove('is-open');
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

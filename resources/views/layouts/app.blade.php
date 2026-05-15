@@ -10,9 +10,43 @@
     
 
     <style>
+        html {
+            width: 100%;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             min-height: 100vh;
             background: #f5f5f5;
+            overflow-x: hidden;
+        }
+
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+        }
+
+        img,
+        video {
+            height: auto;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            max-width: 100%;
+            font: inherit;
+        }
+
+        .table-responsive,
+        [class*="table-wrap"] {
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .container-center {
@@ -20,6 +54,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 24px 16px;
         }
 
         .card-center {
@@ -37,6 +72,36 @@
             font-weight: bold;
             color: #667eea;
             margin-bottom: 20px;
+        }
+
+        @media (max-width: 576px) {
+            .container-center {
+                align-items: flex-start;
+                padding: 18px 10px;
+            }
+
+            .card-center {
+                max-width: 100%;
+                padding: 20px 16px;
+                border-radius: 14px;
+            }
+
+            .auth-logo {
+                font-size: 1.55rem;
+                margin-bottom: 16px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .container-center {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+
+            .card-center {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
         }
     </style>
 </head>

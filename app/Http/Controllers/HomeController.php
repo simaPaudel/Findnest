@@ -29,6 +29,7 @@ class HomeController extends Controller
             }
 
             $featuredListings = Property::where('status', 'approved')
+                ->withApprovedReviewStats()
                 ->with([
                     'images' => function ($query) {
                         $query->ordered();

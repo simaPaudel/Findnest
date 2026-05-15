@@ -26,6 +26,12 @@
             box-sizing: border-box;
         }
 
+        html {
+            width: 100%;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #FFF5F7 0%, #FFFFFF 50%, #FFF1F3 100%);
@@ -35,6 +41,17 @@
             justify-content: center;
             position: relative;
             overflow-x: hidden;
+        }
+
+        img,
+        svg {
+            max-width: 100%;
+        }
+
+        input,
+        button,
+        a {
+            max-width: 100%;
         }
 
         /* Background Pattern */
@@ -236,6 +253,30 @@
             font-weight: 500;
             margin-bottom: 8px;
             font-size: 14px;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                align-items: flex-start;
+                padding: 20px 0;
+            }
+
+            .relative.z-10.w-full.max-w-md.px-6 {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .fn-glass-card {
+                border-radius: 18px;
+                padding: 1.25rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .relative.z-10.w-full.max-w-md.px-6 {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
         }
     </style>
 </head>

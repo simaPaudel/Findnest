@@ -132,31 +132,37 @@ class KhaltiPaymentController extends Controller
 
                 // Access user and property through booking relationship
                 if ($payment && $payment->booking) {
-                    $payment->loadMissing(['booking.user', 'booking.property']);
+                    $payment->loadMissing([
+                        'booking.user',
+                        'booking.property.owner',
+                        'booking.property.images',
+                        'booking.room',
+                    ]);
+                    $booking = $payment->booking;
 
                     Log::info('Payment booking details', [
                         'payment_id' => $payment->id,
-                        'user_name' => $payment->booking->user?->name,
-                        'property_name' => $payment->booking->property?->title,
+                        'user_name' => $booking->user?->name,
+                        'property_name' => $booking->property?->title,
                         'amount' => $payment->amount,
                     ]);
 
                     if ($shouldNotify) {
                         try {
                             NotificationService::sendNotification(
-                                (int) $payment->booking->user_id,
+                                (int) $booking->user_id,
                                 'payment',
                                 'Payment completed',
                                 'Your payment has been recorded successfully.',
-                                route('user.bookings.show', $payment->booking)
+                                route('user.bookings.show', $booking)
                             );
 
                             if (
-                                $payment->booking->property?->owner_id
-                                && (int) $payment->booking->property->owner_id !== (int) $payment->booking->user_id
+                                $booking->property?->owner_id
+                                && (int) $booking->property->owner_id !== (int) $booking->user_id
                             ) {
                                 NotificationService::sendNotification(
-                                    (int) $payment->booking->property->owner_id,
+                                    (int) $booking->property->owner_id,
                                     'payment',
                                     'Booking payment received',
                                     'The booking payment for your property has been completed.',
@@ -167,6 +173,11 @@ class KhaltiPaymentController extends Controller
                             // Notification failures must not block payment completion.
                         }
                     }
+
+                    return view('payments.success', [
+                        'booking' => $booking,
+                        'payment' => $payment,
+                    ]);
                 }
 
                 return redirect()->route('user.bookings.index')

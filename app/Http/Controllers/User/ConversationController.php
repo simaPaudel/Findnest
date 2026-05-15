@@ -13,7 +13,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 class ConversationController extends Controller
 {
@@ -161,7 +163,14 @@ class ConversationController extends Controller
     public function sendMessage(Request $request, $conversationId): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'message' => 'required|string|max:5000',
+            'message' => 'nullable|required_without:image|string|max:5000',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
+        ], [
+            'message.required_without' => 'Please enter a message or attach an image.',
+            'message.max' => 'Messages may not be greater than 5000 characters.',
+            'image.image' => 'The attachment must be a valid image file.',
+            'image.mimes' => 'Images must be JPG, JPEG, PNG, WEBP, or GIF files.',
+            'image.max' => 'Images may not be larger than 4 MB.',
         ]);
 
         if ($validator->fails()) {
@@ -185,11 +194,31 @@ class ConversationController extends Controller
             ], 403);
         }
 
-        $newMessage = new Message();
-        $newMessage->conversation_id = $conversation->id;
-        $newMessage->sender_id = $userId;
-        $newMessage->message = trim((string) $validator->validated()['message']);
-        $newMessage->save();
+        $validated = $validator->validated();
+        $imagePath = null;
+        $image = $request->file('image');
+
+        if ($image) {
+            $imagePath = $image->store('messages', 'public');
+        }
+
+        try {
+            $newMessage = new Message();
+            $newMessage->conversation_id = $conversation->id;
+            $newMessage->sender_id = $userId;
+            $newMessage->message = trim((string) ($validated['message'] ?? ''));
+            $newMessage->image_path = $imagePath;
+            $newMessage->image_original_name = $image?->getClientOriginalName();
+            $newMessage->image_mime_type = $image?->getMimeType();
+            $newMessage->image_size = $image?->getSize();
+            $newMessage->save();
+        } catch (Throwable $exception) {
+            if ($imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
+            throw $exception;
+        }
 
         ConversationParticipant::query()
             ->where('conversation_id', $conversation->id)
@@ -200,7 +229,18 @@ class ConversationController extends Controller
             ->where('conversation_id', $conversation->id)
             ->with(['sender:id,name,email,profile_photo'])
             ->orderBy('created_at')
-            ->get(['id', 'conversation_id', 'sender_id', 'message', 'created_at', 'updated_at']);
+            ->get([
+                'id',
+                'conversation_id',
+                'sender_id',
+                'message',
+                'image_path',
+                'image_original_name',
+                'image_mime_type',
+                'image_size',
+                'created_at',
+                'updated_at',
+            ]);
 
         return response()->json([
             'conversation_id' => $conversation->id,
@@ -363,7 +403,18 @@ class ConversationController extends Controller
             $query->where('created_at', '>', $validated['last_message_time']);
         }
 
-        $messages = $query->get(['id', 'conversation_id', 'sender_id', 'message', 'created_at', 'updated_at']);
+        $messages = $query->get([
+            'id',
+            'conversation_id',
+            'sender_id',
+            'message',
+            'image_path',
+            'image_original_name',
+            'image_mime_type',
+            'image_size',
+            'created_at',
+            'updated_at',
+        ]);
 
         return response()->json([
             'conversation_id' => $conversationId,

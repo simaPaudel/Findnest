@@ -13,7 +13,7 @@
     </div>
 
     @if($savedListings->count() > 0)
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-6 gap-y-10 mb-12 items-start">
+    <div class="saved-listings-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 mb-12 items-start">
         @foreach($savedListings as $saved)
             @php
                 $property = $saved->property;
@@ -54,6 +54,8 @@
                 $availabilityLabel = $property->is_property_bookable ? 'Available' : 'Unavailable';
                 $availabilityClass = $property->is_property_bookable ? 'available' : 'unavailable';
                 $priceToneClass = $priceAmount === 'Price on request' ? 'is-muted' : 'is-red';
+                $propertyReviewCount = (int) ($property->property_reviews_count ?? 0);
+                $propertyAverageRating = (float) ($property->property_average_rating ?? 0);
             @endphp
 
             <a href="{{ route('listings.show', $property) }}" class="listing-card">
@@ -90,6 +92,14 @@
                     </div>
 
                     <p class="text-sm text-slate-500 line-clamp-1">{{ $property->address ?: ($property->location ?: 'Location not specified') }}</p>
+                    <p class="flex items-center gap-1.5 text-sm text-slate-600">
+                        <span class="text-amber-400">★</span>
+                        @if($propertyReviewCount > 0)
+                            <span>{{ number_format($propertyAverageRating, 1) }} · {{ $propertyReviewCount }} {{ $propertyReviewCount === 1 ? 'review' : 'reviews' }}</span>
+                        @else
+                            <span>No reviews yet</span>
+                        @endif
+                    </p>
 
                     <div class="flex items-center gap-2">
                         <span class="listing-status-pill {{ $availabilityClass }}">{{ $availabilityLabel }}</span>
@@ -133,6 +143,10 @@
 </div>
 
 <style>
+    .saved-listings-grid {
+        max-width: 1650px;
+    }
+
     .listing-card {
         display: block;
         color: inherit;
@@ -295,6 +309,30 @@
 
     .line-clamp-2 {
         -webkit-line-clamp: 2;
+    }
+
+    @media (min-width: 1280px) {
+        .saved-listings-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 1279px) and (min-width: 768px) {
+        .saved-listings-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 767px) and (min-width: 640px) {
+        .saved-listings-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 639px) {
+        .saved-listings-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 

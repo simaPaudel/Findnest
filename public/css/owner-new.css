@@ -106,13 +106,13 @@ body {
 }
 
 .nav-link:hover {
-    background: #f5f5f5;
-    color: var(--fn-text);
+    background: transparent;
+    color: var(--fn-red);
 }
 
 .nav-link.active {
-    background: var(--fn-red);
-    color: var(--fn-white);
+    background: transparent;
+    color: var(--fn-red);
 }
 
 .nav-icon {
@@ -790,5 +790,89 @@ body {
 
     .topbar-title {
         font-size: 20px;
+    }
+}
+
+/* Responsive hardening for legacy owner shell */
+html {
+    width: 100%;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+}
+
+img,
+video {
+    height: auto;
+}
+
+input,
+select,
+textarea,
+button {
+    max-width: 100%;
+    font: inherit;
+}
+
+.owner-main,
+.owner-content,
+.content-section,
+.booking-card,
+.stat-card {
+    min-width: 0;
+}
+
+.table-responsive {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+    min-width: 680px;
+}
+
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .owner-content {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .section-header,
+    .booking-right,
+    .booking-actions {
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .owner-content,
+    .owner-topbar {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .data-table {
+        min-width: 620px;
     }
 }

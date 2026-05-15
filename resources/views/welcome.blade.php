@@ -148,6 +148,73 @@
             box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
         }
 
+        @media (max-width: 767px) {
+            .home-search-section {
+                padding: 0.9rem 0 1.1rem;
+            }
+
+            .home-search-container {
+                padding-left: 0.85rem;
+                padding-right: 0.85rem;
+            }
+
+            .home-search-form {
+                max-width: none;
+            }
+
+            .home-search-form .search-shell {
+                border-radius: 16px;
+                padding: 0.6rem !important;
+                gap: 0.55rem !important;
+                box-shadow: 0 8px 18px rgba(15, 23, 42, 0.07);
+            }
+
+            .home-search-form .search-shell > div {
+                width: 100%;
+                min-width: 0;
+                padding: 0.65rem 0.75rem !important;
+                border-right: 0 !important;
+                border-bottom: 0 !important;
+                border-radius: 11px;
+                background: #f8fafc;
+            }
+
+            .home-search-form label {
+                margin-bottom: 0.16rem;
+                font-size: 0.68rem;
+                line-height: 1.15;
+            }
+
+            .home-search-form input,
+            .home-search-form select {
+                min-height: 1.45rem;
+                font-size: 0.82rem;
+                line-height: 1.25;
+            }
+
+            .home-search-form button[type="submit"] {
+                width: 100% !important;
+                height: 2.65rem !important;
+                margin: 0 !important;
+                border-radius: 12px !important;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .home-search-container {
+                padding-left: 0.65rem;
+                padding-right: 0.65rem;
+            }
+
+            .home-search-form .search-shell {
+                padding: 0.5rem !important;
+            }
+
+            .home-search-form .search-shell > div {
+                padding: 0.55rem 0.65rem !important;
+            }
+        }
+
         /* Cards */
         .fn-glass-card {
             background: var(--fn-white);
@@ -446,18 +513,17 @@
         .fn-badge {
             display: inline-flex;
             align-items: center;
-            padding: 4px 12px;
-            border-radius: 8px;
+            padding: 4px 10px;
+            border-radius: 10px;
             font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
+            font-weight: 650;
+            letter-spacing: 0.01em;
         }
 
         .fn-badge-red {
-            background: rgba(255, 56, 92, 0.12);
-            color: var(--fn-red);
-            border: 1px solid rgba(255, 56, 92, 0.2);
+            background: rgba(255, 56, 92, 0.07);
+            color: #e11d48;
+            border: 1px solid rgba(255, 56, 92, 0.1);
         }
 
         .fn-badge-gray {
@@ -525,10 +591,14 @@
             transition: all 0.2s ease;
         }
 
-        .fn-nav-link:hover,
+        .fn-nav-link:hover {
+            color: var(--fn-red);
+            background: transparent;
+        }
+
         .fn-nav-link.active {
             color: var(--fn-red);
-            background: rgba(255, 56, 92, 0.05);
+            background: transparent;
         }
 
         @media (max-width: 768px) {
@@ -543,9 +613,9 @@
     @include('components.navbar')
 
     <!-- Search Section -->
-    <section class="py-6 lg:py-8">
-        <div class="max-w-7xl mx-auto px-4 lg:px-6">
-            <form action="{{ route('home') }}" method="GET" class="max-w-5xl mx-auto">
+    <section class="home-search-section py-6 lg:py-8">
+        <div class="home-search-container max-w-7xl mx-auto px-4 lg:px-6">
+            <form action="{{ route('home') }}" method="GET" class="home-search-form max-w-5xl mx-auto">
                 <div class="search-shell p-2 flex flex-col gap-2 md:flex-row md:items-center md:gap-0">
                     <div class="flex-1 px-4 py-3 md:border-r md:border-slate-200">
                         <label class="block text-xs font-semibold text-slate-500 mb-1">Where</label>
@@ -618,6 +688,8 @@
                         $availabilityLabel = $property->is_property_bookable ? 'Available' : 'Unavailable';
                         $availabilityClass = $property->is_property_bookable ? 'available' : 'unavailable';
                         $priceToneClass = $priceAmount === 'Price on request' ? 'is-muted' : 'is-red';
+                        $propertyReviewCount = (int) ($property->property_reviews_count ?? 0);
+                        $propertyAverageRating = (float) ($property->property_average_rating ?? 0);
                     @endphp
 
                     <a href="{{ route('listings.show', $property) }}" class="listing-card">
@@ -646,6 +718,14 @@
                             </div>
 
                             <p class="text-sm text-slate-500 line-clamp-1">{{ $property->address ?: ($property->location ?: 'Location not specified') }}</p>
+                            <p class="flex items-center gap-1.5 text-sm text-slate-600">
+                                <span class="text-amber-400">★</span>
+                                @if($propertyReviewCount > 0)
+                                    <span>{{ number_format($propertyAverageRating, 1) }} · {{ $propertyReviewCount }} {{ $propertyReviewCount === 1 ? 'review' : 'reviews' }}</span>
+                                @else
+                                    <span>No reviews yet</span>
+                                @endif
+                            </p>
                             <div class="flex items-center gap-2">
                                 <span class="listing-status-pill {{ $availabilityClass }}">{{ $availabilityLabel }}</span>
                                 <p class="text-sm text-slate-500 line-clamp-1">{{ $subtitle }}</p>
@@ -674,7 +754,7 @@
     <section id="how-it-works" class="bg-slate-50 py-14 lg:py-16">
         <div class="mx-auto max-w-7xl px-4 lg:px-6">
             <div class="mx-auto max-w-2xl text-center">
-                <span class="inline-flex items-center rounded-full border border-rose-100 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-rose-500 shadow-sm">
+                <span class="inline-flex items-center border-l-[3px] border-rose-300 pl-3 text-sm font-medium tracking-normal text-rose-600">
                     Simple Process
                 </span>
                 <h2 class="mt-4 text-3xl font-bold tracking-tight text-slate-950 lg:text-[2.5rem]">How FindNest Works</h2>
@@ -731,7 +811,7 @@
                     </div>
 
                     <div class="flex flex-col items-start justify-center p-7 text-left sm:p-8 lg:p-12">
-                        <span class="inline-flex w-fit items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        <span class="inline-flex w-fit items-center border-l-[3px] border-slate-300 pl-3 text-sm font-medium tracking-normal text-slate-600">
                             Smart Matching
                         </span>
                         <h2 class="mt-4 text-3xl font-bold leading-tight tracking-tight text-slate-950 lg:text-[2.25rem]">Find Your Perfect Roommate</h2>
@@ -788,7 +868,7 @@
             <div class="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
                 <div class="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
                     <div class="p-8 text-left sm:p-10 lg:p-12">
-                        <span class="inline-flex items-center rounded-full border border-rose-100 bg-rose-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-rose-500 shadow-sm">
+                        <span class="inline-flex items-center border-l-[3px] border-rose-300 pl-3 text-sm font-medium tracking-normal text-rose-600">
                             Get Started
                         </span>
                         <h2 class="mt-4 text-3xl font-bold tracking-tight text-slate-950 lg:text-[2.5rem]">Ready to Find Your Perfect Home?</h2>

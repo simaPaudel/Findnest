@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class OwnerProfileController extends Controller
 {
@@ -30,9 +33,47 @@ class OwnerProfileController extends Controller
     {
         $owner = Auth::user();
 
+        if ($request->input('profile_action') === 'password') {
+            $validator = Validator::make($request->all(), [
+                'current_password' => 'required|string',
+                'password' => ['required', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()->symbols()],
+            ], [
+                'current_password.required' => 'Please enter your current password.',
+                'password.required' => 'Please enter a new password.',
+                'password.confirmed' => 'Password confirmation does not match.',
+                'password.min' => 'Password must be at least 8 characters long.',
+                'password.mixed' => 'Password must contain at least one uppercase letter and one lowercase letter.',
+                'password.numbers' => 'Password must contain at least one number.',
+                'password.symbols' => 'Password must contain at least one special character.',
+            ]);
+
+            if ($validator->fails()) {
+                return back()
+                    ->withErrors($validator)
+                    ->with('password_modal_open', true);
+            }
+
+            $validated = $validator->validated();
+
+            if (! Hash::check($validated['current_password'], $owner->password)) {
+                return back()
+                    ->withErrors(['current_password' => 'The current password is incorrect.'])
+                    ->with('password_modal_open', true);
+            }
+
+            $owner->update([
+                'password' => Hash::make($validated['password']),
+            ]);
+
+            return redirect()
+                ->route('owner.profile.edit')
+                ->with('success', 'Password updated successfully.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
+            'gender' => 'nullable|in:male,female,other',
             'bio' => 'nullable|string|max:1000',
             'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'payout_method' => 'nullable|in:khalti,esewa,bank',
@@ -68,6 +109,7 @@ class OwnerProfileController extends Controller
         $owner->update([
             'name' => $validated['name'],
             'phone' => $validated['phone'] ?? $owner->phone,
+            'gender' => $validated['gender'] ?? $owner->gender,
             'bio' => $validated['bio'] ?? $owner->bio,
             'profile_photo' => $validated['profile_photo'] ?? $owner->profile_photo,
             'payout_method' => $validated['payout_method'] ?? $owner->payout_method,

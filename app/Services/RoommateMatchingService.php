@@ -133,6 +133,7 @@ class RoommateMatchingService
                 'name' => $candidateUser->name,
                 'email' => $candidateUser->email,
                 'profile_photo' => $candidateUser->profile_photo,
+                'trust_points' => (int) $candidateUser->trust_points,
                 'gender' => $candidateUser->gender,
                 'bio' => $candidateUser->bio,
                 'preferred_location' => $candidatePreference->preferred_location,

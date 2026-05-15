@@ -21,7 +21,8 @@ class SavedListingController extends Controller
         $savedListings = SavedListing::where('user_id', Auth::id())
             ->with([
                 'property' => function ($query) {
-                    $query->with([
+                    $query->withApprovedReviewStats()
+                        ->with([
                         'images' => function ($imageQuery) {
                             $imageQuery->ordered();
                         },

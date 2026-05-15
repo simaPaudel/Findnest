@@ -187,10 +187,9 @@
 
     .roommate-flow-kicker {
         margin-bottom: 6px;
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
+        font-size: 0.84rem;
+        font-weight: 650;
+        letter-spacing: 0.01em;
         color: #b4234a;
     }
 

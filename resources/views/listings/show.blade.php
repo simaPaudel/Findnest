@@ -7,33 +7,112 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --fn-red: #ff385c;
+            --fn-red-dark: #e11d48;
+            --fn-ink: #0f172a;
+            --fn-muted: #64748b;
+            --fn-border: #e5eaf1;
+            --fn-soft: #f8fafc;
+            --fn-warm: #fff8fa;
+        }
+
+        html {
+            width: 100%;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            color: #0f172a;
-            background: #ffffff;
+            color: var(--fn-ink);
+            background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 46%, #f8fafc 100%);
+            overflow-x: hidden;
+        }
+
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+        }
+
+        img,
+        video {
+            height: auto;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            max-width: 100%;
+            font: inherit;
         }
 
         .surface {
-            border: 1px solid #e2e8f0;
-            border-radius: 22px;
-            background: #ffffff;
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
+            min-width: 0;
+            border: 1px solid var(--fn-border);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 16px 34px rgba(15, 23, 42, 0.055);
+        }
+
+        .surface-section {
+            position: relative;
+        }
+
+        .surface-section::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 3px;
+            border-radius: 999px;
+            background: rgba(255, 56, 92, 0.2);
+        }
+
+        .section-title {
+            font-size: clamp(1.25rem, 2vw, 1.65rem);
+            line-height: 1.22;
+            letter-spacing: -0.03em;
+            font-weight: 800;
+            color: var(--fn-ink);
+        }
+
+        .section-copy {
+            color: #526174;
+        }
+
+        .section-label {
+            color: #e11d48;
+            font-size: 0.84rem;
+            font-weight: 650;
+            letter-spacing: 0.01em;
         }
 
         .muted-surface {
-            border: 1px solid #e2e8f0;
+            min-width: 0;
+            border: 1px solid #e7edf5;
             border-radius: 18px;
-            background: #f8fafc;
+            background: #fbfdff;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+        }
+
+        .muted-surface:hover {
+            border-color: rgba(255, 56, 92, 0.15);
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.045);
+            transform: translateY(-1px);
         }
 
         .tag {
             display: inline-flex;
             align-items: center;
             border-radius: 999px;
-            padding: 0.5rem 0.9rem;
+            padding: 0.48rem 0.82rem;
             font-size: 0.78rem;
             font-weight: 600;
             line-height: 1;
+            border: 1px solid rgba(226, 232, 240, 0.9);
         }
 
         .btn-primary {
@@ -43,15 +122,18 @@
             justify-content: center;
             border-radius: 14px;
             padding: 0.95rem 1.2rem;
-            background: #ff385c;
+            background: var(--fn-red);
             color: #ffffff;
             font-weight: 700;
             text-decoration: none;
-            transition: background 0.2s ease;
+            box-shadow: 0 12px 22px rgba(255, 56, 92, 0.16);
+            transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
         }
 
         .btn-primary:hover {
-            background: #e11d48;
+            background: var(--fn-red-dark);
+            box-shadow: 0 14px 26px rgba(255, 56, 92, 0.22);
+            transform: translateY(-1px);
         }
 
         .btn-secondary {
@@ -61,26 +143,30 @@
             justify-content: center;
             border-radius: 14px;
             padding: 0.95rem 1.2rem;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #d7dee8;
+            background: #ffffff;
             color: #0f172a;
             font-weight: 600;
             text-decoration: none;
-            transition: background 0.2s ease, border-color 0.2s ease;
+            transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
         }
 
         .btn-secondary:hover {
-            background: #f8fafc;
-            border-color: #94a3b8;
+            background: #fff8fa;
+            border-color: rgba(255, 56, 92, 0.22);
+            color: var(--fn-red-dark);
+            transform: translateY(-1px);
         }
 
         .gallery-shell {
             overflow: hidden;
+            border-radius: 28px;
         }
 
         .gallery-stage {
             position: relative;
             aspect-ratio: 16 / 10;
-            background: #f8fafc;
+            background: #f3f6fa;
             overflow: hidden;
         }
 
@@ -97,7 +183,7 @@
         .gallery-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(248,250,252,0.55) 100%);
+            background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(248,250,252,0.45) 100%);
         }
 
         .gallery-main {
@@ -113,8 +199,8 @@
 
         .gallery-main-image {
             display: block;
-            border-radius: 18px;
-            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
             background: #ffffff;
             image-rendering: auto;
         }
@@ -199,7 +285,7 @@
         }
 
         .gallery-thumb.active {
-            border-color: #ff385c;
+            border-color: var(--fn-red);
             box-shadow: 0 12px 20px rgba(255, 56, 92, 0.12);
         }
 
@@ -209,6 +295,137 @@
             display: block;
             object-fit: cover;
             aspect-ratio: 4 / 3;
+        }
+
+        .booking-card {
+            background: #ffffff;
+        }
+
+        .owner-avatar {
+            background: #fff1f4;
+            color: var(--fn-red);
+            border: 1px solid rgba(255, 56, 92, 0.12);
+        }
+
+        .room-card,
+        .similar-card {
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+        }
+
+        .room-card:hover,
+        .similar-card:hover {
+            border-color: rgba(255, 56, 92, 0.16);
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.075);
+            transform: translateY(-2px);
+        }
+
+        .amenity-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .amenity-card::before {
+            content: "";
+            width: 9px;
+            height: 9px;
+            flex: 0 0 auto;
+            border-radius: 999px;
+            background: var(--fn-red);
+            box-shadow: 0 0 0 4px rgba(255, 56, 92, 0.08);
+        }
+
+        .match-card {
+            border-color: rgba(255, 56, 92, 0.16);
+            background: #fff8fa;
+        }
+
+        .review-card {
+            border: 1px solid #e7edf5;
+            border-radius: 18px;
+            padding: 1.15rem;
+            background: #ffffff;
+        }
+
+        .review-empty {
+            border: 1px dashed #d7dee8;
+            border-radius: 20px;
+            background: #fbfdff;
+            padding: 1.75rem;
+            text-align: center;
+        }
+
+        .map-frame {
+            overflow: hidden;
+            background: #fbfdff;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                padding-top: 1.75rem !important;
+                padding-bottom: 2.25rem !important;
+            }
+
+            .surface {
+                border-radius: 20px;
+            }
+
+            .surface.p-7,
+            .surface.p-6 {
+                padding: 1.25rem !important;
+            }
+
+            .gallery-stage {
+                aspect-ratio: 4 / 3;
+            }
+
+            .gallery-main {
+                padding: 0.65rem;
+            }
+
+            .gallery-main-image {
+                border-radius: 16px;
+            }
+
+            .gallery-nav {
+                width: 36px;
+                height: 36px;
+            }
+
+            .gallery-nav.prev {
+                left: 10px;
+            }
+
+            .gallery-nav.next {
+                right: 10px;
+            }
+
+            .gallery-counter {
+                right: 10px;
+                bottom: 10px;
+            }
+
+            .gallery-thumbs {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.55rem;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                white-space: normal;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .gallery-thumbs {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .tag {
+                font-size: 0.74rem;
+                padding: 0.44rem 0.68rem;
+            }
         }
     </style>
 </head>
@@ -261,7 +478,7 @@
     <main class="py-10 lg:py-12">
         <div class="mx-auto max-w-7xl px-4 lg:px-6">
             <div class="space-y-8">
-                <a href="{{ route('home') }}" class="inline-flex items-center text-sm font-medium text-slate-500 transition hover:text-slate-900">
+                <a href="{{ route('home') }}" class="inline-flex items-center text-sm font-medium text-slate-500 transition hover:text-rose-600">
                     Back to Home
                 </a>
 
@@ -292,10 +509,10 @@
                         </div>
 
                         <div class="space-y-4">
-                            <h1 class="max-w-4xl text-2xl font-semibold leading-tight tracking-tight text-slate-950 lg:text-[2rem]">
+                            <h1 class="max-w-4xl text-3xl font-extrabold leading-tight tracking-[-0.04em] text-slate-950 lg:text-[2.45rem]">
                                 {{ $property->title }}
                             </h1>
-                            <p class="text-base text-slate-500">
+                            <p class="max-w-3xl text-base leading-7 text-slate-500">
                                 {{ $addressLine }}@if($property->city), {{ $property->city }}@endif
                             </p>
                         </div>
@@ -339,9 +556,9 @@
 
                     <aside class="space-y-4 xl:pt-24">
                         @if($isOwnerView)
-                            <div class="surface p-6 xl:sticky xl:top-24">
+                            <div class="surface booking-card p-6 xl:sticky xl:top-24">
                                 <div class="border-b border-slate-200 pb-5">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Owner View</p>
+                                    <p class="section-label">Owner View</p>
                                     <p class="mt-3 text-2xl font-semibold leading-tight text-slate-950">{{ $property->title }}</p>
                                     <p class="mt-2 text-sm leading-6 text-slate-500">
                                         Booking actions are hidden here because you manage this property from your owner dashboard.
@@ -354,9 +571,9 @@
                                 </div>
                             </div>
                         @else
-                            <div class="surface p-6 xl:sticky xl:top-24">
+                            <div class="surface booking-card p-6 xl:sticky xl:top-24">
                                 <div class="border-b border-slate-200 pb-5">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Booking Summary</p>
+                                    <p class="section-label">Booking Summary</p>
                                     <p class="mt-3 text-2xl font-semibold leading-tight text-slate-950">{{ $headlinePrice }}</p>
                                     <p class="mt-2 text-sm leading-6 text-slate-500">
                                         @if($property->canRentRooms())
@@ -368,12 +585,15 @@
                                 </div>
 
                                 <div class="mt-5 flex items-center gap-3">
-                                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-base font-bold text-rose-500">
+                                    <div class="owner-avatar flex h-12 w-12 items-center justify-center rounded-full text-base font-bold">
                                         {{ strtoupper(substr($property->owner->name ?? 'O', 0, 1)) }}
                                     </div>
                                     <div>
                                         <p class="font-semibold text-slate-900">{{ $property->owner->name ?? 'Owner' }}</p>
                                         <p class="text-sm text-slate-500">Property owner</p>
+                                        <p class="mt-1 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                                            Trust Points: {{ (int) ($property->owner->trust_points ?? 0) }}
+                                        </p>
                                     </div>
                                 </div>
 
@@ -399,7 +619,7 @@
 
                                 @if($property->owner->email)
                                     <div class="mt-6 border-t border-slate-200 pt-5">
-                                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Contact Email</p>
+                                        <p class="section-label">Contact Email</p>
                                         <p class="mt-2 break-all text-sm font-medium text-slate-700">{{ $property->owner->email }}</p>
                                     </div>
                                 @endif
@@ -411,10 +631,10 @@
                 <section class="grid grid-cols-1 gap-8 xl:grid-cols-[1.65fr_0.9fr]">
                     <div class="space-y-8">
                         @if($property->canRentRooms())
-                            <section id="available-rooms" class="surface p-7">
+                            <section id="available-rooms" class="surface surface-section p-7">
                                 <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                                     <div>
-                                        <h2 class="text-2xl font-bold text-slate-950">Room Details</h2>
+                                        <h2 class="section-title">Room Details</h2>
                                         <p class="mt-2 text-sm text-slate-500">Choose the room that fits your budget and move-in plan.</p>
                                     </div>
                                     <p class="text-sm font-semibold text-slate-700">
@@ -436,7 +656,7 @@
                                                     ? 'bg-emerald-50 text-emerald-700'
                                                     : 'bg-amber-50 text-amber-700';
                                             @endphp
-                                            <div class="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm">
+                                            <div class="room-card overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm">
                                                 <div class="aspect-[16/10] bg-slate-100">
                                                     <img src="{{ $roomImageUrl }}" alt="{{ $room->room_name }}" class="h-full w-full object-cover">
                                                 </div>
@@ -451,21 +671,21 @@
                                                         <span class="tag {{ $roomAvailabilityClasses }}">{{ $roomAvailabilityLabel }}</span>
                                                     </div>
 
-                                                    <div class="mt-5 grid grid-cols-2 gap-3">
+                                                    <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                                         <div class="muted-surface p-4">
-                                                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Price</p>
+                                                            <p class="section-label">Price</p>
                                                             <p class="mt-2 text-sm font-bold text-slate-900">Rs {{ number_format((float) $room->price) }} / month</p>
                                                         </div>
                                                         <div class="muted-surface p-4">
-                                                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Capacity</p>
+                                                            <p class="section-label">Capacity</p>
                                                             <p class="mt-2 text-sm font-bold text-slate-900">{{ $room->capacity }} {{ $room->capacity === 1 ? 'person' : 'people' }}</p>
                                                         </div>
                                                         <div class="muted-surface p-4">
-                                                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Booking Status</p>
+                                                            <p class="section-label">Booking Status</p>
                                                             <p class="mt-2 text-sm font-bold text-slate-900">{{ $roomAvailabilityLabel }}</p>
                                                         </div>
                                                         <div class="muted-surface p-4">
-                                                            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Location</p>
+                                                            <p class="section-label">Location</p>
                                                             <p class="mt-2 text-sm font-bold text-slate-900">{{ $property->city ?: 'Listed location' }}</p>
                                                         </div>
                                                     </div>
@@ -500,32 +720,32 @@
                         @endif
 
                         @if($property->description)
-                            <section class="surface p-7">
-                                <h2 class="text-2xl font-bold text-slate-950">About This Property</h2>
-                                <p class="mt-4 whitespace-pre-line text-base leading-8 text-slate-600">{{ $property->description }}</p>
+                            <section class="surface surface-section p-7">
+                                <h2 class="section-title">About This Property</h2>
+                                <p class="section-copy mt-4 whitespace-pre-line text-base leading-8">{{ $property->description }}</p>
                             </section>
                         @endif
 
-                        <section class="surface p-7">
-                            <h2 class="text-2xl font-bold text-slate-950">Property Details</h2>
+                        <section class="surface surface-section p-7">
+                            <h2 class="section-title">Property Details</h2>
                             <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div class="muted-surface p-5">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Address</p>
+                                    <p class="section-label">Address</p>
                                     <p class="mt-2 text-sm font-semibold text-slate-900">{{ $property->address ?: 'Not specified' }}</p>
                                 </div>
                                 <div class="muted-surface p-5">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">City</p>
+                                    <p class="section-label">City</p>
                                     <p class="mt-2 text-sm font-semibold text-slate-900">{{ $property->city ?: ($property->location ?: 'Not specified') }}</p>
                                 </div>
                                 @if($property->landmark)
                                     <div class="muted-surface p-5">
-                                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Nearby Landmark</p>
+                                        <p class="section-label">Nearby Landmark</p>
                                         <p class="mt-2 text-sm font-semibold text-slate-900">{{ $property->landmark }}</p>
                                     </div>
                                 @endif
                                 @if($property->total_rooms)
                                     <div class="muted-surface p-5">
-                                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Total Rooms</p>
+                                        <p class="section-label">Total Rooms</p>
                                         <p class="mt-2 text-sm font-semibold text-slate-900">{{ $property->total_rooms }}</p>
                                     </div>
                                 @endif
@@ -533,7 +753,7 @@
                         </section>
 
                         @if(!is_null($property->latitude) && !is_null($property->longitude))
-                            <section class="surface p-7">
+                            <section class="surface surface-section map-frame p-7">
                                 @include('components.leaflet-property-map', [
                                     'mapId' => 'property-show-map',
                                     'mode' => 'readonly',
@@ -550,11 +770,11 @@
                         @endif
 
                         @if($property->amenities && $property->amenities->count() > 0)
-                            <section class="surface p-7">
-                                <h2 class="text-2xl font-bold text-slate-950">Amenities</h2>
+                            <section class="surface surface-section p-7">
+                                <h2 class="section-title">Amenities</h2>
                                 <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     @foreach($property->amenities as $amenity)
-                                        <div class="muted-surface px-4 py-4 text-sm font-medium text-slate-700">
+                                        <div class="amenity-card muted-surface px-4 py-4 text-sm font-medium text-slate-700">
                                             {{ $amenity->name ?? $amenity }}
                                         </div>
                                     @endforeach
@@ -563,16 +783,16 @@
                         @endif
 
                         @if($property->rules)
-                            <section class="surface p-7">
-                                <h2 class="text-2xl font-bold text-slate-950">House Rules</h2>
-                                <p class="mt-4 whitespace-pre-line text-base leading-8 text-slate-600">{{ $property->rules }}</p>
+                            <section class="surface surface-section p-7">
+                                <h2 class="section-title">House Rules</h2>
+                                <p class="section-copy mt-4 whitespace-pre-line text-base leading-8">{{ $property->rules }}</p>
                             </section>
                         @endif
 
-                        <section class="surface p-7">
+                        <section class="surface surface-section p-7">
                             <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                                 <div>
-                                    <h2 class="text-2xl font-bold text-slate-950">Reviews</h2>
+                                    <h2 class="section-title">Reviews</h2>
                                     <p class="mt-2 text-sm text-slate-500">
                                         @if($reviewCount > 0)
                                             {{ $reviewCount }} {{ $reviewCount === 1 ? 'review' : 'reviews' }} from previous tenants
@@ -592,7 +812,7 @@
                             @if($reviewCount > 0)
                                 <div class="mt-6 space-y-5">
                                     @foreach($reviews as $review)
-                                        <div class="border-b border-slate-200 pb-5 last:border-b-0 last:pb-0">
+                                        <div class="review-card">
                                             <div class="flex items-start justify-between gap-4">
                                                 <div>
                                                     <p class="font-semibold text-slate-900">{{ $review->user->name ?? 'Anonymous' }}</p>
@@ -610,6 +830,11 @@
                                         </div>
                                     @endforeach
                                 </div>
+                            @else
+                                <div class="review-empty mt-6">
+                                    <p class="text-base font-semibold text-slate-900">No reviews have been added yet.</p>
+                                    <p class="mt-2 text-sm leading-6 text-slate-500">Once verified tenants review this property, their feedback will appear here.</p>
+                                </div>
                             @endif
                         </section>
                     </div>
@@ -621,26 +846,26 @@
                             @endphp
 
                             @if($pref)
-                                <section class="surface p-6">
-                                    <h2 class="text-xl font-bold text-slate-950">Roommate Match Snapshot</h2>
+                                <section class="surface match-card p-6">
+                                    <h2 class="text-xl font-extrabold tracking-[-0.03em] text-slate-950">Roommate Match Snapshot</h2>
                                     <p class="mt-2 text-sm leading-6 text-slate-500">Use your saved preferences to explore shared-living matches for this area.</p>
 
                                     <div class="mt-5 space-y-3">
                                         @if($pref->preferred_location)
                                             <div class="muted-surface p-4">
-                                                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Preferred Location</p>
+                                                <p class="section-label">Preferred Location</p>
                                                 <p class="mt-2 text-sm font-semibold text-slate-900">{{ $pref->preferred_location }}</p>
                                             </div>
                                         @endif
                                         @if($pref->budget_range)
                                             <div class="muted-surface p-4">
-                                                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Budget Range</p>
+                                                <p class="section-label">Budget Range</p>
                                                 <p class="mt-2 text-sm font-semibold text-slate-900">{{ $pref->budget_range }}</p>
                                             </div>
                                         @endif
                                         @if($pref->gender_preference)
                                             <div class="muted-surface p-4">
-                                                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Gender Preference</p>
+                                                <p class="section-label">Gender Preference</p>
                                                 <p class="mt-2 text-sm font-semibold capitalize text-slate-900">{{ $pref->gender_preference }}</p>
                                             </div>
                                         @endif
@@ -658,7 +883,7 @@
                 @if($similar->count() > 0)
                     <section class="space-y-6 border-t border-slate-200 pt-10">
                         <div>
-                            <h2 class="text-2xl font-bold text-slate-950">Similar Properties Nearby</h2>
+                            <h2 class="section-title">Similar Properties Nearby</h2>
                             <p class="mt-2 text-sm text-slate-500">A few comparable listings you may also want to explore.</p>
                         </div>
 
@@ -681,9 +906,11 @@
                                     } else {
                                         $similarPrice = 'Rs ' . number_format((float) $p->rent_price) . ' / month';
                                     }
+                                    $similarReviewCount = (int) ($p->property_reviews_count ?? 0);
+                                    $similarAverageRating = (float) ($p->property_average_rating ?? 0);
                                 @endphp
 
-                                <a href="{{ route('listings.show', $p->id) }}" class="block overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                                <a href="{{ route('listings.show', $p->id) }}" class="similar-card block overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm transition">
                                     <div class="aspect-[4/3] bg-slate-100">
                                         <img src="{{ $similarImageUrl }}" alt="{{ $p->title }}" class="h-full w-full object-cover">
                                     </div>
@@ -693,6 +920,14 @@
                                         </div>
                                         <h3 class="mt-3 text-base font-bold leading-6 text-slate-950">{{ $p->title }}</h3>
                                         <p class="mt-2 text-sm text-slate-500">{{ $p->city ?: ($p->location ?: 'Location not specified') }}</p>
+                                        <p class="mt-2 flex items-center gap-1.5 text-sm text-slate-600">
+                                            <span class="text-amber-400">★</span>
+                                            @if($similarReviewCount > 0)
+                                                <span>{{ number_format($similarAverageRating, 1) }} · {{ $similarReviewCount }} {{ $similarReviewCount === 1 ? 'review' : 'reviews' }}</span>
+                                            @else
+                                                <span>No reviews yet</span>
+                                            @endif
+                                        </p>
                                         <p class="mt-4 text-sm font-semibold text-slate-900">{{ $similarPrice }}</p>
                                     </div>
                                 </a>

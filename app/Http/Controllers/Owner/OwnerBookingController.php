@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Property;
+use App\Models\TrustPoint;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OwnerBookingController extends Controller
 {
@@ -24,7 +26,7 @@ class OwnerBookingController extends Controller
 
         // Get bookings for owner's properties with relationships
         $bookings = Booking::whereIn('property_id', $propertyIds)
-            ->with(['property', 'user'])
+            ->with(['property', 'user', 'payments', 'trustPoints'])
             ->latest()
             ->paginate(15);
 
@@ -109,5 +111,52 @@ class OwnerBookingController extends Controller
         return redirect()
             ->route('owner.bookings.index')
             ->with('success', 'Booking request rejected.');
+    }
+
+    public function storeTrustPoint(Booking $booking)
+    {
+        $booking->load(['property', 'user']);
+
+        if ($booking->property->owner_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $receiver = $booking->user;
+
+        if (! $receiver || (int) $receiver->id === (int) Auth::id()) {
+            return redirect()
+                ->route('owner.bookings.index')
+                ->with('error', 'Trust point cannot be given to this account.');
+        }
+
+        if (! $booking->isStayCompletedForFeedback()) {
+            return redirect()
+                ->route('owner.bookings.index')
+                ->with('error', 'Trust point is available only after the paid stay period is completed.');
+        }
+
+        try {
+            $created = DB::transaction(function () use ($booking, $receiver): bool {
+                $trustPoint = TrustPoint::firstOrCreate([
+                    'booking_id' => $booking->id,
+                    'giver_id' => Auth::id(),
+                    'receiver_id' => $receiver->id,
+                ]);
+
+                if (! $trustPoint->wasRecentlyCreated) {
+                    return false;
+                }
+
+                $receiver->increment('trust_points');
+
+                return true;
+            });
+        } catch (\Throwable $e) {
+            $created = false;
+        }
+
+        return redirect()
+            ->route('owner.bookings.index')
+            ->with($created ? 'success' : 'error', $created ? 'Trust point given to the user.' : 'Trust point already given for this booking.');
     }
 }

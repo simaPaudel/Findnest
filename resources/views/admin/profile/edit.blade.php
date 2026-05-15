@@ -11,26 +11,35 @@
             gap: 20px;
         }
 
-        .admin-profile-overview {
+        .content-card-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 18px;
+            gap: 14px;
             flex-wrap: wrap;
-            padding: 20px;
+        }
+
+        .admin-profile-overview {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 22px;
+            flex-wrap: wrap;
+            padding: 24px;
         }
 
         .admin-profile-overview-main {
             display: flex;
-            align-items: center;
-            gap: 16px;
+            align-items: flex-start;
+            gap: 20px;
             min-width: 0;
+            flex: 1 1 560px;
         }
 
         .admin-profile-avatar {
-            width: 76px;
-            height: 76px;
-            border-radius: 18px;
+            width: 156px;
+            height: 156px;
+            border-radius: 999px;
             overflow: hidden;
             border: 1px solid var(--fn-line);
             background: #fff;
@@ -38,6 +47,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
         }
 
         .admin-profile-avatar img {
@@ -60,6 +70,36 @@
 
         .admin-profile-heading {
             min-width: 0;
+        }
+
+        .admin-profile-summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .admin-profile-summary span {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 10px;
+            border: 1px solid #eef2f7;
+            border-radius: 999px;
+            background: #f9fafb;
+            color: #4b5563;
+            font-size: 12px;
+            font-weight: 650;
+            line-height: 1;
+        }
+
+        .admin-profile-bio {
+            max-width: 680px;
+            margin: 12px 0 0;
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
         .admin-profile-heading h2 {
@@ -90,11 +130,166 @@
             gap: 20px;
         }
 
+        .admin-profile-editor {
+            display: none;
+        }
+
+        .admin-profile-editor.is-editing {
+            display: block;
+        }
+
+        .admin-profile-editor .admin-profile-view {
+            display: none;
+        }
+
+        .admin-profile-editor .admin-profile-form {
+            display: none;
+        }
+
+        .admin-profile-editor.is-editing .admin-profile-form {
+            display: grid;
+        }
+
+        .admin-profile-editor.is-editing .admin-profile-view,
+        .admin-profile-editor.is-editing [data-profile-edit] {
+            display: none;
+        }
+
+        .admin-profile-page.is-editing [data-profile-edit] {
+            display: none;
+        }
+
+        .admin-profile-editor .content-card-header {
+            display: none;
+        }
+
+        .admin-profile-view {
+            padding: 20px;
+            display: grid;
+            gap: 16px;
+        }
+
+        .admin-view-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .admin-view-card {
+            border: 1px solid var(--fn-line);
+            border-radius: 12px;
+            background: #fff;
+            padding: 16px;
+            min-width: 0;
+        }
+
+        .admin-view-card.admin-view-card-wide {
+            grid-column: 1 / -1;
+        }
+
+        .admin-view-label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--fn-muted);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .admin-view-value {
+            margin: 0;
+            color: var(--fn-charcoal);
+            font-size: 15px;
+            line-height: 1.55;
+            word-break: break-word;
+        }
+
+        .admin-view-note {
+            margin: 6px 0 0;
+            color: var(--fn-muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
         .admin-profile-grid {
             display: grid;
             grid-template-columns: 260px minmax(0, 1fr);
             gap: 20px;
             align-items: start;
+        }
+
+        .admin-security-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .admin-password-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.42);
+        }
+
+        .admin-password-modal.is-open {
+            display: flex;
+        }
+
+        .admin-password-dialog {
+            width: min(100%, 460px);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            border-radius: 18px;
+            background: #fff;
+            border: 1px solid var(--fn-line);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+        }
+
+        .admin-password-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 20px 20px 14px;
+            border-bottom: 1px solid var(--fn-line);
+        }
+
+        .admin-password-header h3 {
+            margin: 0;
+            color: var(--fn-charcoal);
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .admin-password-header p {
+            margin: 5px 0 0;
+            color: var(--fn-muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .admin-password-close {
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--fn-line);
+            border-radius: 999px;
+            background: #fff;
+            color: #475569;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .admin-password-form {
+            display: grid;
+            gap: 14px;
+            padding: 20px;
         }
 
         .admin-profile-section {
@@ -233,11 +428,29 @@
 
         @media (max-width: 860px) {
             .admin-profile-overview,
-            .admin-profile-form {
+            .admin-profile-form,
+            .admin-profile-view {
                 padding: 18px;
             }
 
+            .admin-profile-overview-main {
+                flex-direction: column;
+            }
+
+            .admin-profile-avatar {
+                width: 122px;
+                height: 122px;
+            }
+
             .admin-profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-view-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-security-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -251,7 +464,7 @@
         }
     </style>
 
-    <div class="admin-profile-page">
+    <div class="admin-profile-page {{ $errors->any() ? 'is-editing' : '' }}" data-profile-page>
         <section class="content-card admin-profile-overview">
             <div class="admin-profile-overview-main">
                 <div class="admin-profile-avatar">
@@ -268,16 +481,23 @@
                     <p class="page-kicker" style="margin-bottom: 6px;">Administrator Account</p>
                     <h2>{{ $admin->name }}</h2>
                     <p>{{ $admin->email }}</p>
+                    <div class="admin-profile-summary">
+                        <span>{{ $admin->phone ?: 'Phone not set' }}</span>
+                        <span>{{ $admin->gender ? ucfirst($admin->gender) : 'Gender not set' }}</span>
+                        <span>{{ ucfirst($admin->role) }}</span>
+                    </div>
+                    @if ($admin->bio)
+                        <p class="admin-profile-bio">{{ $admin->bio }}</p>
+                    @endif
                 </div>
             </div>
 
             <div class="admin-profile-meta">
-                <span class="status-pill status-neutral">{{ ucfirst($admin->role) }}</span>
-                <span class="admin-meta-note">Update your name, photo, phone, and bio.</span>
+                <button type="button" class="admin-btn admin-btn-primary" data-profile-edit>Edit Profile</button>
             </div>
         </section>
 
-        <section class="content-card">
+        <section class="content-card admin-profile-editor {{ $errors->any() ? 'is-editing' : '' }}" data-profile-editor>
             <div class="content-card-header">
                 <div>
                     <h2>Profile Details</h2>
@@ -285,7 +505,37 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('admin.profile.update') }}" enctype="multipart/form-data" class="admin-profile-form">
+            <div class="admin-profile-view" data-profile-view>
+                <div class="admin-view-grid">
+                    <div class="admin-view-card">
+                        <span class="admin-view-label">Full Name</span>
+                        <p class="admin-view-value">{{ $admin->name ?: 'Not set' }}</p>
+                    </div>
+                    <div class="admin-view-card">
+                        <span class="admin-view-label">Email Address</span>
+                        <p class="admin-view-value">{{ $admin->email }}</p>
+                        <p class="admin-view-note">Email cannot be changed from the profile page.</p>
+                    </div>
+                    <div class="admin-view-card">
+                        <span class="admin-view-label">Phone Number</span>
+                        <p class="admin-view-value">{{ $admin->phone ?: 'Not set' }}</p>
+                    </div>
+                    <div class="admin-view-card">
+                        <span class="admin-view-label">Gender</span>
+                        <p class="admin-view-value">{{ $admin->gender ? ucfirst($admin->gender) : 'Not set' }}</p>
+                    </div>
+                    <div class="admin-view-card">
+                        <span class="admin-view-label">Role</span>
+                        <p class="admin-view-value">{{ ucfirst($admin->role) }}</p>
+                    </div>
+                    <div class="admin-view-card admin-view-card-wide">
+                        <span class="admin-view-label">Bio</span>
+                        <p class="admin-view-value">{{ $admin->bio ?: 'No bio added yet.' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('admin.profile.update') }}" enctype="multipart/form-data" class="admin-profile-form" data-profile-form>
                 @csrf
                 @method('PUT')
 
@@ -345,6 +595,19 @@
                                         <div class="admin-form-error">{{ $message }}</div>
                                     @enderror
                                 </div>
+
+                                <div class="admin-form-group">
+                                    <label for="gender" class="admin-form-label">Gender</label>
+                                    <select name="gender" id="gender" class="admin-form-input @error('gender') error @enderror">
+                                        <option value="">Select Gender</option>
+                                        <option value="male" {{ old('gender', $admin->gender) === 'male' ? 'selected' : '' }}>Male</option>
+                                        <option value="female" {{ old('gender', $admin->gender) === 'female' ? 'selected' : '' }}>Female</option>
+                                        <option value="other" {{ old('gender', $admin->gender) === 'other' ? 'selected' : '' }}>Other</option>
+                                    </select>
+                                    @error('gender')
+                                        <div class="admin-form-error">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
 
@@ -365,10 +628,94 @@
                 </div>
 
                 <div class="admin-profile-actions">
-                    <a href="{{ route('admin.dashboard') }}" class="admin-btn admin-btn-secondary">Cancel</a>
+                    <button type="button" class="admin-btn admin-btn-secondary" data-password-open>Change Password</button>
+                    <button type="button" class="admin-btn admin-btn-secondary" data-profile-cancel>Cancel</button>
                     <button type="submit" class="admin-btn admin-btn-primary">Save Changes</button>
                 </div>
             </form>
         </section>
+
+        <div class="admin-password-modal {{ session('password_modal_open') ? 'is-open' : '' }}" data-password-modal>
+            <div class="admin-password-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-password-title">
+                <div class="admin-password-header">
+                    <div>
+                        <h3 id="admin-password-title">Change Password</h3>
+                        <p>Use a strong password with uppercase, lowercase, number, and symbol.</p>
+                    </div>
+                    <button type="button" class="admin-password-close" aria-label="Close password modal" data-password-close>&times;</button>
+                </div>
+
+                <form method="POST" action="{{ route('admin.profile.update') }}" class="admin-password-form">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="profile_action" value="password">
+
+                    <div class="admin-form-group">
+                        <label for="password_current" class="admin-form-label">Current Password</label>
+                        <input type="password" name="current_password" id="password_current" class="admin-form-input @error('current_password') error @enderror" autocomplete="current-password">
+                        @error('current_password')
+                            <div class="admin-form-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="password_new" class="admin-form-label">New Password</label>
+                        <input type="password" name="password" id="password_new" class="admin-form-input @error('password') error @enderror" autocomplete="new-password">
+                        <div class="admin-form-helper">Minimum 8 characters with uppercase, lowercase, number, and special character.</div>
+                        @error('password')
+                            <div class="admin-form-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="password_new_confirmation" class="admin-form-label">Confirm Password</label>
+                        <input type="password" name="password_confirmation" id="password_new_confirmation" class="admin-form-input" autocomplete="new-password">
+                    </div>
+
+                    <div class="admin-profile-actions">
+                        <button type="button" class="admin-btn admin-btn-secondary" data-password-close>Cancel</button>
+                        <button type="submit" class="admin-btn admin-btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-profile-page]').forEach((page) => {
+                const editor = page.querySelector('[data-profile-editor]');
+                const editButtons = page.querySelectorAll('[data-profile-edit]');
+                const cancelButton = editor.querySelector('[data-profile-cancel]');
+                const form = editor.querySelector('[data-profile-form]');
+                const passwordModal = page.querySelector('[data-password-modal]');
+                const passwordOpenButtons = page.querySelectorAll('[data-password-open]');
+                const passwordCloseButtons = page.querySelectorAll('[data-password-close]');
+
+                editButtons.forEach((editButton) => editButton.addEventListener('click', () => {
+                    page.classList.add('is-editing');
+                    editor.classList.add('is-editing');
+                }));
+
+                cancelButton?.addEventListener('click', () => {
+                    form?.reset();
+                    page.classList.remove('is-editing');
+                    editor.classList.remove('is-editing');
+                });
+
+                passwordOpenButtons.forEach((button) => button.addEventListener('click', () => {
+                    passwordModal?.classList.add('is-open');
+                }));
+
+                passwordCloseButtons.forEach((button) => button.addEventListener('click', () => {
+                    passwordModal?.classList.remove('is-open');
+                }));
+
+                passwordModal?.addEventListener('click', (event) => {
+                    if (event.target === passwordModal) {
+                        passwordModal.classList.remove('is-open');
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

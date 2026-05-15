@@ -27,11 +27,48 @@
             box-sizing: border-box;
         }
 
+        html {
+            width: 100%;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: var(--fn-white);
             color: var(--fn-charcoal);
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+        }
+
+        img,
+        video {
+            height: auto;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            max-width: 100%;
+            font: inherit;
+        }
+
+        .max-w-7xl {
+            min-width: 0;
+        }
+
+        .overflow-x-auto,
+        [class*="table-wrap"],
+        [class*="table-responsive"] {
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Utility Classes */
@@ -122,10 +159,14 @@
             transition: all 0.2s ease;
         }
 
-        .fn-nav-link:hover,
+        .fn-nav-link:hover {
+            color: var(--fn-red);
+            background: transparent;
+        }
+
         .fn-nav-link.active {
             color: var(--fn-red);
-            background: rgba(255, 56, 92, 0.05);
+            background: transparent;
         }
 
         .fn-navbar-end {
@@ -257,6 +298,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            min-width: 0;
         }
 
         .fn-alert-success {
@@ -269,6 +311,46 @@
             background: rgba(239, 68, 68, 0.1);
             color: #EF4444;
             border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            main.py-8 {
+                padding-top: 1.25rem;
+                padding-bottom: 1.5rem;
+            }
+
+            main .px-6 {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            h1.text-3xl {
+                font-size: 1.55rem;
+                line-height: 1.25;
+            }
+
+            .fn-card {
+                border-radius: 10px;
+            }
+
+            .fn-btn-primary,
+            .fn-btn-secondary {
+                justify-content: center;
+                text-align: center;
+                white-space: normal;
+            }
+        }
+
+        @media (max-width: 420px) {
+            main .px-6 {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+
+            .fn-alert {
+                align-items: flex-start;
+                padding: 10px 12px;
+            }
         }
     </style>
     @stack('styles')

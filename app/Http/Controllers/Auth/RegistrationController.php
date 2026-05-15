@@ -6,12 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Brian2694\Toastr\Facades\Toastr;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 use App\Mail\RegistrationEmail;
 
 
@@ -29,9 +28,16 @@ class RegistrationController extends Controller
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|confirmed|min:6',
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()->symbols()],
             'phone' => 'nullable|string|max:20',
             'gender' => 'required|in:male,female,other'
+        ], [
+            'password.required' => 'Please enter a password.',
+            'password.confirmed' => 'Password confirmation does not match.',
+            'password.min' => 'Password must be at least 8 characters long.',
+            'password.mixed' => 'Password must contain at least one uppercase letter and one lowercase letter.',
+            'password.numbers' => 'Password must contain at least one number.',
+            'password.symbols' => 'Password must contain at least one special character.',
         ]);
 
         $verificationToken = Str::random(50);

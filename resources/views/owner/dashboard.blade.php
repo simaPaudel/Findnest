@@ -10,6 +10,12 @@
             <p class="owner-dashboard-kicker">Overview</p>
             <h2 class="owner-dashboard-title">Dashboard</h2>
             <p class="owner-dashboard-copy">Manage listings, bookings, and activity.</p>
+
+            <div class="owner-dashboard-summary" aria-label="Owner dashboard summary">
+                <span>{{ $activeListings }} active {{ $activeListings === 1 ? 'listing' : 'listings' }}</span>
+                <span>{{ $pendingBookingRequests }} pending {{ $pendingBookingRequests === 1 ? 'request' : 'requests' }}</span>
+                <span>{{ number_format($avgRating, 1) }} average rating</span>
+            </div>
         </div>
 
         <a href="{{ route('owner.listings.create') }}" class="owner-dashboard-cta">Add Property</a>
@@ -20,24 +26,28 @@
             <p class="owner-stat-label">Total Properties</p>
             <div class="owner-stat-value">{{ $totalListings }}</div>
             <p class="owner-stat-note">All properties in your portfolio</p>
+            <span class="owner-stat-chip">Portfolio</span>
         </article>
 
         <article class="owner-stat-card owner-stat-card--active">
             <p class="owner-stat-label">Active Properties</p>
             <div class="owner-stat-value">{{ $activeListings }}</div>
             <p class="owner-stat-note">Currently visible and bookable</p>
+            <span class="owner-stat-chip">Live</span>
         </article>
 
         <article class="owner-stat-card owner-stat-card--pending">
             <p class="owner-stat-label">Pending Requests</p>
             <div class="owner-stat-value">{{ $pendingBookingRequests }}</div>
             <p class="owner-stat-note">Needs review or action</p>
+            <span class="owner-stat-chip">Action</span>
         </article>
 
         <article class="owner-stat-card owner-stat-card--rating">
             <p class="owner-stat-label">Average Rating</p>
             <div class="owner-stat-value">{{ number_format($avgRating, 1) }}</div>
             <p class="owner-stat-note">{{ $reviewsCount }} {{ $reviewsCount === 1 ? 'review' : 'reviews' }}</p>
+            <span class="owner-stat-chip">Trust</span>
         </article>
     </section>
 
@@ -133,11 +143,11 @@
                             <div class="owner-property-subtitle">{{ $booking->property->city ?? 'Property' }}</div>
                         </div>
 
-                        <div>
+                        <div class="owner-mobile-field" data-label="Check-in">
                             <div class="owner-meta-value">{{ \Carbon\Carbon::parse($booking->check_in_date)->format('M d, Y') }}</div>
                         </div>
 
-                        <div>
+                        <div class="owner-mobile-field" data-label="Status">
                             <div class="owner-status-badge-wrap">
                                 <span class="badge badge-{{ $booking->status }}">
                                     {{ $bookingStatusLabel }}

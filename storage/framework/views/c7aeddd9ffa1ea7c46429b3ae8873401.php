@@ -236,4 +236,24 @@
         }
     }
 </style>
+
+<script>
+    (() => {
+        if (window.findNestNotificationOutsideCloseReady) {
+            return;
+        }
+
+        window.findNestNotificationOutsideCloseReady = true;
+
+        const closeOpenNotificationMenus = (event) => {
+            document.querySelectorAll('.fn-notification-menu[open]').forEach((menu) => {
+                if (!menu.contains(event.target)) {
+                    menu.removeAttribute('open');
+                }
+            });
+        };
+
+        document.addEventListener('click', closeOpenNotificationMenus);
+    })();
+</script>
 <?php /**PATH C:\xampp\htdocs\FindNest\resources\views/components/notification-dropdown.blade.php ENDPATH**/ ?>

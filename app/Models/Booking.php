@@ -82,6 +82,16 @@ class Booking extends Model
             ->orderByDesc('paid_at');
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class, 'booking_id');
+    }
+
+    public function trustPoints()
+    {
+        return $this->hasMany(TrustPoint::class, 'booking_id');
+    }
+
     // ==================== SCOPES ====================
 
     /**
@@ -349,6 +359,15 @@ class Booking extends Model
     public function hasPassed(): bool
     {
         return $this->check_out_date && $this->check_out_date->isPast();
+    }
+
+    public function isStayCompletedForFeedback(): bool
+    {
+        return $this->check_out_date
+            && $this->check_out_date->copy()->endOfDay()->lessThanOrEqualTo(now())
+            && ($this->isConfirmed() || $this->isCompleted())
+            && $this->hasSuccessfulPayment()
+            && (float) $this->getTotalPaid() > 0;
     }
 
     /**

@@ -167,6 +167,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Review::class);
     }
 
+    public function trustPointsGiven()
+    {
+        return $this->hasMany(TrustPoint::class, 'giver_id');
+    }
+
+    public function trustPointsReceived()
+    {
+        return $this->hasMany(TrustPoint::class, 'receiver_id');
+    }
+
     public function roommatePreference()
     {
         return $this->hasOne(RoommatePreference::class);

@@ -3,6 +3,41 @@
 @section('title', 'Booking Details')
 @section('page-title', 'Booking Details')
 
+@push('styles')
+    <style>
+        .review-star-picker {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .review-star-picker label {
+            display: inline-flex;
+            cursor: pointer;
+        }
+
+        .review-star-picker label svg {
+            display: block;
+            color: #94a3b8;
+            fill: currentColor;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+
+        .review-star-picker label:hover svg,
+        .review-star-picker label:hover ~ label svg,
+        .review-star-picker label.is-active svg {
+            color: #f59e0b;
+        }
+
+        .review-star-picker input:focus-visible + svg {
+            outline: 2px solid rgba(249, 115, 22, 0.45);
+            outline-offset: 4px;
+            border-radius: 9999px;
+        }
+    </style>
+@endpush
+
 @section('content')
 @php
     $propertyImageUrl = $booking->room?->getFirstImageUrl() ?? $booking->property?->getFirstImageUrl() ?? asset('images/property-placeholder.jpg');
@@ -13,6 +48,19 @@
     $advanceTarget = round((float) $booking->total_rent * 0.20, 2);
     $remainingBalance = max((float) $booking->total_rent - $totalPaid, 0);
     $lastPayment = $booking->lastSuccessfulPayment();
+    $paymentProgress = $booking->getPaymentProgress();
+    $canPayBooking = $booking->isPending()
+        && ! $booking->hasSuccessfulPayment()
+        && $booking->getAmountPending() > 0
+        && ! $booking->isCancelled()
+        && ! $booking->isRejected()
+        && ! $booking->isCompleted();
+    $canCancelBooking = $booking->isPending()
+        && ! $booking->hasSuccessfulPayment()
+        && ! $booking->isCancelled()
+        && ! $booking->isRejected()
+        && ! $booking->isCompleted();
+    $canShowInvoiceActions = $booking->hasSuccessfulPayment();
 
     if ($booking->isCancelled()) {
         $statusLabel = 'Booking Cancelled';
@@ -215,27 +263,39 @@
                         @endif
                     </p>
                 </div>
+
+                <div class="mt-5 rounded-xl border border-slate-200 bg-white p-4">
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="text-sm font-semibold text-slate-900">Payment Progress</p>
+                            <p class="mt-1 text-sm text-slate-500">Based on successful payments recorded for this booking.</p>
+                        </div>
+                        <span class="text-sm font-bold text-slate-900">{{ $paymentProgress }}%</span>
+                    </div>
+                    <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-100">
+                        <div class="h-full rounded-full bg-rose-500" style="width: {{ $paymentProgress }}%;"></div>
+                    </div>
+                </div>
             </section>
 
-            @if($canReviewBooking || $existingReview)
-                <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold text-slate-900">Your Review</h3>
-                            <p class="mt-1 text-sm leading-6 text-slate-500">
-                                Share your experience with this property. Reviews appear on the listing only after admin approval.
-                            </p>
-                        </div>
-                        @if($reviewStatusLabel)
-                            <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $reviewStatusClasses }}">
-                                {{ $reviewStatusLabel }}
-                            </span>
-                        @endif
+            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-900">Property Review</h3>
+                        <p class="mt-1 text-sm leading-6 text-slate-500">Rate this property after your paid stay reaches checkout.</p>
                     </div>
+                    @if($reviewStatusLabel)
+                        <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $reviewStatusClasses }}">
+                            {{ $reviewStatusLabel }}
+                        </span>
+                    @endif
+                </div>
 
+                <div class="mt-5">
                     @if($existingReview)
-                        <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                            <div class="flex items-center gap-1 text-amber-400">
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-sm font-semibold text-slate-900">Review already submitted</p>
+                            <div class="mt-3 flex items-center gap-1">
                                 @for($i = 1; $i <= 5; $i++)
                                     <svg class="h-4 w-4 {{ $i <= $existingReview->rating ? 'text-amber-400' : 'text-slate-200' }}" viewBox="0 0 20 20" fill="currentColor">
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z"/>
@@ -245,58 +305,58 @@
                             </div>
                             <p class="mt-3 text-sm leading-7 text-slate-600">{{ $existingReview->review_text }}</p>
                         </div>
-                    @endif
+                    @elseif($canReviewBooking)
+                        <form action="{{ route('user.bookings.review', $booking) }}" method="POST" class="space-y-5">
+                            @csrf
 
-                    <form action="{{ route('user.bookings.review', $booking) }}" method="POST" class="mt-5 space-y-5">
-                        @csrf
-
-                        <div>
-                            <label class="text-sm font-medium text-slate-900">Rating</label>
-                            <div class="mt-3 inline-flex flex-row-reverse items-center justify-end gap-1 review-star-picker">
-                                @for($i = 5; $i >= 1; $i--)
-                                    <label class="cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="rating"
-                                            value="{{ $i }}"
-                                            class="sr-only"
-                                            {{ (int) old('rating', $existingReview?->rating) === $i ? 'checked' : '' }}>
-                                        <svg class="h-8 w-8 text-slate-200 transition" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z"/>
-                                        </svg>
-                                    </label>
-                                @endfor
+                            <div>
+                                <label class="text-sm font-medium text-slate-900">Rate This Property</label>
+                                <div class="mt-3 inline-flex flex-row-reverse items-center justify-end gap-1 review-star-picker">
+                                    @for($i = 5; $i >= 1; $i--)
+                                        <label data-rating-value="{{ $i }}">
+                                            <input
+                                                type="radio"
+                                                name="rating"
+                                                value="{{ $i }}"
+                                                class="sr-only"
+                                                {{ (int) old('rating') === $i ? 'checked' : '' }}>
+                                            <svg class="h-8 w-8 transition" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                            <span class="sr-only">{{ $i }} star{{ $i === 1 ? '' : 's' }}</span>
+                                        </label>
+                                    @endfor
+                                </div>
+                                @error('rating')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
-                            <p class="mt-2 text-xs text-slate-500">Select 1 to 5 stars for your stay experience.</p>
-                            @error('rating')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
 
-                        <div>
-                            <label for="review_text" class="text-sm font-medium text-slate-900">Review</label>
-                            <textarea
-                                id="review_text"
-                                name="review_text"
-                                rows="5"
-                                class="mt-3 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-rose-400 focus:ring-4 focus:ring-rose-100"
-                                placeholder="Write a short and honest review about the property, cleanliness, location, and overall experience.">{{ old('review_text', $existingReview?->review_text) }}</textarea>
-                            @error('review_text')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                            <div>
+                                <label for="review_text" class="text-sm font-medium text-slate-900">Review message</label>
+                                <textarea
+                                    id="review_text"
+                                    name="review_text"
+                                    rows="4"
+                                    class="mt-3 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-rose-400 focus:ring-4 focus:ring-rose-100"
+                                    placeholder="Share a clear and honest review about your stay.">{{ old('review_text') }}</textarea>
+                                @error('review_text')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <p class="text-xs leading-6 text-slate-500">
-                                Your review will stay hidden until an admin approves it.
-                            </p>
-                            <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
-                                {{ $existingReview ? 'Update Review' : 'Submit Review' }}
+                            <button type="submit" class="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+                                Submit Review
                             </button>
+                        </form>
+                    @else
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-500">
+                            Review available after stay completion.
                         </div>
-                    </form>
-                </section>
-            @endif
+                    @endif
+                </div>
+            </section>
+
         </div>
 
         <div class="space-y-6">
@@ -304,25 +364,40 @@
                 <h3 class="text-lg font-semibold text-slate-900">Actions</h3>
 
                 <div class="mt-5 space-y-3">
-                    @if($booking->hasSuccessfulPayment())
+                    @if($canShowInvoiceActions)
                         <a href="{{ route('user.bookings.download-invoice', $booking) }}" class="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
                             Download Invoice PDF
                         </a>
+
+                        <a href="{{ route('user.bookings.bill', $booking) }}" class="inline-flex w-full items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                            View Invoice
+                        </a>
+
+                        @if($canGiveOwnerTrustPoint)
+                            <form action="{{ route('user.bookings.trust-point', $booking) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="inline-flex w-full items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-100">
+                                    Trust This Owner
+                                </button>
+                            </form>
+                        @elseif($ownerTrustGiven)
+                            <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700">
+                                Trust point already given.
+                            </div>
+                        @elseif($isFeedbackAvailable)
+                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-500">
+                                Trust point is not available for this owner.
+                            </div>
+                        @endif
                     @endif
 
-                    @if(!$booking->hasSuccessfulPayment() && $booking->getAmountPending() > 0 && !$booking->isCancelled() && !$booking->isRejected() && !$booking->isCompleted())
+                    @if($canPayBooking)
                         <a href="{{ route('user.bookings.bill', $booking) }}" class="inline-flex w-full items-center justify-center rounded-xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">
                             Pay Advance
                         </a>
                     @endif
 
-                    @if($booking->isPending())
-                        <a href="{{ route('user.bookings.edit', $booking) }}" class="inline-flex w-full items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                            Edit Booking
-                        </a>
-                    @endif
-
-                    @if($booking->isActive() || $booking->isConfirmed())
+                    @if($canCancelBooking)
                         <form action="{{ route('user.bookings.cancel', $booking) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this booking?')">
                             @csrf
                             @method('PUT')
@@ -332,9 +407,11 @@
                         </form>
                     @endif
 
-                    <a href="{{ route('user.bookings.bill', $booking) }}" class="inline-flex w-full items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                        View Invoice
-                    </a>
+                    @if(! $canShowInvoiceActions && ! $canPayBooking && ! $canCancelBooking)
+                        <div class="rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-500">
+                            No user action is required for this booking right now.
+                        </div>
+                    @endif
                 </div>
             </section>
 
@@ -344,7 +421,7 @@
                 <dl class="mt-5 space-y-3 text-sm">
                     <div class="flex items-center justify-between gap-4">
                         <dt class="text-slate-500">Payment progress</dt>
-                        <dd class="font-semibold text-slate-900">{{ $booking->getPaymentProgress() }}%</dd>
+                        <dd class="font-semibold text-slate-900">{{ $paymentProgress }}%</dd>
                     </div>
                     @if($lastPayment)
                         <div class="flex items-center justify-between gap-4">
@@ -409,3 +486,32 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.review-star-picker').forEach(function (picker) {
+                const labels = Array.from(picker.querySelectorAll('label[data-rating-value]'));
+                const inputs = picker.querySelectorAll('input[type="radio"][name="rating"]');
+
+                const updateStars = function (rating) {
+                    const selectedRating = Number(rating) || 0;
+
+                    labels.forEach(function (label) {
+                        const value = Number(label.dataset.ratingValue || 0);
+                        label.classList.toggle('is-active', value > 0 && value <= selectedRating);
+                    });
+                };
+
+                const checkedInput = picker.querySelector('input[type="radio"][name="rating"]:checked');
+                updateStars(checkedInput ? Number(checkedInput.value) : 0);
+
+                inputs.forEach(function (input) {
+                    input.addEventListener('change', function () {
+                        updateStars(Number(this.value));
+                    });
+                });
+            });
+        });
+    </script>
+@endpush

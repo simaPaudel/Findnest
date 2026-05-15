@@ -37,6 +37,7 @@ use App\Http\Controllers\Admin\AdminReportController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about-us', [PageController::class, 'about'])->name('pages.about');
 Route::get('/contact-us', [PageController::class, 'contact'])->name('pages.contact');
+Route::post('/contact-us', [PageController::class, 'sendContact'])->name('pages.contact.send');
 Route::get('/faq', [PageController::class, 'faq'])->name('pages.faq');
 Route::get('/help-center', [PageController::class, 'helpCenter'])->name('pages.help-center');
 Route::get('/terms-and-conditions', [PageController::class, 'terms'])->name('pages.terms');
@@ -45,6 +46,8 @@ Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('pages.p
 // Auth Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
+Route::get('/auth/google', [LoginController::class, 'redirectToGoogle'])->name('auth.google.redirect');
+Route::get('/auth/google/callback', [LoginController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware(['auth', 'blocked'])->get('/notifications/{notification}/open', [NotificationController::class, 'open'])
     ->whereNumber('notification')
@@ -153,6 +156,7 @@ Route::prefix('user')->middleware(['auth', 'blocked', 'user'])->group(function (
     Route::get('/bookings/{booking}/bill', [UserBookingController::class, 'bill'])->name('user.bookings.bill');
     Route::get('/bookings/{booking}/invoice/download', [UserBookingController::class, 'downloadInvoice'])->name('user.bookings.download-invoice');
     Route::post('/bookings/{booking}/review', [UserBookingController::class, 'storeReview'])->name('user.bookings.review');
+    Route::post('/bookings/{booking}/trust-point', [UserBookingController::class, 'storeTrustPoint'])->name('user.bookings.trust-point');
     Route::post('/bookings/check-availability', [UserBookingController::class, 'checkAvailability'])->name('user.bookings.check-availability');
     Route::get('/bookings/available-dates', [UserBookingController::class, 'getAvailableDates'])->name('user.bookings.available-dates');
 
@@ -230,6 +234,7 @@ Route::prefix('owner')->middleware(['auth', 'blocked', 'owner'])->group(function
     Route::get('/bookings', [OwnerBookingController::class, 'index'])->name('owner.bookings.index');
     Route::post('/bookings/{booking}/accept', [OwnerBookingController::class, 'accept'])->name('owner.bookings.accept');
     Route::post('/bookings/{booking}/reject', [OwnerBookingController::class, 'reject'])->name('owner.bookings.reject');
+    Route::post('/bookings/{booking}/trust-point', [OwnerBookingController::class, 'storeTrustPoint'])->name('owner.bookings.trust-point');
 
     // Reviews
     Route::get('/reviews', [OwnerReviewController::class, 'index'])->name('owner.reviews.index');

@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class UserProfileController extends Controller
 {
@@ -33,6 +36,42 @@ class UserProfileController extends Controller
     public function update(Request $request)
     {
         $user = Auth::user();
+
+        if ($request->input('profile_action') === 'password') {
+            $validator = Validator::make($request->all(), [
+                'current_password' => 'required|string',
+                'password' => ['required', 'confirmed', PasswordRule::min(8)->mixedCase()->numbers()->symbols()],
+            ], [
+                'current_password.required' => 'Please enter your current password.',
+                'password.required' => 'Please enter a new password.',
+                'password.confirmed' => 'Password confirmation does not match.',
+                'password.min' => 'Password must be at least 8 characters long.',
+                'password.mixed' => 'Password must contain at least one uppercase letter and one lowercase letter.',
+                'password.numbers' => 'Password must contain at least one number.',
+                'password.symbols' => 'Password must contain at least one special character.',
+            ]);
+
+            if ($validator->fails()) {
+                return back()
+                    ->withErrors($validator)
+                    ->with('password_modal_open', true);
+            }
+
+            $validated = $validator->validated();
+
+            if (! Hash::check($validated['current_password'], $user->password)) {
+                return back()
+                    ->withErrors(['current_password' => 'The current password is incorrect.'])
+                    ->with('password_modal_open', true);
+            }
+
+            $user->update([
+                'password' => Hash::make($validated['password']),
+            ]);
+
+            return redirect()->route('user.profile.edit')
+                ->with('success', 'Password updated successfully.');
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',

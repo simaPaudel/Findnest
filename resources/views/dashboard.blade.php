@@ -5,6 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - FindNest</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html,
+        body {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        img,
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .navbar .container {
+            gap: 0.75rem;
+        }
+
+        .navbar-nav {
+            min-width: 0;
+            align-items: center;
+        }
+
+        .navbar-text {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 576px) {
+            .navbar .container,
+            .navbar-nav {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .navbar-text,
+            .navbar form,
+            .navbar button {
+                width: 100%;
+                margin-right: 0 !important;
+                text-align: center;
+            }
+
+            .container.mt-5 {
+                margin-top: 2rem !important;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+                line-height: 1.2;
+            }
+
+            .card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">

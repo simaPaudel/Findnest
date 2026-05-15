@@ -7,7 +7,6 @@
     $navbarSecondaryLink = null;
     $navbarProfileRoute = route('login');
     $navbarAvatarUrl = null;
-    $navbarProfileFallbackInitial = 'A';
     $navbarShowNotifications = false;
 
     try {
@@ -43,10 +42,6 @@
             ? $navbarUser->profilePhotoUrl()
             : $resolveAvatarUrl(data_get($navbarUser, 'profile_photo'));
         $navbarShowNotifications = true;
-        $navbarProfileFallbackInitial = method_exists($navbarUser, 'avatarInitial')
-            ? $navbarUser->avatarInitial()
-            : strtoupper(substr(data_get($navbarUser, 'name', 'A'), 0, 1));
-
         if ($navbarUser->isUser()) {
             $navbarRole = 'user';
             $navbarHomeRoute = route('user.dashboard');
@@ -173,11 +168,8 @@
                             <img
                                 src="<?php echo e($navbarAvatarUrl); ?>"
                                 alt="<?php echo e($navbarUser->name); ?>"
-                                onerror="this.style.display='none'; this.nextElementSibling.removeAttribute('hidden');"
+                                onerror="this.style.display='none';"
                             />
-                            <span class="fn-profile-avatar-fallback" hidden><?php echo e($navbarProfileFallbackInitial); ?></span>
-                        <?php else: ?>
-                            <span class="fn-profile-avatar-fallback"><?php echo e($navbarProfileFallbackInitial); ?></span>
                         <?php endif; ?>
                     </summary>
 
@@ -199,6 +191,53 @@
 </nav>
 
 <style>
+    html {
+        width: 100%;
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    img,
+    video,
+    canvas,
+    svg {
+        max-width: 100%;
+    }
+
+    img,
+    video {
+        height: auto;
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+        max-width: 100%;
+        font: inherit;
+    }
+
+    table {
+        max-width: 100%;
+    }
+
+    [class*="table-wrap"],
+    [class*="table-responsive"] {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .line-clamp-1,
+    .line-clamp-2 {
+        overflow-wrap: anywhere;
+    }
+
     /* Navbar Styling */
     .fn-navbar {
         background: var(--fn-white, #ffffff);
@@ -264,10 +303,14 @@
         cursor: pointer;
     }
 
-    .fn-nav-link:hover,
+    .fn-nav-link:hover {
+        color: var(--fn-red, #ff385c);
+        background: transparent;
+    }
+
     .fn-nav-link.active {
         color: var(--fn-red, #ff385c);
-        background: rgba(255, 56, 92, 0.05);
+        background: transparent;
     }
 
     .fn-navbar-end {
@@ -302,9 +345,9 @@
 
     .fn-message-link:hover,
     .fn-message-link.active {
-        border-color: rgba(255, 56, 92, 0.25);
+        border-color: var(--fn-gray-border, #e5e7eb);
         color: var(--fn-red, #ff385c);
-        background: rgba(255, 56, 92, 0.06);
+        background: #fff;
     }
 
     .fn-message-badge {
@@ -356,19 +399,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-        }
-
-        .fn-profile-avatar-fallback {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(180deg, #fff5f7 0%, #ffe9ee 100%);
-            color: var(--fn-red, #ff385c);
-            font-size: 0.82rem;
-            font-weight: 700;
-            line-height: 1;
         }
 
         .fn-profile-menu {
@@ -425,7 +455,7 @@
         }
 
         .fn-profile-item:hover {
-            background: rgba(255, 56, 92, 0.06);
+            background: transparent;
             color: var(--fn-red, #ff385c);
         }
 
@@ -456,6 +486,7 @@
     @media (max-width: 768px) {
         .fn-navbar-container {
             padding: 0.85rem 1rem;
+            gap: 0.7rem;
         }
 
         .fn-navbar-brand {
@@ -487,6 +518,7 @@
         .fn-navbar-end {
             margin-left: auto;
             gap: 0.35rem;
+            max-width: calc(100vw - 120px);
         }
 
         .fn-nav-link {
@@ -508,6 +540,34 @@
         .fn-profile-panel {
             right: -4px;
             width: min(220px, calc(100vw - 24px));
+        }
+    }
+
+    @media (max-width: 420px) {
+        .fn-navbar-container {
+            padding-inline: 0.75rem;
+        }
+
+        .fn-navbar-brand > span {
+            max-width: 118px;
+        }
+
+        .fn-navbar-end {
+            max-width: calc(100vw - 104px);
+        }
+
+        .fn-navbar-end > .fn-nav-link {
+            padding-inline: 0.55rem;
+        }
+
+        .fn-navbar-end > .fn-btn-primary {
+            padding-inline: 0.7rem;
+            font-size: 0.84rem;
+        }
+
+        .fn-navbar-center {
+            margin-inline: -0.75rem;
+            padding-inline: 0.75rem;
         }
     }
 </style>

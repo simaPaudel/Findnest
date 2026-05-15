@@ -331,16 +331,22 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 38px;
-            width: 38px;
+            min-height: 32px;
+            width: 32px;
             padding: 0;
-            border-radius: 10px;
+            border-radius: 9px;
             border: 1px solid #e5e7eb;
             background: #fff;
             color: #475569;
             font-weight: 700;
             cursor: pointer;
             transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+        }
+
+        .host-upload-mini-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2;
         }
 
         .host-upload-mini-btn:hover {

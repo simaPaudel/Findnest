@@ -58,6 +58,20 @@ class Property extends Model
         return $this->hasMany(Review::class, 'property_id');
     }
 
+    public function approvedPropertyReviews()
+    {
+        return $this->hasMany(Review::class, 'property_id')
+            ->where('review_type', 'property')
+            ->where('is_approved', true);
+    }
+
+    public function scopeWithApprovedReviewStats($query)
+    {
+        return $query
+            ->withCount(['approvedPropertyReviews as property_reviews_count'])
+            ->withAvg(['approvedPropertyReviews as property_average_rating'], 'rating');
+    }
+
     public function reports()
     {
         return $this->morphMany(Report::class, 'reportable');
