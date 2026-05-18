@@ -28,6 +28,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'payout_method',
         'payout_account_name',
         'payout_account_number',
+        'payout_wallet_number',
+        'payout_bank_name',
         'payout_qr',
         'payout_notes',
         'trust_points',
@@ -149,6 +151,17 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return asset($path);
+    }
+
+    public function hasPayoutDetails(): bool
+    {
+        return filled($this->payout_method)
+            || filled($this->payout_account_name)
+            || filled($this->payout_account_number)
+            || filled($this->payout_wallet_number)
+            || filled($this->payout_bank_name)
+            || filled($this->payout_qr)
+            || filled($this->payout_notes);
     }
 
     // Relationships

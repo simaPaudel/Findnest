@@ -397,6 +397,8 @@
         </div>
     </main>
 
+    @include('components.footer')
+
     @stack('scripts')
 </body>
 

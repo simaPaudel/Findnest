@@ -49,9 +49,25 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::get('/auth/google', [LoginController::class, 'redirectToGoogle'])->name('auth.google.redirect');
 Route::get('/auth/google/callback', [LoginController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-Route::middleware(['auth', 'blocked'])->get('/notifications/{notification}/open', [NotificationController::class, 'open'])
-    ->whereNumber('notification')
-    ->name('notifications.open');
+Route::middleware(['auth', 'blocked'])->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::get('/notifications/{notification}/open', [NotificationController::class, 'open'])
+        ->whereNumber('notification')
+        ->name('notifications.open');
+
+    Route::get('/messages', function () {
+        $user = auth()->user();
+
+        $targetRoute = match ($user?->role) {
+            'owner' => 'owner.messages.index',
+            'admin' => 'admin.dashboard',
+            default => 'user.messages.index',
+        };
+
+        return redirect()->route($targetRoute, request()->query());
+    })->name('messages.index');
+});
 
 Route::get('/register', [RegistrationController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegistrationController::class, 'register']);
@@ -277,12 +293,17 @@ Route::prefix('admin')->middleware(['auth', 'blocked', 'admin'])->group(function
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::get('/properties', [AdminPropertyController::class, 'index'])->name('admin.properties.index');
+    Route::get('/properties/{property}', [AdminPropertyController::class, 'show'])->name('admin.properties.show');
+    Route::get('/properties/{property}/edit', [AdminPropertyController::class, 'edit'])->name('admin.properties.edit');
+    Route::put('/properties/{property}', [AdminPropertyController::class, 'update'])->name('admin.properties.update');
     Route::post('/properties/{property}/approve', [AdminPropertyController::class, 'approve'])->name('admin.properties.approve');
     Route::post('/properties/{property}/reject', [AdminPropertyController::class, 'reject'])->name('admin.properties.reject');
     Route::post('/properties/{property}/verify', [AdminPropertyController::class, 'verify'])->name('admin.properties.verify');
     Route::delete('/properties/{property}', [AdminPropertyController::class, 'destroy'])->name('admin.properties.destroy');
 
     Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+    Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->whereNumber('user')->name('admin.users.edit');
+    Route::put('/users/{user}', [AdminUserController::class, 'update'])->whereNumber('user')->name('admin.users.update');
     Route::get('/users/{user}', [AdminUserController::class, 'show'])->whereNumber('user')->name('admin.users.show');
     Route::post('/users/{user}/toggle-status', [AdminUserController::class, 'toggleStatus'])->whereNumber('user')->name('admin.users.toggle-status');
     Route::put('/users/{user}/role', [AdminUserController::class, 'updateRole'])->whereNumber('user')->name('admin.users.update-role');
@@ -298,6 +319,7 @@ Route::prefix('admin')->middleware(['auth', 'blocked', 'admin'])->group(function
 
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('admin.bookings.index');
     Route::get('/bookings/{booking}', [AdminBookingController::class, 'show'])->whereNumber('booking')->name('admin.bookings.show');
+    Route::post('/bookings/{booking}/cancel', [AdminBookingController::class, 'cancel'])->name('admin.bookings.cancel');
     Route::post('/bookings/{booking}/release', [AdminBookingController::class, 'release'])->name('admin.bookings.release');
     Route::post('/payments/{payment}/mark-paid', [AdminBookingController::class, 'markPayoutPaid'])->whereNumber('payment')->name('admin.payments.mark-paid');
 

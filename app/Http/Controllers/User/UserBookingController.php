@@ -122,8 +122,8 @@ class UserBookingController extends Controller
      */
     public function request(Request $request, Property $property, RoomAvailabilityService $roomAvailabilityService)
     {
-        // Verify property is approved and available
-        if ($property->status !== 'approved') {
+        // Verify property is approved, verified, and available to users
+        if ($property->status !== 'approved' || ! $property->is_verified) {
             abort(404, 'Property not found');
         }
 
@@ -187,7 +187,7 @@ class UserBookingController extends Controller
         try {
             $data = $request->validated();
 
-            $property = Property::where('status', 'approved')
+            $property = Property::verified()
                 ->with([
                     'rooms' => function ($query) {
                         $query->withCount([
@@ -239,7 +239,7 @@ class UserBookingController extends Controller
 
             $existingActiveBooking = Booking::where('user_id', Auth::id())
                 ->where('property_id', $property->id)
-                ->whereIn('status', ['pending', 'confirmed', 'completed'])
+                ->active()
                 ->when(
                     $data['room_id'] !== null,
                     fn ($query) => $query->where('room_id', $data['room_id']),
@@ -432,12 +432,12 @@ class UserBookingController extends Controller
             'rating' => $request->validated('rating'),
             'review_text' => $request->validated('review_text'),
             'is_verified' => true,
-            'is_approved' => false,
+            'is_approved' => true,
         ]);
 
         return redirect()
             ->route('user.bookings.show', $booking)
-            ->with('success', 'Review submitted successfully. It will appear after admin approval.');
+            ->with('success', 'Review posted successfully and is now visible to everyone!');
     }
 
     public function storeTrustPoint(Booking $booking)
@@ -498,6 +498,8 @@ class UserBookingController extends Controller
             'check_out_date' => 'required|date|after:check_in_date',
         ]);
 
+        Property::verified()->findOrFail($validated['property_id']);
+
         $isAvailable = $this->bookingService->isAvailable(
             $validated['property_id'],
             $validated['check_in_date'],
@@ -522,6 +524,8 @@ class UserBookingController extends Controller
             'month' => 'required|integer|min:1|max:12',
             'year' => 'required|integer|min:2024',
         ]);
+
+        Property::verified()->findOrFail($validated['property_id']);
 
         $availableDates = $this->bookingService->getAvailableDates(
             $validated['property_id'],

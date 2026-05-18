@@ -19,22 +19,40 @@ class OwnerApplicationController extends Controller
                 ->with('error', 'Host applications are not available yet. Please try again after setup is complete.');
         }
 
-        $status = $request->string('status')->toString();
+        $searchTerm = trim((string) $request->query('q', ''));
+        $selectedRole = $request->query('role');
+        $roleOptions = [
+            User::ROLE_USER => 'User',
+            User::ROLE_OWNER => 'Owner',
+        ];
 
         $applications = OwnerApplication::query()
             ->with('user')
-            ->when(in_array($status, [
-                OwnerApplication::STATUS_PENDING,
-                OwnerApplication::STATUS_APPROVED,
-                OwnerApplication::STATUS_REJECTED,
-            ], true), function ($query) use ($status): void {
-                $query->where('status', $status);
+            ->when($searchTerm !== '', function ($query) use ($searchTerm): void {
+                $like = '%' . $searchTerm . '%';
+
+                $query->where(function ($searchQuery) use ($like): void {
+                    $searchQuery->where('full_name', 'like', $like)
+                        ->orWhereHas('user', function ($userQuery) use ($like): void {
+                            $userQuery->where('name', 'like', $like);
+                        });
+                });
+            })
+            ->when(in_array($selectedRole, [User::ROLE_USER, User::ROLE_OWNER], true), function ($query) use ($selectedRole): void {
+                $query->whereHas('user', function ($userQuery) use ($selectedRole): void {
+                    $userQuery->where('role', $selectedRole);
+                });
             })
             ->orderByDesc('submitted_at')
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.owner-applications.index', compact('applications', 'status'));
+        return view('admin.owner-applications.index', compact(
+            'applications',
+            'searchTerm',
+            'selectedRole',
+            'roleOptions'
+        ));
     }
 
     public function show(OwnerApplication $ownerApplication)

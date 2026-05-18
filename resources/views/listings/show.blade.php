@@ -194,7 +194,7 @@
             justify-content: center;
             width: 100%;
             height: 100%;
-            padding: 1rem;
+            padding: 0.75rem;
         }
 
         .gallery-main-image {
@@ -213,10 +213,9 @@
         }
 
         .gallery-main-image.portrait {
+            width: 100%;
             height: 100%;
-            width: auto;
-            max-width: min(100%, 72%);
-            object-fit: contain;
+            object-fit: cover;
             object-position: center;
         }
 
@@ -380,7 +379,7 @@
             }
 
             .gallery-main {
-                padding: 0.65rem;
+                padding: 0.5rem;
             }
 
             .gallery-main-image {

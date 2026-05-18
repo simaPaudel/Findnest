@@ -293,7 +293,6 @@
 
             <div class="admin-booking-detail-hero-actions">
                 <a href="{{ route('admin.bookings.index') }}" class="admin-btn admin-btn-secondary">View all bookings</a>
-                <a href="{{ route('admin.reports.index') }}" class="admin-btn admin-btn-secondary">Open reports</a>
 
                 @if($booking->status === 'confirmed' && $booking->hasSuccessfulPayment())
                     <form method="POST" action="{{ route('admin.bookings.release', $booking) }}" class="admin-booking-release-form">
@@ -523,6 +522,18 @@
                                         <strong>{{ $bookingOwner->payout_account_number ?? 'Not set' }}</strong>
                                         <p>Number or wallet ID used for payout.</p>
                                     </div>
+
+                                    <div class="admin-booking-mini-card">
+                                        <span>Khalti / eSewa number</span>
+                                        <strong>{{ $bookingOwner->payout_wallet_number ?? 'Not set' }}</strong>
+                                        <p>Wallet number used for digital payout.</p>
+                                    </div>
+
+                                    <div class="admin-booking-mini-card">
+                                        <span>Bank name</span>
+                                        <strong>{{ $bookingOwner->payout_bank_name ?? 'Not set' }}</strong>
+                                        <p>Bank used when the owner prefers bank transfer.</p>
+                                    </div>
                                 </div>
 
                                 @if($bookingOwnerPayoutQrUrl || $bookingOwner->payout_notes)
@@ -585,9 +596,6 @@
                                 <span class="status-pill {{ $reportStatusClass }}">{{ $report->getStatusLabel() }}</span>
                             </div>
 
-                            <div class="admin-dispute-item-actions">
-                                <a href="{{ route('admin.reports.show', $report) }}" class="admin-btn admin-btn-secondary">Open report</a>
-                            </div>
                         </article>
                     @endforeach
                 </div>

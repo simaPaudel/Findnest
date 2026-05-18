@@ -252,6 +252,44 @@
             box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.08);
         }
 
+        .password-field {
+            position: relative;
+        }
+
+        .password-field .fn-input {
+            padding-right: 48px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--fn-muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: color 0.18s ease, background 0.18s ease;
+        }
+
+        .password-toggle:hover,
+        .password-toggle:focus-visible {
+            color: var(--fn-red);
+            background: rgba(255, 56, 92, 0.06);
+            outline: none;
+        }
+
+        .password-toggle svg {
+            width: 18px;
+            height: 18px;
+        }
+
         .auth-row {
             display: flex;
             justify-content: flex-end;
@@ -419,14 +457,22 @@
 
                     <div>
                         <label for="password" class="fn-label">Password</label>
-                        <input
-                            type="password"
-                            class="fn-input"
-                            id="password"
-                            name="password"
-                            placeholder="Enter your password"
-                            required
-                        >
+                        <div class="password-field">
+                            <input
+                                type="password"
+                                class="fn-input"
+                                id="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                required
+                            >
+                            <button type="button" class="password-toggle" data-password-toggle="password" aria-label="Show password" aria-pressed="false">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="auth-row">
@@ -453,6 +499,21 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const input = document.getElementById(button.dataset.passwordToggle);
+                if (!input) {
+                    return;
+                }
+
+                const shouldShow = input.type === 'password';
+                input.type = shouldShow ? 'text' : 'password';
+                button.setAttribute('aria-pressed', shouldShow ? 'true' : 'false');
+                button.setAttribute('aria-label', shouldShow ? 'Hide password' : 'Show password');
+            });
+        });
+    </script>
     {!! Toastr::message() !!}
 </body>
 </html>

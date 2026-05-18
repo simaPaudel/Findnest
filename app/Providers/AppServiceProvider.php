@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
             return "<?php echo 'Rs ' . number_format((float)($expression), 0); ?>";
         });
 
-        View::composer(['components.navbar', 'owner.layout', 'admin.layout'], function ($view) {
+        View::composer(['components.navbar', 'owner.layout', 'admin.layout', 'user.layout'], function ($view) {
             try {
                 if (!Auth::check()) {
                     $view->with([
@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
 
                 $view->with([
                     'notificationCount' => NotificationService::countUnreadNotifications($userId),
-                    'recentNotifications' => NotificationService::fetchNotifications($userId, null),
+                    'recentNotifications' => NotificationService::fetchNotifications($userId, 10),
                 ]);
             } catch (\Throwable $e) {
                 $view->with([

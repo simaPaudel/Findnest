@@ -4,6 +4,8 @@
 @section('hide_pagebar', 'true')
 
 @section('content')
+    @php($editMode = $editMode ?? false)
+
     <div class="admin-dashboard admin-user-detail-page">
         <section class="content-card admin-user-profile-card">
             <div class="admin-user-profile-main">
@@ -38,6 +40,10 @@
             </div>
 
             <div class="admin-user-profile-actions">
+                @if (! $editMode)
+                    <a href="{{ route('admin.users.edit', $user) }}" class="admin-btn admin-btn-primary">Edit User</a>
+                @endif
+
                 @if (! $user->isAdmin())
                     <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}">
                         @csrf
@@ -143,41 +149,111 @@
                 </div>
 
                 <div class="admin-user-actions-body">
-                    @if (! $user->isAdmin() && (int) auth()->id() !== (int) $user->id)
-                        <form method="POST" action="{{ route('admin.users.update-role', $user) }}" class="admin-user-role-form">
+                    @if ($editMode)
+                        <form method="POST" action="{{ route('admin.users.update', $user) }}" class="admin-user-edit-form">
                             @csrf
                             @method('PUT')
 
-                            <label for="role" class="admin-detail-label">Manage role</label>
-                            <div class="admin-user-role-row">
-                                <select id="role" name="role" class="admin-input">
-                                    <option value="user" @selected($user->role === 'user')>User</option>
-                                    <option value="owner" @selected($user->role === 'owner')>Owner</option>
-                                </select>
-                                <button type="submit" class="admin-btn admin-btn-secondary">Save role</button>
+                            <div class="admin-user-edit-grid">
+                                <div class="admin-filter-group">
+                                    <label for="name">Full name</label>
+                                    <input id="name" type="text" name="name" value="{{ old('name', $user->name) }}" class="admin-input" required>
+                                    @error('name')
+                                        <span class="admin-form-error">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div class="admin-filter-group">
+                                    <label for="email">Email</label>
+                                    <input id="email" type="email" value="{{ $user->email }}" class="admin-input" readonly>
+                                    <span class="admin-meta-note">Email is read-only because it is used for login identity.</span>
+                                </div>
+
+                                <div class="admin-filter-group">
+                                    <label for="phone">Phone number</label>
+                                    <input id="phone" type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="admin-input" placeholder="Optional">
+                                    @error('phone')
+                                        <span class="admin-form-error">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div class="admin-filter-group">
+                                    <label for="role">Role</label>
+                                    @if (! $user->isAdmin() && (int) auth()->id() !== (int) $user->id)
+                                        <select id="role" name="role" class="admin-input">
+                                            <option value="user" @selected(old('role', $user->role) === 'user')>User</option>
+                                            <option value="owner" @selected(old('role', $user->role) === 'owner')>Owner</option>
+                                        </select>
+                                    @else
+                                        <input id="role" type="text" value="{{ ucfirst($user->role) }}" class="admin-input" readonly>
+                                        <span class="admin-meta-note">Role changes are protected for this account.</span>
+                                    @endif
+                                    @error('role')
+                                        <span class="admin-form-error">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div class="admin-filter-group">
+                                    <label for="is_blocked">Account status</label>
+                                    @if (! $user->isAdmin() && (int) auth()->id() !== (int) $user->id)
+                                        <select id="is_blocked" name="is_blocked" class="admin-input">
+                                            <option value="0" @selected((string) old('is_blocked', (int) $user->is_blocked) === '0')>Active</option>
+                                            <option value="1" @selected((string) old('is_blocked', (int) $user->is_blocked) === '1')>Blocked</option>
+                                        </select>
+                                    @else
+                                        <input id="is_blocked" type="text" value="{{ $user->is_blocked ? 'Blocked' : 'Active' }}" class="admin-input" readonly>
+                                        <span class="admin-meta-note">Status changes are protected for this account.</span>
+                                    @endif
+                                    @error('is_blocked')
+                                        <span class="admin-form-error">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="admin-user-edit-actions">
+                                <button type="submit" class="admin-btn admin-btn-primary">Save changes</button>
+                                <a href="{{ route('admin.users.show', $user) }}" class="admin-btn admin-btn-secondary">Cancel</a>
                             </div>
                         </form>
                     @else
-                        <div class="admin-empty-note">
-                            Role changes are protected for this account.
-                        </div>
-                    @endif
-
-                    <div class="admin-user-access-actions">
-                        @if (! $user->isAdmin())
-                            <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}">
+                        @if (! $user->isAdmin() && (int) auth()->id() !== (int) $user->id)
+                            <form method="POST" action="{{ route('admin.users.update-role', $user) }}" class="admin-user-role-form">
                                 @csrf
-                                <button
-                                    type="submit"
-                                    class="admin-btn {{ $user->is_blocked ? 'admin-btn-success' : 'admin-btn-danger' }}"
-                                >
-                                    {{ $user->is_blocked ? 'Reactivate user' : 'Block user' }}
-                                </button>
+                                @method('PUT')
+
+                                <label for="role" class="admin-detail-label">Manage role</label>
+                                <div class="admin-user-role-row">
+                                    <select id="role" name="role" class="admin-input">
+                                        <option value="user" @selected($user->role === 'user')>User</option>
+                                        <option value="owner" @selected($user->role === 'owner')>Owner</option>
+                                    </select>
+                                    <button type="submit" class="admin-btn admin-btn-secondary">Save role</button>
+                                </div>
                             </form>
+                        @else
+                            <div class="admin-empty-note">
+                                Role changes are protected for this account.
+                            </div>
                         @endif
 
-                        <a href="{{ route('admin.users.index') }}" class="admin-btn admin-btn-secondary">View all users</a>
-                    </div>
+                        <div class="admin-user-access-actions">
+                            <a href="{{ route('admin.users.edit', $user) }}" class="admin-btn admin-btn-primary">Edit User</a>
+
+                            @if (! $user->isAdmin())
+                                <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}">
+                                    @csrf
+                                    <button
+                                        type="submit"
+                                        class="admin-btn {{ $user->is_blocked ? 'admin-btn-success' : 'admin-btn-danger' }}"
+                                    >
+                                        {{ $user->is_blocked ? 'Reactivate user' : 'Block user' }}
+                                    </button>
+                                </form>
+                            @endif
+
+                            <a href="{{ route('admin.users.index') }}" class="admin-btn admin-btn-secondary">View all users</a>
+                        </div>
+                    @endif
                 </div>
             </article>
         </section>
@@ -340,38 +416,6 @@
                 </div>
             </article>
 
-            <article class="content-card admin-user-reports-card">
-                <div class="content-card-header admin-panel-header">
-                    <div>
-                        <h2>Reports</h2>
-                        <p>Recent reports filed by or about this user.</p>
-                    </div>
-
-                    <a href="{{ route('admin.reports.index', ['user' => $user->id]) }}" class="admin-btn admin-btn-secondary admin-btn-sm">View all reports</a>
-                </div>
-
-                <div class="admin-user-record-list">
-                    @if ($recentReports->isNotEmpty())
-                        @foreach ($recentReports as $report)
-                            <article class="admin-user-record-item">
-                                <div class="admin-user-record-copy">
-                                    <span class="admin-user-record-rating">{{ $report->getReportTypeLabel() }}</span>
-                                    <strong>{{ \Illuminate\Support\Str::limit($report->reason, 60) }}</strong>
-                                    <p>{{ $report->reporter?->name ?? 'Unknown reporter' }} &middot; {{ $report->getTargetLabel() }}</p>
-                                </div>
-
-                                <span class="status-pill {{ $report->status === 'resolved' ? 'status-approved' : ($report->status === 'under_review' ? 'status-pending' : 'status-neutral') }}">
-                                    {{ $report->getStatusLabel() }}
-                                </span>
-
-                                <a href="{{ route('admin.reports.show', $report) }}" class="admin-btn admin-btn-secondary admin-user-record-view">View</a>
-                            </article>
-                        @endforeach
-                    @else
-                        <div class="admin-user-record-empty">No related reports found for this user.</div>
-                    @endif
-                </div>
-            </article>
         </section>
     </div>
 @endsection

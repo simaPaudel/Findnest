@@ -105,7 +105,14 @@ class ConversationController extends Controller
     public function createOrOpenPropertyConversation($propertyId): JsonResponse
     {
         $userId = (int) Auth::id();
-        $property = Property::query()->select(['id', 'owner_id'])->findOrFail($propertyId);
+        $property = Property::verified()->select(['id', 'owner_id'])->find($propertyId);
+
+        if (! $property) {
+            return response()->json([
+                'message' => 'This property is not available for messaging.',
+            ], 422);
+        }
+
         $ownerId = (int) $property->owner_id;
 
         if ($userId === $ownerId) {
@@ -181,7 +188,7 @@ class ConversationController extends Controller
         }
 
         $userId = (int) Auth::id();
-        $conversation = Conversation::query()->findOrFail($conversationId);
+        $conversation = Conversation::query()->with('property')->findOrFail($conversationId);
 
         $isParticipant = ConversationParticipant::query()
             ->where('conversation_id', $conversation->id)
@@ -254,7 +261,7 @@ class ConversationController extends Controller
     public function showConversation($conversationId): JsonResponse
     {
         $userId = (int) Auth::id();
-        $conversation = Conversation::query()->findOrFail($conversationId);
+        $conversation = Conversation::query()->with('property')->findOrFail($conversationId);
 
         $isParticipant = ConversationParticipant::query()
             ->where('conversation_id', $conversation->id)
@@ -394,6 +401,7 @@ class ConversationController extends Controller
             ], 403);
         }
 
+        $conversation = Conversation::query()->with('property')->findOrFail($conversationId);
         $query = Message::query()
             ->where('conversation_id', $conversationId)
             ->with(['sender:id,name,email,profile_photo'])
@@ -434,6 +442,7 @@ class ConversationController extends Controller
                 $join->on('cp.conversation_id', '=', 'messages.conversation_id')
                     ->where('cp.user_id', '=', $userId);
             })
+            ->join('conversations', 'conversations.id', '=', 'messages.conversation_id')
             ->where('messages.sender_id', '!=', $userId)
             ->where(function ($query) {
                 $query->whereNull('cp.last_read_at')
@@ -447,4 +456,5 @@ class ConversationController extends Controller
             })
             ->all();
     }
+
 }

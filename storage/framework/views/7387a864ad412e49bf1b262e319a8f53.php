@@ -1,3 +1,195 @@
+<?php
+    $footerVariant = $variant ?? 'default';
+?>
+
+<?php if($footerVariant === 'compact'): ?>
+<style>
+    .fn-footer-compact {
+        background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+        border-top: 1px solid rgba(148, 163, 184, 0.22);
+        color: rgba(226, 232, 240, 0.86);
+        padding: 26px 0;
+    }
+
+    .fn-footer-compact-container {
+        width: min(1240px, calc(100% - 48px));
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+    }
+
+    .fn-footer-compact-brand-block {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        min-width: min(100%, 280px);
+    }
+
+    .fn-footer-compact-brand {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        flex: 0 0 auto;
+    }
+
+    .fn-footer-compact-brand > span {
+        width: 106px !important;
+    }
+
+    .fn-footer-compact-tagline-wrap {
+        padding-left: 18px;
+        border-left: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .fn-footer-compact-tagline {
+        margin: 0;
+        color: rgba(226, 232, 240, 0.72);
+        font-size: 0.84rem;
+        line-height: 1.55;
+        max-width: 320px;
+    }
+
+    .fn-footer-compact-meta {
+        display: grid;
+        justify-items: end;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .fn-footer-compact-copy {
+        margin: 0;
+        color: rgba(226, 232, 240, 0.74);
+        font-size: 0.82rem;
+        line-height: 1.5;
+        white-space: nowrap;
+    }
+
+    .fn-footer-compact-links {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .fn-footer-compact-links a {
+        color: rgba(226, 232, 240, 0.78);
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1.5;
+        padding: 2px 0;
+        transition: color 0.18s ease;
+    }
+
+    .fn-footer-compact-links span {
+        width: 4px;
+        height: 4px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.5);
+    }
+
+    .fn-footer-compact-links a:hover,
+    .fn-footer-compact-links a:focus-visible {
+        color: #ffffff;
+        outline: none;
+    }
+
+    @media (max-width: 820px) {
+        .fn-footer-compact-container {
+            flex-direction: column;
+            justify-content: center;
+            gap: 16px;
+            text-align: center;
+        }
+
+        .fn-footer-compact-brand-block,
+        .fn-footer-compact-meta {
+            justify-content: center;
+        }
+
+        .fn-footer-compact-meta {
+            justify-items: center;
+            gap: 8px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .fn-footer-compact {
+            padding: 18px 0;
+        }
+
+        .fn-footer-compact-container {
+            width: min(100% - 28px, 1180px);
+            align-items: center;
+        }
+
+        .fn-footer-compact-brand-block {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .fn-footer-compact-tagline-wrap {
+            padding-left: 0;
+            border-left: 0;
+        }
+
+        .fn-footer-compact-links {
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .fn-footer-compact-copy,
+        .fn-footer-compact-tagline {
+            white-space: normal;
+        }
+    }
+</style>
+
+<footer class="fn-footer-compact">
+    <div class="fn-footer-compact-container">
+        <div class="fn-footer-compact-brand-block">
+            <div class="fn-footer-compact-brand">
+                <?php if (isset($component)) { $__componentOriginal343e84183e8c00ed9639e7134ef5492a = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal343e84183e8c00ed9639e7134ef5492a = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.findnest-logo','data' => ['variant' => 'inline','size' => 'sm']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('findnest-logo'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['variant' => 'inline','size' => 'sm']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal343e84183e8c00ed9639e7134ef5492a)): ?>
+<?php $attributes = $__attributesOriginal343e84183e8c00ed9639e7134ef5492a; ?>
+<?php unset($__attributesOriginal343e84183e8c00ed9639e7134ef5492a); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal343e84183e8c00ed9639e7134ef5492a)): ?>
+<?php $component = $__componentOriginal343e84183e8c00ed9639e7134ef5492a; ?>
+<?php unset($__componentOriginal343e84183e8c00ed9639e7134ef5492a); ?>
+<?php endif; ?>
+            </div>
+            <div class="fn-footer-compact-tagline-wrap">
+                <p class="fn-footer-compact-tagline">Verified stays and roommate matching.</p>
+            </div>
+        </div>
+
+        <div class="fn-footer-compact-meta">
+            <p class="fn-footer-compact-copy">&copy; 2026 FindNest. All rights reserved.</p>
+            <nav class="fn-footer-compact-links" aria-label="Footer links">
+                <a href="<?php echo e(route('pages.privacy')); ?>">Privacy Policy</a>
+                <span aria-hidden="true"></span>
+                <a href="<?php echo e(route('pages.terms')); ?>">Terms</a>
+                <span aria-hidden="true"></span>
+                <a href="<?php echo e(route('pages.contact')); ?>">Support</a>
+            </nav>
+        </div>
+    </div>
+</footer>
+<?php else: ?>
 <!-- Reusable Footer Component -->
 <style>
     .fn-footer {
@@ -365,4 +557,5 @@
         </div>
     </div>
 </footer>
+<?php endif; ?>
 <?php /**PATH C:\xampp\htdocs\FindNest\resources\views/components/footer.blade.php ENDPATH**/ ?>

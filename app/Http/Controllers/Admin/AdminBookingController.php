@@ -10,28 +10,57 @@ use App\Models\Report;
 use App\Models\User;
 use App\Services\BookingService;
 use App\Services\NotificationService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class AdminBookingController extends Controller
 {
     public function index(Request $request)
     {
-        $bookings = Booking::with([
+        $allowedTabs = ['pending', 'paid', 'cancelled'];
+        $activeTab = in_array($request->query('tab'), $allowedTabs, true)
+            ? $request->query('tab')
+            : 'pending';
+
+        $baseQuery = $this->applyAdminBookingFilters(Booking::query(), $request);
+
+        $tabs = [
+            'pending' => [
+                'label' => 'Pending',
+                'description' => 'Bookings waiting for payment or admin cancellation.',
+                'empty' => 'No pending bookings found.',
+                'count' => $this->applyAdminBookingTabFilter(clone $baseQuery, 'pending')->count(),
+            ],
+            'paid' => [
+                'label' => 'Paid / Confirmed',
+                'description' => 'Bookings with successful payments or confirmed stays.',
+                'empty' => 'No paid or confirmed bookings found.',
+                'count' => $this->applyAdminBookingTabFilter(clone $baseQuery, 'paid')->count(),
+            ],
+            'cancelled' => [
+                'label' => 'Cancelled',
+                'description' => 'Cancelled bookings kept for records and history.',
+                'empty' => 'No cancelled bookings found.',
+                'count' => $this->applyAdminBookingTabFilter(clone $baseQuery, 'cancelled')->count(),
+            ],
+        ];
+
+        $bookings = $this->applyAdminBookingTabFilter(
+            $this->applyAdminBookingFilters(Booking::with([
             'property.owner',
             'property.images',
             'property.rooms.images',
             'room.images',
             'user',
             'payments',
-        ])
-            ->when($request->filled('user'), function ($query) use ($request) {
-                $query->where('user_id', $request->integer('user'));
-            })
+        ]), $request),
+            $activeTab
+        )
             ->latest()
-            ->paginate(5)
+            ->paginate(6)
             ->withQueryString();
 
-        return view('admin.bookings.index', compact('bookings'));
+        return view('admin.bookings.index', compact('bookings', 'tabs', 'activeTab'));
     }
 
     public function show(Booking $booking)
@@ -97,6 +126,27 @@ class AdminBookingController extends Controller
         }
     }
 
+    public function cancel(Booking $booking, BookingService $bookingService)
+    {
+        if (! $booking->isPending()) {
+            return redirect()
+                ->route('admin.bookings.index', ['tab' => 'pending'])
+                ->with('error', 'Only pending bookings can be cancelled from the list.');
+        }
+
+        try {
+            $bookingService->cancelBooking($booking);
+
+            return redirect()
+                ->route('admin.bookings.index', ['tab' => 'cancelled'])
+                ->with('success', 'Booking cancelled successfully.');
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.bookings.index', ['tab' => 'pending'])
+                ->with('error', $e->getMessage());
+        }
+    }
+
     public function markPayoutPaid(Payment $payment)
     {
         $payment->loadMissing(['booking.property.owner']);
@@ -128,5 +178,33 @@ class AdminBookingController extends Controller
         }
 
         return back()->with('success', 'Payout marked as completed.');
+    }
+
+    private function applyAdminBookingFilters(Builder $query, Request $request): Builder
+    {
+        return $query->when($request->filled('user'), function (Builder $builder) use ($request) {
+            $builder->where('user_id', $request->integer('user'));
+        });
+    }
+
+    private function applyAdminBookingTabFilter(Builder $query, string $tab): Builder
+    {
+        return match ($tab) {
+            'pending' => $query
+                ->where('status', 'pending')
+                ->whereDoesntHave('payments', function (Builder $paymentQuery) {
+                    $paymentQuery->where('payment_status', 'success');
+                }),
+            'paid' => $query
+                ->whereNotIn('status', ['cancelled', 'rejected'])
+                ->where(function (Builder $paidQuery) {
+                    $paidQuery->whereIn('status', ['confirmed', 'completed'])
+                        ->orWhereHas('payments', function (Builder $paymentQuery) {
+                            $paymentQuery->where('payment_status', 'success');
+                        });
+                }),
+            'cancelled' => $query->whereIn('status', ['cancelled', 'rejected']),
+            default => $query,
+        };
     }
 }

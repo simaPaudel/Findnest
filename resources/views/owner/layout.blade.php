@@ -101,6 +101,8 @@
         </div>
     </main>
 
+    @include('components.footer')
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const unreadBadge = document.getElementById('owner-unread-badge');

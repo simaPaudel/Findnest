@@ -35,7 +35,7 @@ class PageController extends Controller
                     'title' => 'How we keep the flow practical',
                     'body' => [
                         'Owners can create structured listings with room details, pricing, and images. Users can compare options, request bookings, and review their stay after payment and confirmation.',
-                        'Reviews and listing approvals are moderated to keep the marketplace more trustworthy and easier to scan.',
+                        'Listings are moderated for verification, and reviews are posted immediately but can be hidden by admin if they violate community guidelines.',
                     ],
                 ],
                 [
@@ -151,7 +151,7 @@ class PageController extends Controller
                 ],
                 [
                     'question' => 'Do reviews show immediately after submission?',
-                    'answer' => 'No. Users can submit a review after a valid booking, but the review only appears publicly after admin approval.',
+                    'answer' => 'Yes. Reviews are posted immediately and visible to everyone. However, admin can hide reviews if they violate community guidelines.',
                 ],
                 [
                     'question' => 'How much does the user pay during booking?',
@@ -255,7 +255,7 @@ class PageController extends Controller
                     'bullets' => [
                         'Review the booking or listing page where the issue happened',
                         'Confirm the payment status before retrying another payment',
-                        'Check whether the listing or review is waiting for admin approval',
+                        'Check whether the listing is waiting for admin approval (reviews show immediately)',
                     ],
                 ],
                 [

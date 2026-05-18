@@ -16,8 +16,8 @@ class ListingsController extends Controller
      */
     public function index(Request $request, RoomAvailabilityService $roomAvailabilityService)
     {
-        // Base query for approved properties
-        $query = Property::where('status', 'approved')
+        // Base query for properties visible to users
+        $query = Property::verified()
             ->withApprovedReviewStats()
             ->with([
                 'images' => function ($query) {
@@ -146,8 +146,8 @@ class ListingsController extends Controller
      */
     public function show(Property $property, RoomAvailabilityService $roomAvailabilityService)
     {
-        // Only show approved properties
-        if ($property->status !== 'approved') {
+        // Only show verified, approved properties to users
+        if ($property->status !== 'approved' || ! $property->is_verified) {
             abort(404);
         }
 
@@ -192,7 +192,7 @@ class ListingsController extends Controller
         $reviewCount = $reviews->count();
 
         // Fetch similar properties
-        $similar = Property::where('status', 'approved')
+        $similar = Property::verified()
             ->withApprovedReviewStats()
             ->where('id', '!=', $property->id)
             ->with([

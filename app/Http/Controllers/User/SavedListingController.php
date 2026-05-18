@@ -19,9 +19,13 @@ class SavedListingController extends Controller
     public function index(RoomAvailabilityService $roomAvailabilityService)
     {
         $savedListings = SavedListing::where('user_id', Auth::id())
+            ->whereHas('property', function ($query) {
+                $query->verified();
+            })
             ->with([
                 'property' => function ($query) {
-                    $query->withApprovedReviewStats()
+                    $query->verified()
+                        ->withApprovedReviewStats()
                         ->with([
                         'images' => function ($imageQuery) {
                             $imageQuery->ordered();
@@ -60,6 +64,8 @@ class SavedListingController extends Controller
      */
     public function save(Property $property)
     {
+        abort_if($property->status !== 'approved' || ! $property->is_verified, 404);
+
         try {
             $userId = Auth::id();
             
@@ -103,6 +109,8 @@ class SavedListingController extends Controller
      */
     public function unsave(Property $property)
     {
+        abort_if($property->status !== 'approved' || ! $property->is_verified, 404);
+
         try {
             $userId = Auth::id();
             
@@ -140,6 +148,8 @@ class SavedListingController extends Controller
      */
     public function isSaved(Property $property)
     {
+        abort_if($property->status !== 'approved' || ! $property->is_verified, 404);
+
         try {
             $isSaved = SavedListing::where('user_id', Auth::id())
                 ->where('property_id', $property->id)

@@ -22,8 +22,8 @@ class UserDashboardController extends Controller
     {
         $userId = Auth::id();
 
-        // Featured listings - latest 4 approved properties
-        $featuredListings = Property::where('status', 'approved')
+        // Featured listings - latest 4 properties visible to users
+        $featuredListings = Property::verified()
             ->latest()
             ->take(4)
             ->get();

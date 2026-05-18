@@ -70,17 +70,76 @@ class OwnerProfileController extends Controller
                 ->with('success', 'Password updated successfully.');
         }
 
+        if ($request->input('profile_action') === 'payout_clear') {
+            if ($owner->payout_qr) {
+                Storage::disk('public')->delete($owner->payout_qr);
+            }
+
+            $owner->update([
+                'payout_method' => null,
+                'payout_account_name' => null,
+                'payout_account_number' => null,
+                'payout_wallet_number' => null,
+                'payout_bank_name' => null,
+                'payout_qr' => null,
+                'payout_notes' => null,
+            ]);
+
+            return redirect()
+                ->route('owner.profile.edit')
+                ->with('success', 'Payout details removed successfully.');
+        }
+
+        if ($request->input('profile_action') === 'payout_update') {
+            $validator = Validator::make($request->all(), [
+                'payout_method' => 'nullable|in:khalti,esewa,bank',
+                'payout_account_name' => 'nullable|string|max:255',
+                'payout_account_number' => 'nullable|string|max:255',
+                'payout_wallet_number' => 'nullable|string|max:255',
+                'payout_bank_name' => 'nullable|string|max:255',
+                'payout_qr' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+                'payout_notes' => 'nullable|string|max:2000',
+            ]);
+
+            if ($validator->fails()) {
+                return back()
+                    ->withErrors($validator, 'payout')
+                    ->withInput()
+                    ->with('payout_edit_open', true);
+            }
+
+            $validated = $validator->validated();
+
+            if ($request->hasFile('payout_qr')) {
+                if ($owner->payout_qr) {
+                    Storage::disk('public')->delete($owner->payout_qr);
+                }
+
+                $qrPath = $request->file('payout_qr')->store('payout-qr', 'public');
+                $validated['payout_qr'] = $qrPath;
+            }
+
+            $owner->update([
+                'payout_method' => $validated['payout_method'] ?? $owner->payout_method,
+                'payout_account_name' => $validated['payout_account_name'] ?? $owner->payout_account_name,
+                'payout_account_number' => $validated['payout_account_number'] ?? $owner->payout_account_number,
+                'payout_wallet_number' => $validated['payout_wallet_number'] ?? $owner->payout_wallet_number,
+                'payout_bank_name' => $validated['payout_bank_name'] ?? $owner->payout_bank_name,
+                'payout_qr' => $validated['payout_qr'] ?? $owner->payout_qr,
+                'payout_notes' => $validated['payout_notes'] ?? $owner->payout_notes,
+            ]);
+
+            return redirect()
+                ->route('owner.profile.edit')
+                ->with('success', 'Payout details updated successfully.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'gender' => 'nullable|in:male,female,other',
             'bio' => 'nullable|string|max:1000',
             'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'payout_method' => 'nullable|in:khalti,esewa,bank',
-            'payout_account_name' => 'nullable|string|max:255',
-            'payout_account_number' => 'nullable|string|max:255',
-            'payout_qr' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'payout_notes' => 'nullable|string|max:2000',
         ]);
 
         // Handle profile photo upload
@@ -112,11 +171,6 @@ class OwnerProfileController extends Controller
             'gender' => $validated['gender'] ?? $owner->gender,
             'bio' => $validated['bio'] ?? $owner->bio,
             'profile_photo' => $validated['profile_photo'] ?? $owner->profile_photo,
-            'payout_method' => $validated['payout_method'] ?? $owner->payout_method,
-            'payout_account_name' => $validated['payout_account_name'] ?? $owner->payout_account_name,
-            'payout_account_number' => $validated['payout_account_number'] ?? $owner->payout_account_number,
-            'payout_qr' => $validated['payout_qr'] ?? $owner->payout_qr,
-            'payout_notes' => $validated['payout_notes'] ?? $owner->payout_notes,
         ]);
 
         return redirect()

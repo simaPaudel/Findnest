@@ -28,7 +28,7 @@ class HomeController extends Controller
                 }
             }
 
-            $featuredListings = Property::where('status', 'approved')
+            $featuredListings = Property::verified()
                 ->withApprovedReviewStats()
                 ->with([
                     'images' => function ($query) {
@@ -108,9 +108,7 @@ class HomeController extends Controller
             // Fetch stats
             $stats = [
                 'totalListings' => Property::where('status', 'approved')->count(),
-                'verifiedListings' => Property::where('status', 'approved')
-                    ->where('is_verified', 1)
-                    ->count(),
+                'verifiedListings' => Property::verified()->count(),
                 'activeOwners' => User::where('role', 'owner')->count(),
             ];
 

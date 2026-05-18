@@ -14,8 +14,30 @@ class AdminUserController extends Controller
     {
         $users = User::query()
             ->withCount(['properties', 'bookings', 'reviews', 'savedListings'])
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $term = trim((string) $request->query('q'));
+
+                $query->where(function ($searchQuery) use ($term) {
+                    $searchQuery->where('name', 'like', '%' . $term . '%')
+                        ->orWhere('email', 'like', '%' . $term . '%');
+                });
+            })
             ->when($request->filled('role'), function ($query) use ($request) {
                 $query->where('role', $request->role);
+            })
+            ->when($request->filled('status'), function ($query) use ($request) {
+                if ($request->status === 'active') {
+                    $query->where('is_blocked', false);
+                } elseif ($request->status === 'blocked') {
+                    $query->where('is_blocked', true);
+                }
+            })
+            ->when($request->filled('verification'), function ($query) use ($request) {
+                if ($request->verification === 'verified') {
+                    $query->where('is_verified', true);
+                } elseif ($request->verification === 'unverified') {
+                    $query->where('is_verified', false);
+                }
             })
             ->latest()
             ->paginate(12)
@@ -25,6 +47,16 @@ class AdminUserController extends Controller
     }
 
     public function show(User $user)
+    {
+        return $this->renderProfile($user);
+    }
+
+    public function edit(User $user)
+    {
+        return $this->renderProfile($user, true);
+    }
+
+    private function renderProfile(User $user, bool $editMode = false)
     {
         $user->loadCount(['properties', 'bookings', 'reviews', 'savedListings']);
         $recentProperties = $user->isOwner()
@@ -78,8 +110,40 @@ class AdminUserController extends Controller
             'recentReviews',
             'recentReports',
             'successfulPaymentsCount',
-            'successfulPaymentsAmount'
+            'successfulPaymentsAmount',
+            'editMode'
         ));
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'role' => ['nullable', Rule::in([User::ROLE_USER, User::ROLE_OWNER])],
+            'is_blocked' => ['nullable', 'boolean'],
+        ]);
+
+        $updates = [
+            'name' => $validated['name'],
+            'phone' => $validated['phone'] ?? null,
+        ];
+
+        $canManageProtectedFields = ! $user->isAdmin() && (int) auth()->id() !== (int) $user->id;
+
+        if ($canManageProtectedFields && isset($validated['role'])) {
+            $updates['role'] = $validated['role'];
+        }
+
+        if ($canManageProtectedFields) {
+            $updates['is_blocked'] = (bool) ($validated['is_blocked'] ?? false);
+        }
+
+        $user->update($updates);
+
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('success', 'User details updated successfully.');
     }
 
     public function updateRole(Request $request, User $user)

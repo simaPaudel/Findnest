@@ -13,6 +13,12 @@
 @endsection
 
 @section('content')
+    @php
+        $activeBookings = collect($bookingChart['segments'])
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->sum('count');
+    @endphp
+
     <div class="admin-dashboard admin-dashboard-home">
         <section class="stats-grid admin-dashboard-stats">
             <article class="stat-card">
@@ -27,25 +33,9 @@
                 <p class="stat-label">Total Properties</p>
                 <p class="stat-value">{{ $totalProperties }}</p>
             </article>
-            <article class="stat-card stat-card-warn">
-                <p class="stat-label">Pending Properties</p>
-                <p class="stat-value">{{ $pendingProperties }}</p>
-            </article>
-            <article class="stat-card stat-card-good">
-                <p class="stat-label">Approved Properties</p>
-                <p class="stat-value">{{ $approvedProperties }}</p>
-            </article>
-            <article class="stat-card stat-card-danger">
-                <p class="stat-label">Rejected Properties</p>
-                <p class="stat-value">{{ $rejectedProperties }}</p>
-            </article>
             <article class="stat-card">
-                <p class="stat-label">Total Revenue</p>
-                <p class="stat-value stat-value-currency">NPR {{ number_format($totalRevenue) }}</p>
-            </article>
-            <article class="stat-card">
-                <p class="stat-label">Total Reviews</p>
-                <p class="stat-value">{{ $totalReviews }}</p>
+                <p class="stat-label">Active Bookings</p>
+                <p class="stat-value">{{ $activeBookings }}</p>
             </article>
         </section>
 

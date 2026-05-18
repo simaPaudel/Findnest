@@ -54,12 +54,6 @@
                 <div class="admin-navbar-end">
                     @include('components.notification-dropdown')
 
-                    <a href="{{ route('admin.reports.index') }}" class="admin-message-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" title="Reports" aria-label="Reports">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h8m-8 4h5m7 6l-3.5-2H7a4 4 0 01-4-4V8a4 4 0 014-4h10a4 4 0 014 4v6a4 4 0 01-4 4h-1.5L12 20z"></path>
-                        </svg>
-                    </a>
-
                     <details class="admin-profile-menu">
                         <summary class="admin-profile-trigger {{ request()->routeIs('admin.profile.*') ? 'is-active' : '' }}" aria-label="Profile menu">
                             <div class="admin-avatar">

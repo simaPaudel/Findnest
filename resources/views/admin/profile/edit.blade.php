@@ -400,6 +400,44 @@
             color: #6b7280;
         }
 
+        .password-field {
+            position: relative;
+        }
+
+        .password-field .admin-form-input {
+            padding-right: 48px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: color 0.18s ease, background 0.18s ease;
+        }
+
+        .password-toggle:hover,
+        .password-toggle:focus-visible {
+            color: #ff385c;
+            background: rgba(255, 56, 92, 0.06);
+            outline: none;
+        }
+
+        .password-toggle svg {
+            width: 18px;
+            height: 18px;
+        }
+
         .admin-form-textarea {
             min-height: 120px;
             resize: vertical;
@@ -652,7 +690,15 @@
 
                     <div class="admin-form-group">
                         <label for="password_current" class="admin-form-label">Current Password</label>
-                        <input type="password" name="current_password" id="password_current" class="admin-form-input @error('current_password') error @enderror" autocomplete="current-password">
+                        <div class="password-field">
+                            <input type="password" name="current_password" id="password_current" class="admin-form-input @error('current_password') error @enderror" autocomplete="current-password">
+                            <button type="button" class="password-toggle" data-password-toggle="password_current" aria-label="Show current password" aria-pressed="false">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z"></path>
+                                </svg>
+                            </button>
+                        </div>
                         @error('current_password')
                             <div class="admin-form-error">{{ $message }}</div>
                         @enderror
@@ -660,7 +706,15 @@
 
                     <div class="admin-form-group">
                         <label for="password_new" class="admin-form-label">New Password</label>
-                        <input type="password" name="password" id="password_new" class="admin-form-input @error('password') error @enderror" autocomplete="new-password">
+                        <div class="password-field">
+                            <input type="password" name="password" id="password_new" class="admin-form-input @error('password') error @enderror" autocomplete="new-password">
+                            <button type="button" class="password-toggle" data-password-toggle="password_new" aria-label="Show new password" aria-pressed="false">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z"></path>
+                                </svg>
+                            </button>
+                        </div>
                         <div class="admin-form-helper">Minimum 8 characters with uppercase, lowercase, number, and special character.</div>
                         @error('password')
                             <div class="admin-form-error">{{ $message }}</div>
@@ -669,7 +723,15 @@
 
                     <div class="admin-form-group">
                         <label for="password_new_confirmation" class="admin-form-label">Confirm Password</label>
-                        <input type="password" name="password_confirmation" id="password_new_confirmation" class="admin-form-input" autocomplete="new-password">
+                        <div class="password-field">
+                            <input type="password" name="password_confirmation" id="password_new_confirmation" class="admin-form-input" autocomplete="new-password">
+                            <button type="button" class="password-toggle" data-password-toggle="password_new_confirmation" aria-label="Show password confirmation" aria-pressed="false">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="admin-profile-actions">
@@ -714,6 +776,20 @@
                     if (event.target === passwordModal) {
                         passwordModal.classList.remove('is-open');
                     }
+                });
+
+                page.querySelectorAll('[data-password-toggle]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const input = page.querySelector(`#${button.dataset.passwordToggle}`);
+                        if (!input) {
+                            return;
+                        }
+
+                        const shouldShow = input.type === 'password';
+                        input.type = shouldShow ? 'text' : 'password';
+                        button.setAttribute('aria-pressed', shouldShow ? 'true' : 'false');
+                        button.setAttribute('aria-label', shouldShow ? 'Hide password' : 'Show password');
+                    });
                 });
             });
         });
